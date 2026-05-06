@@ -1,0 +1,15 @@
+*.res
+*.o
+*.ppu
+*.or
+linkfiles*.res
+
+lib/
+units/
+backup/
+project1
+project1.app/
+
+symbol_*.fpc
+ppaslink.sh
+.DS_Store
