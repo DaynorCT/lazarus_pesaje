@@ -20,7 +20,7 @@
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="34"/>
+        <UsageCount Value="35"/>
       </Unit>
       <Unit>
         <Filename Value="units/main.pas"/>
@@ -29,20 +29,21 @@
         <UnitName Value="Main"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <CursorPos X="19" Y="11"/>
-        <UsageCount Value="34"/>
+        <TopLine Value="29"/>
+        <CursorPos X="10" Y="46"/>
+        <UsageCount Value="35"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
         <UnitName Value="CocoaApplication"/>
-        <TopLine Value="481"/>
-        <CursorPos X="18" Y="488"/>
+        <TopLine Value="476"/>
+        <CursorPos Y="486"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="1">
+    <JumpHistory HistoryIndex="3">
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
         <Caret Line="488" Column="18" TopLine="481"/>
@@ -50,6 +51,14 @@
       <Position>
         <Filename Value="units/main.pas"/>
         <Caret Line="7"/>
+      </Position>
+      <Position>
+        <Filename Value="units/main.pas"/>
+        <Caret Line="8" Column="7"/>
+      </Position>
+      <Position>
+        <Filename Value="units/main.pas"/>
+        <Caret Line="46" Column="10" TopLine="29"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
@@ -68,15 +77,4 @@
       </Debugging>
     </Linking>
   </CompilerOptions>
-  <Debugging>
-    <BreakPoints>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="units/main.pas"/>
-        <Line Value="7"/>
-      </Item>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>
