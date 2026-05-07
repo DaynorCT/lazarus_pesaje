@@ -5,7 +5,6 @@
     <General>
       <Title Value="Capturador de Peso"/>
       <ResourceType Value="res"/>
-      <ActiveWindowIndexAtStart Value="-1"/>
     </General>
     <BuildModes>
       <Item Name="default" Default="True"/>
@@ -17,26 +16,42 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <RequiredPackages>
-      <Item1>
-        <PackageName Value="LCL"/>
-      </Item1>
-    </RequiredPackages>
     <Units>
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="34"/>
       </Unit>
       <Unit>
         <Filename Value="units/main.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
         <UnitName Value="Main"/>
-        <UsageCount Value="20"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="19" Y="11"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
+        <UnitName Value="CocoaApplication"/>
+        <TopLine Value="481"/>
+        <CursorPos X="18" Y="488"/>
+        <UsageCount Value="16"/>
+        <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory HistoryIndex="1">
+      <Position>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
+        <Caret Line="488" Column="18" TopLine="481"/>
+      </Position>
+      <Position>
+        <Filename Value="units/main.pas"/>
+        <Caret Line="7"/>
+      </Position>
+    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
@@ -46,7 +61,6 @@
     <SearchPaths>
       <OtherUnitFiles Value="units"/>
       <UnitOutputDirectory Value="lib"/>
-      <LCLWidgetType Value="cocoa"/>
     </SearchPaths>
     <Linking>
       <Debugging>
@@ -54,4 +68,15 @@
       </Debugging>
     </Linking>
   </CompilerOptions>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="units/main.pas"/>
+        <Line Value="7"/>
+      </Item>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>
