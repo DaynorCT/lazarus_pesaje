@@ -25,24 +25,76 @@
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="50"/>
+        <UsageCount Value="53"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitPrincipal.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormPrincipal"/>
-        <UnitName Value="UnitPrincipal"/>
-        <IsVisibleTab Value="True"/>
-        <UsageCount Value="10"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="298"/>
+        <CursorPos X="14" Y="310"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitManual.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormManual"/>
-        <UnitName Value="UnitManual"/>
-        <UsageCount Value="10"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="274"/>
+        <CursorPos X="26" Y="285"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
+        <TopLine Value="3601"/>
+        <CursorPos Y="3613"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
+        <UnitName Value="CocoaApplication"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="476"/>
+        <CursorPos Y="486"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit>
     </Units>
+    <JumpHistory HistoryIndex="6">
+      <Position>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
+        <Caret Line="3613" TopLine="3601"/>
+      </Position>
+      <Position>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
+        <Caret Line="486" TopLine="476"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitPrincipal.pas"/>
+        <Caret Line="309" Column="14" TopLine="297"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitPrincipal.pas"/>
+        <Caret Line="310" Column="14" TopLine="298"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Column="19"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="62" Column="6" TopLine="44"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="285" Column="26" TopLine="273"/>
+      </Position>
+    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
@@ -50,9 +102,9 @@
       <Filename Value="project1"/>
     </Target>
     <SearchPaths>
+      <IncludeFiles Value="/Users/jaru/synapse/"/>
       <OtherUnitFiles Value="units"/>
       <UnitOutputDirectory Value="lib"/>
-      <IncludeFiles Value="/Users/jaru/synapse"/>
     </SearchPaths>
     <Linking>
       <Debugging>
