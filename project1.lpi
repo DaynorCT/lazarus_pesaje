@@ -25,62 +25,24 @@
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="50"/>
       </Unit>
       <Unit>
-        <Filename Value="units/main.pas"/>
+        <Filename Value="units/UnitPrincipal.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
-        <UnitName Value="Main"/>
+        <ComponentName Value="FormPrincipal"/>
+        <UnitName Value="UnitPrincipal"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <CursorPos X="23" Y="9"/>
-        <UsageCount Value="39"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="10"/>
       </Unit>
       <Unit>
-        <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
-        <UnitName Value="CocoaApplication"/>
-        <TopLine Value="476"/>
-        <CursorPos Y="486"/>
-        <UsageCount Value="18"/>
-        <Loaded Value="True"/>
+        <Filename Value="units/UnitManual.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormManual"/>
+        <UnitName Value="UnitManual"/>
+        <UsageCount Value="10"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="7">
-      <Position>
-        <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
-        <Caret Line="488" Column="18" TopLine="481"/>
-      </Position>
-      <Position>
-        <Filename Value="units/main.pas"/>
-        <Caret Line="7"/>
-      </Position>
-      <Position>
-        <Filename Value="units/main.pas"/>
-        <Caret Line="8" Column="7"/>
-      </Position>
-      <Position>
-        <Filename Value="units/main.pas"/>
-        <Caret Line="46" Column="10" TopLine="29"/>
-      </Position>
-      <Position>
-        <Filename Value="units/main.pas"/>
-        <Caret Line="12" Column="36"/>
-      </Position>
-      <Position>
-        <Filename Value="units/main.pas"/>
-        <Caret Line="9" Column="24"/>
-      </Position>
-      <Position>
-        <Filename Value="units/main.pas"/>
-        <Caret Line="14" Column="61"/>
-      </Position>
-      <Position>
-        <Filename Value="units/main.pas"/>
-        <Caret Line="9" Column="27"/>
-      </Position>
-    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
@@ -90,6 +52,7 @@
     <SearchPaths>
       <OtherUnitFiles Value="units"/>
       <UnitOutputDirectory Value="lib"/>
+      <IncludeFiles Value="/Users/jaru/synapse"/>
     </SearchPaths>
     <Linking>
       <Debugging>
