@@ -16,11 +16,16 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
+    <RequiredPackages>
+      <Item>
+        <PackageName Value="laz_synapse"/>
+      </Item>
+    </RequiredPackages>
     <Units>
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="39"/>
       </Unit>
       <Unit>
         <Filename Value="units/main.pas"/>
@@ -29,9 +34,8 @@
         <UnitName Value="Main"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="29"/>
-        <CursorPos X="10" Y="46"/>
-        <UsageCount Value="35"/>
+        <CursorPos X="23" Y="9"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -39,11 +43,11 @@
         <UnitName Value="CocoaApplication"/>
         <TopLine Value="476"/>
         <CursorPos Y="486"/>
-        <UsageCount Value="16"/>
+        <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="3">
+    <JumpHistory HistoryIndex="7">
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
         <Caret Line="488" Column="18" TopLine="481"/>
@@ -59,6 +63,22 @@
       <Position>
         <Filename Value="units/main.pas"/>
         <Caret Line="46" Column="10" TopLine="29"/>
+      </Position>
+      <Position>
+        <Filename Value="units/main.pas"/>
+        <Caret Line="12" Column="36"/>
+      </Position>
+      <Position>
+        <Filename Value="units/main.pas"/>
+        <Caret Line="9" Column="24"/>
+      </Position>
+      <Position>
+        <Filename Value="units/main.pas"/>
+        <Caret Line="14" Column="61"/>
+      </Position>
+      <Position>
+        <Filename Value="units/main.pas"/>
+        <Caret Line="9" Column="27"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
