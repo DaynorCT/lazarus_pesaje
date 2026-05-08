@@ -25,7 +25,7 @@
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="66"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitPrincipal.pas"/>
@@ -35,7 +35,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="244"/>
         <CursorPos Y="256"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="36"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -45,14 +45,14 @@
         <EditorIndex Value="3"/>
         <TopLine Value="399"/>
         <CursorPos X="28" Y="412"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="36"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <TopLine Value="3601"/>
         <CursorPos Y="3613"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -61,7 +61,7 @@
         <EditorIndex Value="1"/>
         <TopLine Value="476"/>
         <CursorPos Y="486"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
