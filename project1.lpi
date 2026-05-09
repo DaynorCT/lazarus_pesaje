@@ -25,34 +25,34 @@
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="67"/>
+        <UsageCount Value="70"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitPrincipal.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormPrincipal"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="245"/>
-        <CursorPos Y="256"/>
-        <UsageCount Value="37"/>
+        <TopLine Value="446"/>
+        <CursorPos X="10" Y="461"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitManual.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormManual"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="399"/>
-        <CursorPos X="28" Y="412"/>
-        <UsageCount Value="37"/>
+        <TopLine Value="460"/>
+        <CursorPos X="19" Y="470"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <TopLine Value="3601"/>
         <CursorPos Y="3613"/>
-        <UsageCount Value="19"/>
+        <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -61,11 +61,11 @@
         <EditorIndex Value="1"/>
         <TopLine Value="476"/>
         <CursorPos Y="486"/>
-        <UsageCount Value="19"/>
+        <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="8">
+    <JumpHistory HistoryIndex="19">
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <Caret Line="3613" TopLine="3601"/>
@@ -100,7 +100,51 @@
       </Position>
       <Position>
         <Filename Value="units/UnitManual.pas"/>
-        <Caret Line="412" Column="28" TopLine="399"/>
+        <Caret Line="412" Column="28" TopLine="400"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="70" Column="6" TopLine="61"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="74" Column="14" TopLine="63"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="510" TopLine="498"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="157" Column="19" TopLine="146"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="737" Column="4" TopLine="714"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="505" Column="19" TopLine="494"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="737" Column="4" TopLine="714"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="209" Column="19" TopLine="198"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="342" Column="19" TopLine="331"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="433" Column="19" TopLine="422"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="470" Column="19" TopLine="459"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
