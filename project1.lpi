@@ -25,7 +25,7 @@
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="70"/>
+        <UsageCount Value="123"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitPrincipal.pas"/>
@@ -34,7 +34,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="446"/>
         <CursorPos X="10" Y="461"/>
-        <UsageCount Value="40"/>
+        <UsageCount Value="93"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -43,16 +43,16 @@
         <ComponentName Value="FormManual"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="460"/>
-        <CursorPos X="19" Y="470"/>
-        <UsageCount Value="40"/>
+        <TopLine Value="239"/>
+        <CursorPos X="56" Y="253"/>
+        <UsageCount Value="93"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <TopLine Value="3601"/>
         <CursorPos Y="3613"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="47"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -61,11 +61,11 @@
         <EditorIndex Value="1"/>
         <TopLine Value="476"/>
         <CursorPos Y="486"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="47"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="19">
+    <JumpHistory HistoryIndex="20">
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <Caret Line="3613" TopLine="3601"/>
@@ -144,7 +144,11 @@
       </Position>
       <Position>
         <Filename Value="units/UnitManual.pas"/>
-        <Caret Line="470" Column="19" TopLine="459"/>
+        <Caret Line="470" Column="19" TopLine="460"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="250" Column="19" TopLine="239"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
