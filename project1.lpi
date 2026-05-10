@@ -31,7 +31,7 @@
         <Filename Value="units/UnitDashboard.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormDashboard"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="21"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitManual.pas"/>
@@ -47,8 +47,8 @@
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <IsVisibleTab Value="True"/>
         <TopLine Value="3601"/>
-        <CursorPos Y="3606"/>
-        <UsageCount Value="49"/>
+        <CursorPos Y="3613"/>
+        <UsageCount Value="50"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -57,11 +57,11 @@
         <EditorIndex Value="1"/>
         <TopLine Value="476"/>
         <CursorPos Y="486"/>
-        <UsageCount Value="49"/>
+        <UsageCount Value="50"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="21">
+    <JumpHistory HistoryIndex="22">
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <Caret Line="3613" TopLine="3601"/>
@@ -149,6 +149,10 @@
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <Caret Line="3609" Column="41" TopLine="3601"/>
+      </Position>
+      <Position>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
+        <Caret Line="3606" TopLine="3601"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
