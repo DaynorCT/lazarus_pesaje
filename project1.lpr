@@ -9,13 +9,13 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces,
   Forms,
-  UnitPrincipal,
+  UnitDashboard,
   UnitManual
   { you can add units after this };
 
 begin
   Application.Title:='Capturador de Peso';
   Application.Initialize;
-  Application.CreateForm(TFormPrincipal, FormPrincipal);
+  Application.CreateForm(TFormDashboard, FormDashboard);
   Application.Run;
 end.

@@ -25,34 +25,30 @@
       <Unit>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="123"/>
+        <UsageCount Value="126"/>
       </Unit>
       <Unit>
-        <Filename Value="units/UnitPrincipal.pas"/>
+        <Filename Value="units/UnitDashboard.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="FormPrincipal"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="446"/>
-        <CursorPos X="10" Y="461"/>
-        <UsageCount Value="93"/>
-        <Loaded Value="True"/>
+        <ComponentName Value="FormDashboard"/>
+        <UsageCount Value="20"/>
       </Unit>
       <Unit>
         <Filename Value="units/UnitManual.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormManual"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="239"/>
         <CursorPos X="56" Y="253"/>
-        <UsageCount Value="93"/>
+        <UsageCount Value="96"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
+        <IsVisibleTab Value="True"/>
         <TopLine Value="3601"/>
-        <CursorPos Y="3613"/>
-        <UsageCount Value="47"/>
+        <CursorPos Y="3606"/>
+        <UsageCount Value="49"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -61,11 +57,11 @@
         <EditorIndex Value="1"/>
         <TopLine Value="476"/>
         <CursorPos Y="486"/>
-        <UsageCount Value="47"/>
+        <UsageCount Value="49"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="20">
+    <JumpHistory HistoryIndex="21">
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
         <Caret Line="3613" TopLine="3601"/>
@@ -73,14 +69,6 @@
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
         <Caret Line="486" TopLine="476"/>
-      </Position>
-      <Position>
-        <Filename Value="units/UnitPrincipal.pas"/>
-        <Caret Line="309" Column="14" TopLine="297"/>
-      </Position>
-      <Position>
-        <Filename Value="units/UnitPrincipal.pas"/>
-        <Caret Line="310" Column="14" TopLine="298"/>
       </Position>
       <Position>
         <Filename Value="units/UnitManual.pas"/>
@@ -149,6 +137,18 @@
       <Position>
         <Filename Value="units/UnitManual.pas"/>
         <Caret Line="250" Column="19" TopLine="239"/>
+      </Position>
+      <Position>
+        <Filename Value="units/UnitManual.pas"/>
+        <Caret Line="253" Column="56" TopLine="239"/>
+      </Position>
+      <Position>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
+        <Caret Line="486" TopLine="476"/>
+      </Position>
+      <Position>
+        <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
+        <Caret Line="3609" Column="41" TopLine="3601"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
