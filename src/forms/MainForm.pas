@@ -58,6 +58,7 @@ begin
   lblAppTitle.Font.Color := clWhite;
   lblAppTitle.Font.Style := [fsBold];
 
+  lblUserInfo := TLabel.Create(Self);
   lblUserInfo.Parent := pnlTop;
   lblUserInfo.Align := alRight;
   lblUserInfo.Alignment := taRightJustify;
@@ -65,6 +66,7 @@ begin
   lblUserInfo.BorderSpacing.Right := 16;
   lblUserInfo.BorderSpacing.Top := 12;
 
+  btnLogout := TSpeedButton.Create(Self);
   btnLogout.Parent := pnlTop;
   btnLogout.Align := alRight;
   btnLogout.Width := 100;
