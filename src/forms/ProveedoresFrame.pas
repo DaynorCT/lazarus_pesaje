@@ -88,7 +88,7 @@ begin
     'SELECT pr.id, p.nombre||'' ''||COALESCE(p.apellido_paterno,''''), '+
     'COALESCE(pr.nombre_empresa,''''), COALESCE(p.ci,''''), pr.estado '+
     'FROM proveedores pr INNER JOIN personas p ON p.id=pr.persona_id '+
-    'WHERE pr.estado=''ACTIVO'''+Filtro+'ORDER BY p.nombre');
+    'WHERE pr.estado=''ACTIVO'''+Filtro+' ORDER BY p.nombre');
   Grid.RowCount := Q.RecordCount+1; Row:=1;
   while not Q.EOF do begin
     Grid.Cells[0,Row]:=Q.Fields[0].AsString; Grid.Cells[1,Row]:=Q.Fields[1].AsString;

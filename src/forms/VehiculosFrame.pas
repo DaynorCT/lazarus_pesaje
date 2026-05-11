@@ -100,7 +100,7 @@ begin
   else
     Filtro := ' WHERE 1=1 ';
 
-  Q := DM.AbrirQuery('SELECT id, placa, tipo_vehiculo, tara, estado FROM vehiculos' + Filtro + 'ORDER BY id DESC');
+  Q := DM.AbrirQuery('SELECT id, placa, tipo_vehiculo, tara, estado FROM vehiculos' + Filtro + ' ORDER BY id DESC');
   Grid.RowCount := Q.RecordCount + 1;
   Row := 1;
   while not Q.EOF do

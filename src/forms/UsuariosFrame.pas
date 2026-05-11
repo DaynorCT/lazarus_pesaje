@@ -82,7 +82,7 @@ begin
   Q := DM.AbrirQuery(
     'SELECT u.id, p.nombre||'' ''||COALESCE(p.apellido_paterno,''''), u.email, u.rol, u.estado '+
     'FROM usuarios u INNER JOIN personas p ON p.id=u.persona_id '+
-    'WHERE 1=1'+Filtro+'ORDER BY p.nombre');
+    'WHERE 1=1'+Filtro+' ORDER BY p.nombre');
   Grid.RowCount := Q.RecordCount+1; Row:=1;
   while not Q.EOF do begin
     Grid.Cells[0,Row]:=Q.Fields[0].AsString; Grid.Cells[1,Row]:=Q.Fields[1].AsString;
