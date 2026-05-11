@@ -14,8 +14,8 @@ type
   TFramePesaje = class(TFrame)
     TimerLectura: TTimer;
     TimerReloj: TTimer;
-    procedure FrameCreate(Sender: TObject);
-    procedure FrameDestroy(Sender: TObject);
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     procedure TimerRelojTimer(Sender: TObject);
     procedure TimerLecturaTimer(Sender: TObject);
   private
@@ -109,8 +109,9 @@ end;
 // TFramePesaje
 // ====================================================================
 
-procedure TFramePesaje.FrameCreate(Sender: TObject);
+constructor TFramePesaje.Create(AOwner: TComponent);
 begin
+  inherited Create(AOwner);
   FConectado := False;
   FPesoActual := '0';
   FPesoBruto := 0;
@@ -136,12 +137,13 @@ begin
   TimerReloj.Enabled := True;
 end;
 
-procedure TFramePesaje.FrameDestroy(Sender: TObject);
+destructor TFramePesaje.Destroy;
 begin
   TimerLectura.Enabled := False;
   TimerReloj.Enabled := False;
   if (DM <> nil) and DM.PuertoConectado then
     DM.DesconectarSerial;
+  inherited Destroy;
 end;
 
 procedure TFramePesaje.TimerRelojTimer(Sender: TObject);

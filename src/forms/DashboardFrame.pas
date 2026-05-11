@@ -13,7 +13,7 @@ type
 
   TFrameDashboard = class(TFrame)
     TimerRefresh: TTimer;
-    procedure FrameCreate(Sender: TObject);
+    constructor Create(AOwner: TComponent); override;
     procedure TimerRefreshTimer(Sender: TObject);
   private
     pnlMain: TPanel;
@@ -31,8 +31,9 @@ implementation
 
 {$R *.lfm}
 
-procedure TFrameDashboard.FrameCreate(Sender: TObject);
+constructor TFrameDashboard.Create(AOwner: TComponent);
 begin
+  inherited Create(AOwner);
   CrearDashboard;
   TimerRefresh := TTimer.Create(Self);
   TimerRefresh.Interval := 30000;

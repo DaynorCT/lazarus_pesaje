@@ -3,7 +3,6 @@ object FrameVehiculos: TFrameVehiculos
   Height = 500
   Top = 0
   Width = 750
-  OnCreate = FrameCreate
   ClientHeight = 500
   ClientWidth = 750
 end

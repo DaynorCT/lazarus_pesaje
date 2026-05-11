@@ -3,7 +3,6 @@ object FrameDashboard: TFrameDashboard
   Height = 400
   Top = 0
   Width = 600
-  OnCreate = FrameCreate
   ClientHeight = 400
   ClientWidth = 600
   object pnlMain: TPanel

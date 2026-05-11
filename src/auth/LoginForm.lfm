@@ -8,7 +8,6 @@ object frmLogin: TfrmLogin
   ClientHeight = 340
   ClientWidth = 420
   Position = poScreenCenter
-  LCLVersion = '3.0'
   object pnlMain: TPanel
     Left = 0
     Height = 340

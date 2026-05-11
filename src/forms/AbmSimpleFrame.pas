@@ -23,7 +23,6 @@ type
   { TFrameAbmSimple }
 
   TFrameAbmSimple = class(TFrame)
-    procedure FrameCreate(Sender: TObject);
   private
     FConfig: TTablaConfig;
     FSG: TStringGrid;
@@ -130,10 +129,6 @@ constructor TFrameAbmSimple.CreateWithConfig(AOwner: TComponent; const AConfig: 
 begin
   FConfig := AConfig;
   inherited Create(AOwner);
-end;
-
-procedure TFrameAbmSimple.FrameCreate(Sender: TObject);
-begin
   CrearUI;
   RefrescarGrid(nil);
 end;

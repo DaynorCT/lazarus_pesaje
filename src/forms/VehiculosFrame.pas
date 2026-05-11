@@ -12,7 +12,7 @@ type
   { TFrameVehiculos }
 
   TFrameVehiculos = class(TFrame)
-    procedure FrameCreate(Sender: TObject);
+    constructor Create(AOwner: TComponent); override;
   private
     Grid: TStringGrid;
     edtBuscar: TEdit;
@@ -29,11 +29,12 @@ implementation
 
 {$R *.lfm}
 
-procedure TFrameVehiculos.FrameCreate(Sender: TObject);
+constructor TFrameVehiculos.Create(AOwner: TComponent);
 var
   PnlTop: TPanel;
   Lbl: TLabel;
 begin
+  inherited Create(AOwner);
   Self.Color := $F0F2F5;
 
   PnlTop := TPanel.Create(Self);

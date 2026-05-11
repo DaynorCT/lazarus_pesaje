@@ -12,7 +12,7 @@ type
   { TFrameChoferes }
 
   TFrameChoferes = class(TFrame)
-    procedure FrameCreate(Sender: TObject);
+    constructor Create(AOwner: TComponent); override;
   private
     Grid: TStringGrid;
     edtBuscar: TEdit;
@@ -29,9 +29,10 @@ implementation
 
 {$R *.lfm}
 
-procedure TFrameChoferes.FrameCreate(Sender: TObject);
+constructor TFrameChoferes.Create(AOwner: TComponent);
 var Pnl: TPanel; Lbl: TLabel;
 begin
+  inherited Create(AOwner);
   Self.Color := $F0F2F5;
   Pnl := TPanel.Create(Self); Pnl.Parent := Self; Pnl.Align := alTop;
   Pnl.Height := 56; Pnl.BevelOuter := bvNone; Pnl.Color := clWhite;
