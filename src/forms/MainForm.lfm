@@ -1,0 +1,67 @@
+object frmMain: TfrmMain
+  Left = 0
+  Height = 700
+  Top = 0
+  Width = 1100
+  Caption = 'Sistema de Pesaje'
+  ClientHeight = 700
+  ClientWidth = 1100
+  Position = poScreenCenter
+  WindowState = wsMaximized
+  OnCreate = FormCreate
+  OnShow = FormShow
+  OnDestroy = FormDestroy
+  LCLVersion = '3.0'
+  object pnlTop: TPanel
+    Left = 0
+    Height = 48
+    Top = 0
+    Width = 1100
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 48
+    ClientWidth = 1100
+    object lblAppTitle: TLabel
+      Left = 16
+      Height = 20
+      Top = 12
+      Width = 200
+      Caption = 'SISTEMA DE PESAJE'
+      Font.Color = clWhite
+      Font.Height = -16
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+  end
+  object pnlLeft: TPanel
+    Left = 0
+    Height = 652
+    Top = 48
+    Width = 200
+    Align = alLeft
+    BevelOuter = bvNone
+    ClientHeight = 652
+    ClientWidth = 200
+    object sbMenu: TScrollBox
+      Left = 0
+      Height = 652
+      Top = 0
+      Width = 200
+      Align = alClient
+      BorderStyle = bsNone
+      ClientHeight = 652
+      ClientWidth = 200
+    end
+  end
+  object pnlContent: TPanel
+    Left = 200
+    Height = 652
+    Top = 48
+    Width = 900
+    Align = alClient
+    BevelOuter = bvNone
+    Caption = ''
+    ClientHeight = 652
+    ClientWidth = 900
+  end
+end

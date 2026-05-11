@@ -1,0 +1,20 @@
+object DM: TDM
+  OldCreateOrder = False
+  Height = 240
+  Width = 380
+  Position = poDesigned
+  object Conexion: TSQLite3Connection
+    Connected = False
+    LoginPrompt = False
+    DatabaseName = 'pesaje.db'
+    Transaction = Transaccion
+  end
+  object Transaccion: TSQLTransaction
+    Active = False
+    Database = Conexion
+  end
+  object Query: TSQLQuery
+    Database = Conexion
+    Transaction = Transaccion
+  end
+end

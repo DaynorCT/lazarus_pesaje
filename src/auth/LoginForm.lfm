@@ -1,0 +1,147 @@
+object frmLogin: TfrmLogin
+  Left = 0
+  Height = 340
+  Top = 0
+  Width = 420
+  BorderStyle = bsDialog
+  Caption = 'Sistema de Pesaje - Iniciar Sesión'
+  ClientHeight = 340
+  ClientWidth = 420
+  Position = poScreenCenter
+  LCLVersion = '3.0'
+  object pnlMain: TPanel
+    Left = 0
+    Height = 340
+    Top = 0
+    Width = 420
+    Align = alClient
+    BevelOuter = bvNone
+    ParentColor = False
+    Color = 15395562
+    ClientHeight = 340
+    ClientWidth = 420
+    object lblTitulo: TLabel
+      Left = 40
+      Height = 24
+      Top = 40
+      Width = 340
+      Align = alTop
+      Alignment = taCenter
+      BorderSpacing.Left = 40
+      BorderSpacing.Right = 40
+      Caption = 'SISTEMA DE PESAJE'
+      Font.Height = -19
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object lblSubtitulo: TLabel
+      Left = 40
+      Height = 16
+      Top = 64
+      Width = 340
+      Align = alTop
+      Alignment = taCenter
+      BorderSpacing.Left = 40
+      BorderSpacing.Right = 40
+      Caption = 'Inicie sesión para continuar'
+      Font.Color = 9079434
+      ParentColor = False
+      ParentFont = False
+    end
+    object lblEmail: TLabel
+      Left = 60
+      Height = 16
+      Top = 120
+      Width = 300
+      Align = alTop
+      BorderSpacing.Left = 60
+      BorderSpacing.Right = 60
+      BorderSpacing.Top = 20
+      Caption = 'Email'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object edtEmail: TEdit
+      Left = 60
+      Height = 32
+      Top = 140
+      Width = 300
+      Align = alTop
+      BorderSpacing.Left = 60
+      BorderSpacing.Right = 60
+      BorderSpacing.Top = 4
+      TabOrder = 0
+    end
+    object lblPassword: TLabel
+      Left = 60
+      Height = 16
+      Top = 188
+      Width = 300
+      Align = alTop
+      BorderSpacing.Left = 60
+      BorderSpacing.Right = 60
+      BorderSpacing.Top = 16
+      Caption = 'Contraseña'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object edtPassword: TEdit
+      Left = 60
+      Height = 32
+      Top = 208
+      Width = 300
+      Align = alTop
+      BorderSpacing.Left = 60
+      BorderSpacing.Right = 60
+      BorderSpacing.Top = 4
+      EchoMode = emPassword
+      PasswordChar = '*'
+      TabOrder = 1
+    end
+    object lblError: TLabel
+      Left = 60
+      Height = 16
+      Top = 256
+      Width = 300
+      Align = alTop
+      BorderSpacing.Left = 60
+      BorderSpacing.Right = 60
+      BorderSpacing.Top = 16
+      Font.Color = clRed
+      ParentColor = False
+      ParentFont = False
+    end
+    object btnIngresar: TBitBtn
+      Left = 60
+      Height = 36
+      Top = 284
+      Width = 300
+      Align = alTop
+      BorderSpacing.Left = 60
+      BorderSpacing.Right = 60
+      BorderSpacing.Top = 12
+      Caption = 'Ingresar'
+      Kind = bkOK
+      ModalResult = 0
+      TabOrder = 2
+      OnClick = btnIngresarClick
+    end
+    object btnSalir: TBitBtn
+      Left = 60
+      Height = 36
+      Top = 328
+      Width = 300
+      Align = alTop
+      BorderSpacing.Left = 60
+      BorderSpacing.Right = 60
+      BorderSpacing.Top = 8
+      Caption = 'Salir'
+      Kind = bkCancel
+      TabOrder = 3
+      OnClick = btnSalirClick
+    end
+  end
+end

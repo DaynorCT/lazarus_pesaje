@@ -1,0 +1,10 @@
+object FramePesaje: TFramePesaje
+  Left = 0
+  Height = 600
+  Top = 0
+  Width = 800
+  OnCreate = FrameCreate
+  OnDestroy = FrameDestroy
+  ClientHeight = 600
+  ClientWidth = 800
+end
