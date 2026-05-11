@@ -1,96 +1,99 @@
 object frmLogin: TfrmLogin
   Left = 0
-  Height = 340
+  Height = 380
   Top = 0
   Width = 420
   BorderStyle = bsDialog
-  Caption = 'Sistema de Pesaje - Iniciar Sesión'
-  ClientHeight = 340
+  Caption = 'Sistema de Pesaje'
+  ClientHeight = 380
   ClientWidth = 420
   Position = poScreenCenter
   object pnlMain: TPanel
     Left = 0
-    Height = 340
+    Height = 380
     Top = 0
     Width = 420
     Align = alClient
     BevelOuter = bvNone
-    ParentColor = False
-    Color = 15395562
-    ClientHeight = 340
+    Color = 16777215
+    ClientHeight = 380
     ClientWidth = 420
+    ParentColor = False
     object lblTitulo: TLabel
       Left = 40
-      Height = 24
-      Top = 40
+      Height = 32
+      Top = 48
       Width = 340
       Align = alTop
       Alignment = taCenter
       BorderSpacing.Left = 40
       BorderSpacing.Right = 40
-      Caption = 'SISTEMA DE PESAJE'
-      Font.Height = -19
+      Caption = 'Sistema de Pesaje'
+      Font.Height = -21
+      Font.Color = 1974838
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object lblSubtitulo: TLabel
       Left = 40
       Height = 16
-      Top = 64
+      Top = 80
       Width = 340
       Align = alTop
       Alignment = taCenter
       BorderSpacing.Left = 40
       BorderSpacing.Right = 40
-      Caption = 'Inicie sesión para continuar'
-      Font.Color = 9079434
-      ParentColor = False
+      Caption = 'Inicie sesion para continuar'
+      Font.Color = 9737364
+      Font.Size = 11
       ParentFont = False
     end
     object lblEmail: TLabel
       Left = 60
       Height = 16
-      Top = 120
+      Top = 128
       Width = 300
       Align = alTop
       BorderSpacing.Left = 60
       BorderSpacing.Right = 60
-      BorderSpacing.Top = 20
+      BorderSpacing.Top = 32
       Caption = 'Email'
+      Font.Size = 11
+      Font.Color = 3342587
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object edtEmail: TEdit
       Left = 60
-      Height = 32
-      Top = 140
+      Height = 34
+      Top = 148
       Width = 300
       Align = alTop
       BorderSpacing.Left = 60
       BorderSpacing.Right = 60
       BorderSpacing.Top = 4
+      Font.Size = 12
       TabOrder = 0
     end
     object lblPassword: TLabel
       Left = 60
       Height = 16
-      Top = 188
+      Top = 200
       Width = 300
       Align = alTop
       BorderSpacing.Left = 60
       BorderSpacing.Right = 60
-      BorderSpacing.Top = 16
-      Caption = 'Contraseña'
+      BorderSpacing.Top = 18
+      Caption = 'Contrasena'
+      Font.Size = 11
+      Font.Color = 3342587
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object edtPassword: TEdit
       Left = 60
-      Height = 32
-      Top = 208
+      Height = 34
+      Top = 220
       Width = 300
       Align = alTop
       BorderSpacing.Left = 60
@@ -98,31 +101,35 @@ object frmLogin: TfrmLogin
       BorderSpacing.Top = 4
       EchoMode = emPassword
       PasswordChar = '*'
+      Font.Size = 12
       TabOrder = 1
     end
     object lblError: TLabel
       Left = 60
       Height = 16
-      Top = 256
+      Top = 268
       Width = 300
       Align = alTop
       BorderSpacing.Left = 60
       BorderSpacing.Right = 60
-      BorderSpacing.Top = 16
-      Font.Color = clRed
-      ParentColor = False
+      BorderSpacing.Top = 14
+      Font.Color = 22028
+      Font.Size = 11
       ParentFont = False
     end
     object btnIngresar: TBitBtn
       Left = 60
-      Height = 36
-      Top = 284
+      Height = 38
+      Top = 304
       Width = 300
       Align = alTop
       BorderSpacing.Left = 60
       BorderSpacing.Right = 60
-      BorderSpacing.Top = 12
+      BorderSpacing.Top = 20
       Caption = 'Ingresar'
+      Font.Size = 13
+      Font.Style = [fsBold]
+      Font.Color = 16777215
       Kind = bkOK
       ModalResult = 0
       TabOrder = 2
@@ -130,14 +137,16 @@ object frmLogin: TfrmLogin
     end
     object btnSalir: TBitBtn
       Left = 60
-      Height = 36
-      Top = 328
+      Height = 34
+      Top = 350
       Width = 300
       Align = alTop
       BorderSpacing.Left = 60
       BorderSpacing.Right = 60
       BorderSpacing.Top = 8
       Caption = 'Salir'
+      Font.Size = 12
+      Font.Color = 9737364
       Kind = bkCancel
       TabOrder = 3
       OnClick = btnSalirClick

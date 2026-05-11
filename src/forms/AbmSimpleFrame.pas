@@ -138,7 +138,7 @@ var
   PnlTop: TPanel;
   i: Integer;
 begin
-  Self.Color := $F0F2F5;
+  Self.Color := $F8FAFC;
 
   PnlTop := TPanel.Create(Self);
   PnlTop.Parent := Self;

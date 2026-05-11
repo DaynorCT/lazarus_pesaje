@@ -49,22 +49,24 @@ begin
   FActiveFrame := nil;
   Caption := 'Sistema de Pesaje';
   pnlLeft.Width := 200;
-  pnlLeft.Color := $2D4A6F;
-  pnlTop.Color := $1E3A5F;
+  pnlLeft.Color := $1E293B;
+  pnlTop.Color := clWhite;
   pnlTop.Height := 48;
-  pnlContent.Color := $F0F2F5;
+  pnlContent.Color := $F8FAFC;
 
-  lblAppTitle.Caption := 'SISTEMA DE PESAJE';
-  lblAppTitle.Font.Color := clWhite;
+  lblAppTitle.Caption := ' SISTEMA DE PESAJE';
+  lblAppTitle.Font.Color := $1E293B;
   lblAppTitle.Font.Style := [fsBold];
+  lblAppTitle.Font.Size := 11;
 
   lblUserInfo := TLabel.Create(Self);
   lblUserInfo.Parent := pnlTop;
   lblUserInfo.Align := alRight;
   lblUserInfo.Alignment := taRightJustify;
-  lblUserInfo.Font.Color := $CCCCCC;
+  lblUserInfo.Font.Color := $94A3B8;
+  lblUserInfo.Font.Size := 11;
   lblUserInfo.BorderSpacing.Right := 16;
-  lblUserInfo.BorderSpacing.Top := 12;
+  lblUserInfo.BorderSpacing.Top := 14;
 
   btnLogout := TSpeedButton.Create(Self);
   btnLogout.Parent := pnlTop;
@@ -72,7 +74,8 @@ begin
   btnLogout.Width := 100;
   btnLogout.Caption := 'Cerrar Sesion';
   btnLogout.Flat := True;
-  btnLogout.Font.Color := $FF9999;
+  btnLogout.Font.Color := $94A3B8;
+  btnLogout.Font.Size := 11;
   btnLogout.BorderSpacing.Right := 16;
   btnLogout.BorderSpacing.Top := 8;
   btnLogout.OnClick := @btnLogoutClick;
@@ -105,6 +108,8 @@ begin
 end;
 
 procedure TfrmMain.BuildMenu;
+var
+  Y: Integer;
 
   function CrearBoton(const Caption: string; const Tag: Integer): TSpeedButton;
   begin
@@ -112,14 +117,16 @@ procedure TfrmMain.BuildMenu;
     Result.Parent := sbMenu;
     Result.Caption := Caption;
     Result.Tag := Tag;
-    Result.Align := alTop;
-    Result.Height := 42;
+    Result.SetBounds(0, Y, 200, 40);
+    Result.Anchors := [akTop, akLeft, akRight];
     Result.Flat := True;
-    Result.Font.Color := $DDDDDD;
+    Result.Font.Color := $94A3B8;
     Result.Font.Height := -13;
     Result.GroupIndex := 1;
     Result.AllowAllUp := True;
     Result.OnClick := @SidebarButtonClick;
+    Result.Margin := 4;
+    Y := Y + 40;
   end;
 
 begin
@@ -128,18 +135,16 @@ begin
   sbMenu.Color := pnlLeft.Color;
   sbMenu.BorderStyle := bsNone;
 
+  Y := 0;
   CrearBoton('  Dashboard', 0);
-  CrearBoton('  Pesaje', 1).Down := True;
-  CrearBoton('  Vehiculos', 2);
+  CrearBoton('  Usuarios', 10);
   CrearBoton('  Choferes', 3);
   CrearBoton('  Proveedores', 4);
+  CrearBoton('  Pesaje', 1).Down := True;
+  CrearBoton('  Vehiculos', 6);
   CrearBoton('  Productos', 5);
-  CrearBoton('  Origenes', 6);
-  CrearBoton('  Destinos', 7);
-  CrearBoton('  Bodegas', 8);
-  CrearBoton('  Empresas', 9);
-  CrearBoton('  Usuarios', 10);
-  CrearBoton('  Reportes', 11);
+  CrearBoton('  Origenes', 7);
+  CrearBoton('  Destinos', 8);
   CrearBoton('  Configuracion', 12);
 end;
 
@@ -153,22 +158,23 @@ begin
   case MenuTag of
     0: LoadFrame(TFrameDashboard, 'Dashboard');
     1: LoadFrame(TFramePesaje, 'Pesaje');
-    2: LoadFrame(TFrameVehiculos, 'Vehiculos');
+    2: ShowMessage('Empresas - Fase 3');
     3: LoadFrame(TFrameChoferes, 'Choferes');
     4: LoadFrame(TFrameProveedores, 'Proveedores');
     5: begin
       FrameP := TFrameAbmSimple.CreateWithConfig(Self, ConfigProductos);
       LoadFrameInstance(FrameP, 'Productos');
     end;
-    6: begin
+    6: LoadFrame(TFrameVehiculos, 'Vehiculos');
+    7: begin
       FrameO := TFrameAbmSimple.CreateWithConfig(Self, ConfigOrigenes);
       LoadFrameInstance(FrameO, 'Origenes');
     end;
-    7: begin
+    8: begin
       FrameD := TFrameAbmSimple.CreateWithConfig(Self, ConfigDestinos);
       LoadFrameInstance(FrameD, 'Destinos');
     end;
-    8: begin
+    9: begin
       FrameD := TFrameAbmSimple.CreateWithConfig(Self, ConfigBodegas);
       LoadFrameInstance(FrameD, 'Bodegas');
     end;

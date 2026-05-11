@@ -167,7 +167,7 @@ var
   pnlReloj, pnlDisplay, pnlResultados: TPanel;
   Lbl: TLabel;
 begin
-  Self.Color := $F0F2F5;
+  Self.Color := $F8FAFC;
 
   // -- Panel izquierdo (pesaje) --
   pnlPesaje := TPanel.Create(Self);
@@ -175,7 +175,7 @@ begin
   pnlPesaje.Align := alLeft;
   pnlPesaje.Width := 430;
   pnlPesaje.BevelOuter := bvNone;
-  pnlPesaje.Color := $F0F2F5;
+  pnlPesaje.Color := $F8FAFC;
   pnlPesaje.Caption := '';
 
   // Reloj
@@ -206,7 +206,7 @@ begin
   pnlDisplay.Parent := pnlPesaje;
   pnlDisplay.SetBounds(24, 96, 382, 160);
   pnlDisplay.BevelOuter := bvNone;
-  pnlDisplay.Color := $2D6A4F;
+  pnlDisplay.Color := $0F766E;
 
   lblPesoDisplay := TLabel.Create(Self);
   lblPesoDisplay.Parent := pnlDisplay;
@@ -226,7 +226,7 @@ begin
   lblUnidad.Alignment := taCenter;
   lblUnidad.Caption := 'KILOGRAMOS';
   lblUnidad.Font.Size := 13;
-  lblUnidad.Font.Color := $AADDBB;
+  lblUnidad.Font.Color := $99F6E0;
 
   // Estado conexión
   lblEstadoConexion := TLabel.Create(Self);
@@ -235,7 +235,7 @@ begin
   lblEstadoConexion.Caption := 'SIN CONEXION';
   lblEstadoConexion.Font.Size := 11;
   lblEstadoConexion.Font.Style := [fsBold];
-  lblEstadoConexion.Font.Color := $E63946;
+  lblEstadoConexion.Font.Color := $DC2626;
 
   lblEstabilidad := TLabel.Create(Self);
   lblEstabilidad.Parent := pnlPesaje;
@@ -280,7 +280,7 @@ begin
   lblResultadoHora.Caption := 'Neto: -- kg';
   lblResultadoHora.Font.Size := 14;
   lblResultadoHora.Font.Style := [fsBold];
-  lblResultadoHora.Font.Color := $2D6A4F;
+  lblResultadoHora.Font.Color := $0F766E;
 
   lblResultadoID := TLabel.Create(Self);
   lblResultadoID.Parent := pnlResultados;
@@ -510,7 +510,7 @@ begin
     TimerLectura.Enabled := False;
     btnConectar.Caption := 'CONECTAR BASCULA';
     lblEstadoConexion.Caption := 'SIN CONEXION';
-    lblEstadoConexion.Font.Color := $E63946;
+    lblEstadoConexion.Font.Color := $DC2626;
     lblEstabilidad.Caption := 'Esperando lectura...';
     btnTara.Enabled := False;
     btnGuardar.Enabled := False;
@@ -531,7 +531,7 @@ begin
   begin
     ShowMessage('Error al conectar al puerto ' + FPuertoSerial);
     lblEstadoConexion.Caption := 'ERROR DE CONEXION';
-    lblEstadoConexion.Font.Color := $E63946;
+    lblEstadoConexion.Font.Color := $DC2626;
   end;
 end;
 
@@ -575,7 +575,7 @@ begin
   btnGuardar.Enabled := False;
   lblResultadoPeso.Caption := 'Bruto: -- kg  |  Tara: -- kg';
   lblResultadoHora.Caption := 'Neto: -- kg';
-  lblResultadoHora.Font.Color := $2D6A4F;
+  lblResultadoHora.Font.Color := $0F766E;
   lblResultadoID.Caption := 'ID: --';
 end;
 

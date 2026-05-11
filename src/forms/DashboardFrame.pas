@@ -53,56 +53,61 @@ begin
   pnlMain.Parent := Self;
   pnlMain.Align := alClient;
   pnlMain.BevelOuter := bvNone;
-  pnlMain.Color := $F0F2F5;
+  pnlMain.Color := $F8FAFC;
   pnlMain.Caption := '';
 
-  CrearCard('Pesajes Hoy', '0', $2D6A4F, 24, 24);
-  CrearCard('Peso Total (kg)', '0', $1B4332, 24, 280);
-  CrearCard('Vehículos Hoy', '0', $40916C, 24, 536);
-  CrearCard('Último Pesaje', 'Sin registros', $52796F, 170, 24);
+  CrearCard('Pesajes Hoy', '0', $0F766E, 24, 24);
+  CrearCard('Peso Total', '0 kg', $2563EB, 24, 280);
+  CrearCard('Vehiculos Hoy', '0', $7C3AED, 24, 536);
+  CrearCard('Ultimo Pesaje', 'Sin registros', $EA580C, 170, 24);
 end;
 
 function TFrameDashboard.CrearCard(const ATitulo, AValor: string;
   AColor, ATop, ALeft: Integer): TPanel;
 var
   LblTitulo, LblValor: TLabel;
+  Barra: TPanel;
 begin
   Result := TPanel.Create(Self);
   Result.Parent := pnlMain;
   Result.Top := ATop;
   Result.Left := ALeft;
-  Result.Width := 232;
-  Result.Height := 120;
+  Result.Width := 240;
+  Result.Height := 110;
   Result.BevelOuter := bvNone;
-  Result.Color := AColor;
+  Result.Color := clWhite;
+
+  Barra := TPanel.Create(Result);
+  Barra.Parent := Result;
+  Barra.Left := 0; Barra.Top := 0;
+  Barra.Width := 4; Barra.Height := 110;
+  Barra.BevelOuter := bvNone;
+  Barra.Color := AColor;
 
   LblTitulo := TLabel.Create(Result);
   LblTitulo.Parent := Result;
-  LblTitulo.Top := 16;
-  LblTitulo.Left := 20;
-  LblTitulo.Width := 192;
+  LblTitulo.Top := 16; LblTitulo.Left := 20;
   LblTitulo.Caption := ATitulo;
-  LblTitulo.Font.Color := $CCDDCC;
-  LblTitulo.Font.Height := -13;
+  LblTitulo.Font.Color := $64748B;
+  LblTitulo.Font.Height := -12;
   LblTitulo.ParentFont := False;
 
   LblValor := TLabel.Create(Result);
   LblValor.Parent := Result;
-  LblValor.Top := 48;
-  LblValor.Left := 20;
-  LblValor.Width := 192;
+  LblValor.Top := 44; LblValor.Left := 20;
+  LblValor.Width := 200;
   LblValor.Caption := AValor;
-  LblValor.Font.Color := clWhite;
+  LblValor.Font.Color := $1E293B;
   LblValor.Font.Height := -27;
   LblValor.Font.Style := [fsBold];
   LblValor.ParentFont := False;
   LblValor.Tag := 99;
 
   case AColor of
-    $2D6A4F: CardPesajesHoy := Result;
-    $1B4332: CardPesoTotal := Result;
-    $40916C: CardVehiculosHoy := Result;
-    $52796F: CardUltimoPesaje := Result;
+    $0F766E: CardPesajesHoy := Result;
+    $2563EB: CardPesoTotal := Result;
+    $7C3AED: CardVehiculosHoy := Result;
+    $EA580C: CardUltimoPesaje := Result;
   end;
 end;
 

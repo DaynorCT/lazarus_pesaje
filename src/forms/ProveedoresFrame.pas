@@ -32,7 +32,7 @@ constructor TFrameProveedores.Create(AOwner: TComponent);
 var Pnl: TPanel; Lbl: TLabel;
 begin
   inherited Create(AOwner);
-  Self.Color := $F0F2F5;
+  Self.Color := $F8FAFC;
   Pnl := TPanel.Create(Self); Pnl.Parent := Self; Pnl.Align := alTop;
   Pnl.Height := 56; Pnl.BevelOuter := bvNone; Pnl.Color := clWhite;
 
