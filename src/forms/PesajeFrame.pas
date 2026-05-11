@@ -139,8 +139,8 @@ end;
 
 destructor TFramePesaje.Destroy;
 begin
-  TimerLectura.Enabled := False;
-  TimerReloj.Enabled := False;
+  if TimerLectura <> nil then TimerLectura.Enabled := False;
+  if TimerReloj <> nil then TimerReloj.Enabled := False;
   if (DM <> nil) and DM.PuertoConectado then
     DM.DesconectarSerial;
   inherited Destroy;
