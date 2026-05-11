@@ -240,6 +240,8 @@ begin
 
   NowStr := FormatDateTime('yyyy-mm-dd hh:nn:ss', Now);
 
+  if DM.Transaccion.Active then
+    DM.Transaccion.Commit;
   DM.Transaccion.StartTransaction;
   try
     DM.EjecutarSQL(

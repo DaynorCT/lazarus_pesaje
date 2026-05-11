@@ -24,35 +24,23 @@ begin
   Application.Title := 'Sistema de Pesaje';
   Application.Initialize;
 
-  // Crear DataModule
   DM := TDM.Create(nil);
-  try
-    if not DM.Conexion.Connected then
-    begin
-      WriteLn('Error: No se pudo conectar a la base de datos');
-      Application.Terminate;
-      Exit;
-    end;
+  DM.InicializarBaseDatos;
 
-    // Crear usuario admin si no existe
+  try
+    if not DM.Conexion.Connected then begin Application.Terminate; Exit; end;
+
     TAuthService.SeedAdminUser;
 
-    // Login
     frmLogin := TfrmLogin.Create(nil);
     try
-      if frmLogin.ShowModal <> mrOK then
-      begin
-        Application.Terminate;
-        Exit;
-      end;
+      if frmLogin.ShowModal <> mrOK then begin Application.Terminate; Exit; end;
     finally
       frmLogin.Free;
     end;
 
-    // Main form
     Application.CreateForm(TfrmMain, frmMain);
     Application.Run;
-
   finally
     DM.Free;
   end;

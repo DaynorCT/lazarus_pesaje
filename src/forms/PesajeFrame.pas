@@ -442,14 +442,50 @@ end;
 // ====================================================================
 
 procedure TFramePesaje.btnQuickCreateClick(Sender: TObject);
+var
+  NewTag: Integer;
+  F: TForm;
+  Lbl: TLabel;
+  edtNombre: TEdit;
+  Tabla: string;
+  Titulo: string;
 begin
-  case TButton(Sender).Tag of
-    1: ShowMessage('Nuevo Vehiculo - Fase 2');
-    2: ShowMessage('Nuevo Chofer - Fase 2');
-    3: ShowMessage('Nuevo Proveedor - Fase 2');
-    4: ShowMessage('Nuevo Producto - Fase 2');
-    5: ShowMessage('Nuevo Origen - Fase 2');
-    6: ShowMessage('Nuevo Destino - Fase 2');
+  NewTag := TButton(Sender).Tag;
+
+  if NewTag in [1,2,3] then begin ShowMessage('Creacion rapida disponible en Fase 2.1'); Exit; end;
+
+  case NewTag of
+    4: begin Tabla := 'productos'; Titulo := 'Nuevo Producto'; end;
+    5: begin Tabla := 'origenes'; Titulo := 'Nuevo Origen'; end;
+    6: begin Tabla := 'destinos'; Titulo := 'Nuevo Destino'; end;
+  else Exit;
+  end;
+
+  F := TForm.Create(nil);
+  try
+    F.Caption := Titulo; F.Width := 400; F.Height := 200;
+    F.Position := poOwnerFormCenter; F.BorderStyle := bsDialog;
+
+    Lbl := TLabel.Create(F); Lbl.Parent := F;
+    Lbl.SetBounds(24, 20, 350, 16); Lbl.Caption := 'Nombre *'; Lbl.Font.Style := [fsBold];
+    edtNombre := TEdit.Create(F); edtNombre.Parent := F;
+    edtNombre.SetBounds(24, 44, 350, 32); edtNombre.Font.Size := 12;
+
+    with TButton.Create(F) do begin Parent := F; SetBounds(100, 100, 90, 32);
+      Caption := 'Guardar'; Font.Style := [fsBold]; ModalResult := mrOK; end;
+    with TButton.Create(F) do begin Parent := F; SetBounds(200, 100, 90, 32);
+      Caption := 'Cancelar'; ModalResult := mrCancel; end;
+
+    if F.ShowModal = mrOK then
+    begin
+      if Trim(edtNombre.Text) = '' then
+      begin ShowMessage('El nombre es obligatorio'); Exit; end;
+      DM.EjecutarSQL('INSERT INTO ' + Tabla + ' (nombre, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+        QuotedStr(Trim(edtNombre.Text)) + ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+      CargarCombos;
+    end;
+  finally
+    F.Free;
   end;
 end;
 

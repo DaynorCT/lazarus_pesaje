@@ -6,16 +6,12 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons, ComCtrls, Menus, AuthService, DataModule, LoginForm;
+  Buttons, ComCtrls, Menus, AuthService, DataModule, LoginForm,
+  PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
+  ProveedoresFrame, UsuariosFrame, AbmSimpleFrame;
 
 type
   TFrameClass = class of TFrame;
-
-  TMenuItemInfo = record
-    Name: string;
-    FrameClass: TFrameClass;
-    RequiereAdmin: Boolean;
-  end;
 
   { TfrmMain }
 
@@ -35,12 +31,8 @@ type
     FActiveFrame: TFrame;
     procedure SidebarButtonClick(Sender: TObject);
     procedure LoadFrame(FrameClass: TFrameClass; const Title: string);
+    procedure LoadFrameInstance(NewFrame: TFrame; const Title: string);
     procedure BuildMenu;
-    procedure ShowPesaje;
-    procedure ShowDashboard;
-    procedure ShowChoferes;
-    procedure ShowVehiculos;
-  public
   end;
 
 var
@@ -49,9 +41,6 @@ var
 implementation
 
 {$R *.lfm}
-
-uses
-  PesajeFrame, DashboardFrame;
 
 { TfrmMain }
 
@@ -79,7 +68,7 @@ begin
   btnLogout.Parent := pnlTop;
   btnLogout.Align := alRight;
   btnLogout.Width := 100;
-  btnLogout.Caption := 'Cerrar Sesión';
+  btnLogout.Caption := 'Cerrar Sesion';
   btnLogout.Flat := True;
   btnLogout.Font.Color := $FF9999;
   btnLogout.BorderSpacing.Right := 16;
@@ -92,21 +81,20 @@ end;
 procedure TfrmMain.FormShow(Sender: TObject);
 begin
   lblUserInfo.Caption := UsuarioActual.PersonaNombre + '  |  ' + UsuarioActual.Rol;
-  ShowDashboard;
+  LoadFrame(TFrameDashboard, 'Dashboard');
 end;
 
 procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
   if FActiveFrame <> nil then
   begin
-    FActiveFrame.Free;
-    FActiveFrame := nil;
+    FreeAndNil(FActiveFrame);
   end;
 end;
 
 procedure TfrmMain.btnLogoutClick(Sender: TObject);
 begin
-  if MessageDlg('Cerrar sesión', '¿Está seguro que desea cerrar sesión?',
+  if MessageDlg('Cerrar sesion', 'Esta seguro que desea cerrar sesion?',
     mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     ModalResult := mrCancel;
@@ -123,14 +111,13 @@ procedure TfrmMain.BuildMenu;
     Result.Caption := Caption;
     Result.Tag := Tag;
     Result.Align := alTop;
-    Result.Height := 44;
+    Result.Height := 42;
     Result.Flat := True;
     Result.Font.Color := $DDDDDD;
-    Result.Font.Height := -14;
+    Result.Font.Height := -13;
     Result.GroupIndex := 1;
     Result.AllowAllUp := True;
     Result.OnClick := @SidebarButtonClick;
-    Result.Margin := 8;
   end;
 
 begin
@@ -141,30 +128,50 @@ begin
 
   CrearBoton('  Dashboard', 0);
   CrearBoton('  Pesaje', 1).Down := True;
-  CrearBoton('  Vehículos', 2);
+  CrearBoton('  Vehiculos', 2);
   CrearBoton('  Choferes', 3);
   CrearBoton('  Proveedores', 4);
   CrearBoton('  Productos', 5);
-  CrearBoton('  Orígenes', 6);
+  CrearBoton('  Origenes', 6);
   CrearBoton('  Destinos', 7);
   CrearBoton('  Bodegas', 8);
   CrearBoton('  Empresas', 9);
   CrearBoton('  Usuarios', 10);
   CrearBoton('  Reportes', 11);
-  CrearBoton('  Configuración', 12);
+  CrearBoton('  Configuracion', 12);
 end;
 
 procedure TfrmMain.SidebarButtonClick(Sender: TObject);
 var
-  Btn: TSpeedButton;
+  MenuTag: Integer;
+  FrameP, FrameD, FrameO: TFrameAbmSimple;
 begin
-  Btn := TSpeedButton(Sender);
-  pnlContent.Caption := '';
+  MenuTag := TSpeedButton(Sender).Tag;
 
-  case Btn.Tag of
-    0: ShowDashboard;
-    1: ShowPesaje;
-    else ShowMessage('Módulo en desarrollo (Fase 2) - Tag: ' + IntToStr(Btn.Tag));
+  case MenuTag of
+    0: LoadFrame(TFrameDashboard, 'Dashboard');
+    1: LoadFrame(TFramePesaje, 'Pesaje');
+    2: LoadFrame(TFrameVehiculos, 'Vehiculos');
+    3: LoadFrame(TFrameChoferes, 'Choferes');
+    4: LoadFrame(TFrameProveedores, 'Proveedores');
+    5: begin
+      FrameP := TFrameAbmSimple.CreateWithConfig(Self, ConfigProductos);
+      LoadFrameInstance(FrameP, 'Productos');
+    end;
+    6: begin
+      FrameO := TFrameAbmSimple.CreateWithConfig(Self, ConfigOrigenes);
+      LoadFrameInstance(FrameO, 'Origenes');
+    end;
+    7: begin
+      FrameD := TFrameAbmSimple.CreateWithConfig(Self, ConfigDestinos);
+      LoadFrameInstance(FrameD, 'Destinos');
+    end;
+    8: begin
+      FrameD := TFrameAbmSimple.CreateWithConfig(Self, ConfigBodegas);
+      LoadFrameInstance(FrameD, 'Bodegas');
+    end;
+    10: LoadFrame(TFrameUsuarios, 'Usuarios');
+    else ShowMessage('Modulo en desarrollo - Fase 3');
   end;
 end;
 
@@ -172,40 +179,21 @@ procedure TfrmMain.LoadFrame(FrameClass: TFrameClass; const Title: string);
 var
   NewFrame: TFrame;
 begin
-  if FActiveFrame <> nil then
-  begin
-    if FActiveFrame.ClassType = FrameClass then
-      Exit;
-    FActiveFrame.Free;
-    FActiveFrame := nil;
-  end;
+  if (FActiveFrame <> nil) and (FActiveFrame.ClassType = FrameClass) then
+    Exit;
+  LoadFrameInstance(FrameClass.Create(Self), Title);
+end;
 
-  NewFrame := FrameClass.Create(Self);
+procedure TfrmMain.LoadFrameInstance(NewFrame: TFrame; const Title: string);
+begin
+  if FActiveFrame <> nil then
+    FreeAndNil(FActiveFrame);
+
   NewFrame.Parent := pnlContent;
   NewFrame.Align := alClient;
   NewFrame.Visible := True;
   FActiveFrame := NewFrame;
   Caption := 'Sistema de Pesaje - ' + Title;
-end;
-
-procedure TfrmMain.ShowDashboard;
-begin
-  LoadFrame(TFrameDashboard, 'Dashboard');
-end;
-
-procedure TfrmMain.ShowPesaje;
-begin
-  LoadFrame(TFramePesaje, 'Pesaje');
-end;
-
-procedure TfrmMain.ShowChoferes;
-begin
-  ShowMessage('ABM Choferes - Fase 2');
-end;
-
-procedure TfrmMain.ShowVehiculos;
-begin
-  ShowMessage('ABM Vehículos - Fase 2');
 end;
 
 end.
