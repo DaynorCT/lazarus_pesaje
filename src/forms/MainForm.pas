@@ -94,7 +94,7 @@ begin
   begin
     Pnl := CrearNavItem(Items[I].Emoji + ' ' + Items[I].Title, Items[I].Tag, XPos);
     FNavItems[I] := Pnl;
-    XPos := XPos + Pnl.Width + 10;
+    XPos := XPos + Pnl.Width + 16;
   end;
 
   // Submenu Catálogo
@@ -129,7 +129,7 @@ begin
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
   FUserBtn.Width := 36; FUserBtn.Height := 36;
-  FUserBtn.Top := 10;
+  FUserBtn.Top := 15;
   FUserBtn.Caption := '👤';
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;
@@ -156,7 +156,7 @@ begin
   Result.Parent := pnlTop;
   Result.Tag := ATag;
   W := Result.Canvas.TextWidth(ACaption) + 24;
-  Result.SetBounds(X, 8, W, 40);
+  Result.SetBounds(X, 15, W, 40);
   Result.BevelOuter := bvNone;
   Result.Color := CLR_CARD;
   Result.Cursor := crHandPoint;

@@ -23,7 +23,7 @@ object frmMain: TfrmMain
     object lblLogo: TLabel
       Left = 16
       Height = 20
-      Top = 14
+      Top = 18
       Width = 200
       Caption = 'SISTEMA DE PESAJE'
       Font.Color = 3684425
