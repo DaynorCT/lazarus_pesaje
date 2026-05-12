@@ -55,6 +55,8 @@ begin
   Grid.Anchors := [akTop,akLeft,akRight,akBottom];
   Grid.ColCount := 5; Grid.RowCount := 2; Grid.FixedRows := 1;
   Grid.FixedCols := 0; Grid.Options := Grid.Options + [goRowSelect];
+  Grid.Color := CLR_CARD;
+  Grid.FixedColor := CLR_TABLE_HEADER;
   Grid.DefaultRowHeight := 26;
   Grid.Cells[0,0]:='ID'; Grid.Cells[1,0]:='Nombre'; Grid.Cells[2,0]:='Empresa';
   Grid.Cells[3,0]:='CI'; Grid.Cells[4,0]:='Estado';
