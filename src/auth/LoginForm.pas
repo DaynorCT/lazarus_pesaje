@@ -64,6 +64,8 @@ end;
 
 procedure TfrmLogin.FormResize(Sender: TObject);
 begin
+  lblTitulo.Left := (pnlCard.ClientWidth - lblTitulo.Width) div 2;
+  lblSubtitulo.Left := (pnlCard.ClientWidth - lblSubtitulo.Width) div 2;
   pnlCard.Left := (pnlBG.ClientWidth - pnlCard.Width) div 2;
   pnlCard.Top := (pnlBG.ClientHeight - pnlCard.Height) div 2;
 end;
