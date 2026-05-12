@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 0
+  Left = 2
   Height = 808
-  Top = 64
+  Top = 0
   Width = 1440
   BorderStyle = bsNone
   Caption = 'Sistema de Pesaje'
@@ -27,7 +27,7 @@ object frmLogin: TfrmLogin
     object pnlCard: TPanel
       Left = 512
       Height = 600
-      Top = 112
+      Top = 80
       Width = 436
       BevelOuter = bvNone
       ClientHeight = 600
@@ -63,7 +63,7 @@ object frmLogin: TfrmLogin
       object lblTitulo: TLabel
         Left = 0
         Height = 27
-        Top = 144
+        Top = 136
         Width = 436
         Alignment = taCenter
         AutoSize = False
@@ -75,8 +75,8 @@ object frmLogin: TfrmLogin
       end
       object lblSubtitulo: TLabel
         Left = 0
-        Height = 27
-        Top = 184
+        Height = 40
+        Top = 176
         Width = 436
         Alignment = taCenter
         AutoSize = False
