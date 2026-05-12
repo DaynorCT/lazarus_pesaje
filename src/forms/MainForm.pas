@@ -244,8 +244,8 @@ begin
   Result.Width := Result.Canvas.TextWidth(ACaption) + 28;
   Result.Flat := True;
   Result.Font.Size := 13;
-  Result.Font.Color := CLR_TEXT_SLATE;
-  Result.Font.Style := [];
+    Result.Font.Color := CLR_TEXT;
+    Result.Font.Style := [];
   Result.OnClick := @NavBtnClick;
 end;
 
@@ -260,7 +260,7 @@ begin
   Btn.SetBounds(0, Y, 180, 36);
   Btn.Flat := True;
   Btn.Font.Size := 12;
-  Btn.Font.Color := CLR_TEXT_SLATE;
+  Btn.Font.Color := CLR_TEXT;
   Btn.Font.Style := [];
   Btn.Alignment := taLeftJustify;
   Btn.OnClick := @SubItemClick;
@@ -346,7 +346,7 @@ var
 begin
   for I := 0 to High(FNavBtns) do
   begin
-    FNavBtns[I].Font.Color := CLR_TEXT_SLATE;
+    FNavBtns[I].Font.Color := CLR_TEXT;
     FNavBtns[I].Font.Style := [];
   end;
 end;
