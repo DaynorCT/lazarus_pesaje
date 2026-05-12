@@ -124,12 +124,13 @@ begin
 
   CrearSubItem(FSubConfig, '📋 Boleta', 12, 0);
 
+  // Botón usuario (TPanel, igual que nav modules)
   // Botón usuario
   FUserBtn := TSpeedButton.Create(pnlTop);
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
   FUserBtn.Width := 40; FUserBtn.Height := 40;
-  FUserBtn.Top := 25;
+  FUserBtn.Top := 13;
   FUserBtn.Caption := '👤';
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;

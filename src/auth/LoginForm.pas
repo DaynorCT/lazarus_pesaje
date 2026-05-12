@@ -5,8 +5,8 @@ unit LoginForm;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  ExtCtrls, AuthService, DataModule;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, AuthService, DataModule, Theme;
 
 type
   TUserRecord = DataModule.TUserRecord;
@@ -14,19 +14,25 @@ type
   { TfrmLogin }
 
   TfrmLogin = class(TForm)
-    pnlMain: TPanel;
+    pnlCard: TPanel;
+    pnlLogoBox: TPanel;
+    lblLogoIcon: TLabel;
     lblTitulo: TLabel;
     lblSubtitulo: TLabel;
-    lblEmail: TLabel;
-    edtEmail: TEdit;
-    lblPassword: TLabel;
-    edtPassword: TEdit;
-    btnIngresar: TBitBtn;
-    btnSalir: TBitBtn;
+    pnlDiv1: TPanel;
     lblError: TLabel;
+    lblUsuario: TLabel;
+    edtUsuario: TEdit;
+    lblContrasena: TLabel;
+    edtContrasena: TEdit;
+    pnlDiv2: TPanel;
+    pnlIngresar: TPanel;
+    lblIngresar: TLabel;
+    lblSalir: TLabel;
     procedure btnIngresarClick(Sender: TObject);
-    procedure btnSalirClick(Sender: TObject);
+    procedure lblSalirClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     FUser: TUserRecord;
   public
@@ -45,31 +51,37 @@ procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
   FillChar(FUser, SizeOf(FUser), 0);
   lblError.Caption := '';
-  ActiveControl := edtEmail;
+  ActiveControl := edtUsuario;
+end;
+
+procedure TfrmLogin.FormResize(Sender: TObject);
+begin
+  pnlCard.Left := (ClientWidth - pnlCard.Width) div 2;
+  pnlCard.Top := (ClientHeight - pnlCard.Height) div 2;
 end;
 
 procedure TfrmLogin.btnIngresarClick(Sender: TObject);
 var
   Resultado: TAuthResult;
 begin
-  if Trim(edtEmail.Text) = '' then
+  if Trim(edtUsuario.Text) = '' then
   begin
-    lblError.Caption := 'Ingrese su email';
-    edtEmail.SetFocus;
+    lblError.Caption := 'Ingrese su usuario';
+    edtUsuario.SetFocus;
     Exit;
   end;
 
-  if Trim(edtPassword.Text) = '' then
+  if Trim(edtContrasena.Text) = '' then
   begin
     lblError.Caption := 'Ingrese su contraseña';
-    edtPassword.SetFocus;
+    edtContrasena.SetFocus;
     Exit;
   end;
 
   lblError.Caption := '';
   Screen.Cursor := crHourGlass;
   try
-    Resultado := TAuthService.Login(Trim(edtEmail.Text), Trim(edtPassword.Text), FUser);
+    Resultado := TAuthService.Login(Trim(edtUsuario.Text), Trim(edtContrasena.Text), FUser);
   finally
     Screen.Cursor := crDefault;
   end;
@@ -81,7 +93,7 @@ begin
         ModalResult := mrOK;
       end;
     arInvalidEmail:
-      lblError.Caption := 'Email no registrado';
+      lblError.Caption := 'Usuario no registrado';
     arInvalidPassword:
       lblError.Caption := 'Contraseña incorrecta';
     arInactiveUser:
@@ -91,7 +103,7 @@ begin
   end;
 end;
 
-procedure TfrmLogin.btnSalirClick(Sender: TObject);
+procedure TfrmLogin.lblSalirClick(Sender: TObject);
 begin
   Application.Terminate;
 end;

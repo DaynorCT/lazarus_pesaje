@@ -1,155 +1,193 @@
 object frmLogin: TfrmLogin
   Left = 0
-  Height = 380
+  Height = 808
   Top = 0
-  Width = 420
-  BorderStyle = bsDialog
+  Width = 1440
   Caption = 'Sistema de Pesaje'
-  ClientHeight = 380
-  ClientWidth = 420
+  ClientHeight = 808
+  ClientWidth = 1440
+  Color = 15779042
   Position = poScreenCenter
-  object pnlMain: TPanel
-    Left = 0
-    Height = 380
-    Top = 0
-    Width = 420
-    Align = alClient
+  LCLVersion = '4.7.0.0'
+  WindowState = wsMaximized
+  OnResize = FormResize
+  object pnlCard: TPanel
+    Left = 32
+    Height = 556
+    Top = 32
+    Width = 436
     BevelOuter = bvNone
-    Color = 16777215
-    ClientHeight = 380
-    ClientWidth = 420
+    ClientHeight = 556
+    ClientWidth = 436
+    Color = clWhite
+    ParentBackground = False
     ParentColor = False
+    TabOrder = 0
+    object pnlLogoBox: TPanel
+      Left = 170
+      Height = 96
+      Top = 24
+      Width = 96
+      BevelOuter = bvNone
+      ClientHeight = 96
+      ClientWidth = 96
+      Color = 5587251
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 2
+      object lblLogoIcon: TLabel
+        Left = 0
+        Height = 96
+        Top = 0
+        Width = 96
+        Align = alClient
+        Alignment = taCenter
+        Caption = '💛'
+        Font.Color = 15779042
+        Font.Height = -32
+        Layout = tlCenter
+        ParentFont = False
+      end
+    end
     object lblTitulo: TLabel
       Left = 40
-      Height = 32
-      Top = 48
-      Width = 340
-      Align = alTop
+      Height = 27
+      Top = 144
+      Width = 180
       Alignment = taCenter
-      BorderSpacing.Left = 40
-      BorderSpacing.Right = 40
       Caption = 'Sistema de Pesaje'
-      Font.Height = -21
-      Font.Color = 1974838
-      Font.Style = [fsBold]
+      Font.Color = 5587251
+      Font.Height = -23
+      Layout = tlCenter
       ParentFont = False
     end
     object lblSubtitulo: TLabel
       Left = 40
-      Height = 16
-      Top = 80
-      Width = 340
-      Align = alTop
+      Height = 27
+      Top = 184
+      Width = 272
       Alignment = taCenter
-      BorderSpacing.Left = 40
-      BorderSpacing.Right = 40
-      Caption = 'Inicie sesion para continuar'
-      Font.Color = 9737364
-      Font.Size = 11
+      Caption = 'Medición y registro de peso'
+      Font.Color = 5587251
+      Font.Height = -23
+      Layout = tlCenter
       ParentFont = False
     end
-    object lblEmail: TLabel
-      Left = 60
-      Height = 16
-      Top = 128
-      Width = 300
-      Align = alTop
-      BorderSpacing.Left = 60
-      BorderSpacing.Right = 60
-      BorderSpacing.Top = 32
-      Caption = 'Email'
-      Font.Size = 11
-      Font.Color = 3342587
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object edtEmail: TEdit
-      Left = 60
-      Height = 34
-      Top = 148
-      Width = 300
-      Align = alTop
-      BorderSpacing.Left = 60
-      BorderSpacing.Right = 60
-      BorderSpacing.Top = 4
-      Font.Size = 12
-      TabOrder = 0
-    end
-    object lblPassword: TLabel
-      Left = 60
-      Height = 16
-      Top = 200
-      Width = 300
-      Align = alTop
-      BorderSpacing.Left = 60
-      BorderSpacing.Right = 60
-      BorderSpacing.Top = 18
-      Caption = 'Contrasena'
-      Font.Size = 11
-      Font.Color = 3342587
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object edtPassword: TEdit
-      Left = 60
-      Height = 34
-      Top = 220
-      Width = 300
-      Align = alTop
-      BorderSpacing.Left = 60
-      BorderSpacing.Right = 60
-      BorderSpacing.Top = 4
-      EchoMode = emPassword
-      PasswordChar = '*'
-      Font.Size = 12
-      TabOrder = 1
+    object pnlDiv1: TPanel
+      Left = 40
+      Height = 1
+      Top = 228
+      Width = 356
+      BevelOuter = bvNone
+      Color = 14800331
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 3
     end
     object lblError: TLabel
-      Left = 60
-      Height = 16
-      Top = 268
-      Width = 300
-      Align = alTop
-      BorderSpacing.Left = 60
-      BorderSpacing.Right = 60
-      BorderSpacing.Top = 14
-      Font.Color = 22028
-      Font.Size = 11
+      Left = 40
+      Height = 1
+      Top = 249
+      Width = 1
+      Alignment = taCenter
+      Font.Color = 2500316
+      Font.Height = -15
       ParentFont = False
     end
-    object btnIngresar: TBitBtn
-      Left = 60
-      Height = 38
-      Top = 304
-      Width = 300
-      Align = alTop
-      BorderSpacing.Left = 60
-      BorderSpacing.Right = 60
-      BorderSpacing.Top = 20
-      Caption = 'Ingresar'
-      Font.Size = 13
-      Font.Style = [fsBold]
-      Font.Color = 16777215
-      Kind = bkOK
-      ModalResult = 0
-      TabOrder = 2
-      OnClick = btnIngresarClick
+    object lblUsuario: TLabel
+      Left = 40
+      Height = 18
+      Top = 285
+      Width = 53
+      Caption = 'Usuario'
+      Font.Color = 2758431
+      Font.Height = -15
+      ParentFont = False
     end
-    object btnSalir: TBitBtn
-      Left = 60
-      Height = 34
-      Top = 350
-      Width = 300
-      Align = alTop
-      BorderSpacing.Left = 60
-      BorderSpacing.Right = 60
-      BorderSpacing.Top = 8
+    object edtUsuario: TEdit
+      Left = 40
+      Height = 25
+      Top = 305
+      Width = 356
+      Font.Height = -17
+      ParentFont = False
+      TabOrder = 0
+      TextHint = 'Ingresa tu usuario'
+    end
+    object lblContrasena: TLabel
+      Left = 40
+      Height = 18
+      Top = 369
+      Width = 79
+      Caption = 'Contraseña'
+      Font.Color = 2758431
+      Font.Height = -15
+      ParentFont = False
+    end
+    object edtContrasena: TEdit
+      Left = 40
+      Height = 25
+      Top = 389
+      Width = 356
+      EchoMode = emPassword
+      Font.Height = -17
+      ParentFont = False
+      PasswordChar = '*'
+      TabOrder = 1
+      TextHint = 'Ingresa tu contraseña'
+    end
+    object pnlDiv2: TPanel
+      Left = 40
+      Height = 1
+      Top = 453
+      Width = 356
+      BevelOuter = bvNone
+      Color = 14800331
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 4
+    end
+    object pnlIngresar: TPanel
+      Cursor = crHandPoint
+      Left = 40
+      Height = 48
+      Top = 474
+      Width = 356
+      BevelOuter = bvNone
+      ClientHeight = 48
+      ClientWidth = 356
+      Color = 8405530
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 5
+      OnClick = btnIngresarClick
+      object lblIngresar: TLabel
+        Left = 0
+        Height = 48
+        Top = 0
+        Width = 356
+        Align = alClient
+        Alignment = taCenter
+        Caption = 'INGRESAR'
+        Font.Color = clWhite
+        Font.Height = -14
+        Layout = tlCenter
+        ParentFont = False
+        OnClick = btnIngresarClick
+      end
+    end
+    object lblSalir: TLabel
+      Cursor = crHandPoint
+      Left = 40
+      Height = 18
+      Top = 534
+      Width = 32
+      Alignment = taCenter
       Caption = 'Salir'
-      Font.Size = 12
-      Font.Color = 9737364
-      Kind = bkCancel
-      TabOrder = 3
-      OnClick = btnSalirClick
+      Font.Color = 8778852
+      Font.Height = -16
+      ParentFont = False
+      OnClick = lblSalirClick
     end
   end
 end
