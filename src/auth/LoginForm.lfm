@@ -42,7 +42,7 @@ object frmLogin: TfrmLogin
         BevelOuter = bvNone
         ClientHeight = 96
         ClientWidth = 96
-        Color = 5587251
+        Color = 15788258
         ParentBackground = False
         ParentColor = False
         TabOrder = 2

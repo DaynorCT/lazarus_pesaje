@@ -48,10 +48,11 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="33"/>
-        <CursorPos X="21" Y="56"/>
+        <TopLine Value="121"/>
+        <CursorPos X="24" Y="18"/>
         <UsageCount Value="49"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/MainForm.pas"/>
@@ -148,7 +149,7 @@
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="9">
+    <JumpHistory HistoryIndex="10">
       <Position>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
         <Caret Line="486" TopLine="476"/>
@@ -188,6 +189,10 @@
       <Position>
         <Filename Value="src/auth/LoginForm.pas"/>
         <Caret Line="61" Column="26"/>
+      </Position>
+      <Position>
+        <Filename Value="src/auth/LoginForm.pas"/>
+        <Caret Line="56" Column="21" TopLine="33"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>

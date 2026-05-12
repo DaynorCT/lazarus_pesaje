@@ -65,7 +65,7 @@ const
   CLR_LOGIN_TITLE      = $554133;  // #334155 - slate-700 (títulos)
   CLR_LOGIN_LABEL      = $2A170F;  // #0F172A - slate-900 (labels de campos)
   CLR_LOGIN_BORDER     = $E1D5CB;  // #CBD5E1 - slate-300 (bordes, divisores)
-  CLR_LOGIN_ICON_BG    = $554133;  // #334155 - slate-700 (fondo caja ícono)
+  CLR_LOGIN_ICON_BG    = $F0E8E2;  // #E2E8F0 - slate-200 (fondo caja ícono)
   CLR_LOGIN_ICON_FG    = $F0E8E2;  // #E2E8F0 - slate-200 (color ícono)
   CLR_LOGIN_ERROR_BG   = $F2F2FE;  // #FEF2F2 - red-50
   CLR_LOGIN_ERROR_FG   = $2626DC;  // #DC2626 - red-600
