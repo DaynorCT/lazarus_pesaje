@@ -60,7 +60,7 @@ const
   CLR_TABLE_ROW_HOVER = $FCFAF8; // #F8FAFC - slate-50
 
   // Login (replicado del diseño web minimalista)
-  CLR_LOGIN_BG        = $F0E8E2;  // #E2E8F0 - slate-200 (fondo página)
+  CLR_LOGIN_BG         = $F0E8E2;  // #E2E8F0 - slate-200 (fondo página)
   CLR_LOGIN_CARD       = $FFFFFF;
   CLR_LOGIN_TITLE      = $554133;  // #334155 - slate-700 (títulos)
   CLR_LOGIN_LABEL      = $2A170F;  // #0F172A - slate-900 (labels de campos)

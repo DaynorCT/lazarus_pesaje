@@ -14,6 +14,7 @@ type
   { TfrmLogin }
 
   TfrmLogin = class(TForm)
+    pnlBG: TPanel;
     pnlCard: TPanel;
     pnlLogoBox: TPanel;
     lblLogoIcon: TLabel;
@@ -53,13 +54,19 @@ begin
   FillChar(FUser, SizeOf(FUser), 0);
   lblError.Caption := '';
   pnlError.Visible := False;
+
+  pnlBG.Color := CLR_LOGIN_BG;
+  pnlCard.Color := CLR_LOGIN_CARD;
+  pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
+  lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
+
   ActiveControl := edtUsuario;
 end;
 
 procedure TfrmLogin.FormResize(Sender: TObject);
 begin
-  pnlCard.Left := (ClientWidth - pnlCard.Width) div 2;
-  pnlCard.Top := (ClientHeight - pnlCard.Height) div 2;
+  pnlCard.Left := (pnlBG.ClientWidth - pnlCard.Width) div 2;
+  pnlCard.Top := (pnlBG.ClientHeight - pnlCard.Height) div 2;
 end;
 
 procedure TfrmLogin.btnIngresarClick(Sender: TObject);
