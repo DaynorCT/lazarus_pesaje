@@ -242,8 +242,10 @@ begin
   Result.Top := 10;
   Result.Height := 36;
   Result.Width := Result.Canvas.TextWidth(ACaption) + 28;
-  Result.Flat := True;
-  Result.Font.Size := 13;
+    Result.Flat := True;
+    Result.Transparent := False;
+    Result.Color := CLR_CARD;
+    Result.Font.Size := 13;
     Result.Font.Color := CLR_TEXT;
     Result.Font.Style := [];
   Result.OnClick := @NavBtnClick;
@@ -260,6 +262,7 @@ begin
   Btn.SetBounds(0, Y, 180, 36);
   Btn.Flat := True;
   Btn.Font.Size := 12;
+  Btn.Color := CLR_CARD;
   Btn.Font.Color := CLR_TEXT;
   Btn.Font.Style := [];
   Btn.Alignment := taLeftJustify;
@@ -346,6 +349,7 @@ var
 begin
   for I := 0 to High(FNavBtns) do
   begin
+    FNavBtns[I].Color := CLR_CARD;
     FNavBtns[I].Font.Color := CLR_TEXT;
     FNavBtns[I].Font.Style := [];
   end;
@@ -353,6 +357,7 @@ end;
 
 procedure TfrmMain.SetActiveNav(ABtn: TSpeedButton);
 begin
+  ABtn.Color := CLR_SIDEBAR_ACTIVE;
   ABtn.Font.Color := CLR_TEXT;
   ABtn.Font.Style := [fsBold];
 end;
