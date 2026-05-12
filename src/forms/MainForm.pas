@@ -128,8 +128,8 @@ begin
   FUserBtn := TSpeedButton.Create(pnlTop);
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
-  FUserBtn.Width := 36; FUserBtn.Height := 36;
-  FUserBtn.Top := 15;
+  FUserBtn.Width := 40; FUserBtn.Height := 40;
+  FUserBtn.Top := 25;
   FUserBtn.Caption := '👤';
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;
@@ -270,13 +270,16 @@ var
   YPos: Integer;
   Sep: TPanel;
 begin
-  CerrarSubmenus;
-
+  // Toggle: si ya está abierto, cerrar
   if FUserMenu.Visible then
   begin
     FUserMenu.Visible := False;
     Exit;
   end;
+
+  // Cerrar otros menús
+  FSubCatalogo.Visible := False;
+  FSubConfig.Visible := False;
 
   FUserMenu.DestroyComponents;
   FUserMenu.Left := FUserBtn.Left + FUserBtn.Width - FUserMenu.Width;
@@ -380,7 +383,9 @@ end;
 
 procedure TfrmMain.ContentClick(Sender: TObject);
 begin
-  CerrarSubmenus;
+  FSubCatalogo.Visible := False;
+  FSubConfig.Visible := False;
+  FUserMenu.Visible := False;
 end;
 
 procedure TfrmMain.LogoutClick(Sender: TObject);
