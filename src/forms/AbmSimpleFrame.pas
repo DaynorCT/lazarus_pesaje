@@ -153,6 +153,7 @@ begin
   FLblTitulo.Caption := FConfig.TituloPlural;
   FLblTitulo.Font.Height := -18;
   FLblTitulo.Font.Style := [fsBold];
+  
   FLblTitulo.Font.Color := $333333;
 
   FEditBuscar := TEdit.Create(Self);
@@ -167,6 +168,8 @@ begin
   FBtnNuevo.SetBounds(580, 12, 100, 32);
   FBtnNuevo.Caption := '+ Nuevo';
   FBtnNuevo.Font.Style := [fsBold];
+  FBtnNuevo.Font.Color := CLR_PRIMARY;
+  
   FBtnNuevo.OnClick := @btnNuevoClick;
 
   FSG := TStringGrid.Create(Self);
@@ -335,6 +338,7 @@ begin
       Lbl := TLabel.Create(F); Lbl.Parent := F;
       Lbl.SetBounds(24, y, 360, 16);
       Lbl.Caption := FConfig.LabelsEdit[i]; Lbl.Font.Style := [fsBold];
+  
       Inc(y, 20);
       Edits[i] := TEdit.Create(F); Edits[i].Parent := F;
       Edits[i].SetBounds(24, y, 360, 32); Edits[i].Font.Size := 12;

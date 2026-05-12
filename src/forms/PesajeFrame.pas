@@ -101,6 +101,7 @@ begin
   Result.Width := 32; Result.Height := 28;
   Result.Caption := '+';
   Result.Font.Style := [fsBold];
+  
   Result.Tag := ATag;
   Result.OnClick := Handler;
 end;
@@ -191,6 +192,7 @@ begin
   lblHora.Caption := '00:00:00';
   lblHora.Font.Height := -32;
   lblHora.Font.Style := [fsBold];
+  
   lblHora.Font.Color := $333333;
 
   lblFecha := TLabel.Create(Self);
@@ -216,6 +218,7 @@ begin
   lblPesoDisplay.Caption := '0';
   lblPesoDisplay.Font.Height := -48;
   lblPesoDisplay.Font.Style := [fsBold];
+  
   lblPesoDisplay.Font.Color := clWhite;
 
   lblUnidad := TLabel.Create(Self);
@@ -234,6 +237,7 @@ begin
   lblEstadoConexion.Caption := 'SIN CONEXION';
   lblEstadoConexion.Font.Size := 11;
   lblEstadoConexion.Font.Style := [fsBold];
+  
   lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
 
   lblEstabilidad := TLabel.Create(Self);
@@ -249,6 +253,8 @@ begin
   btnConectar.SetBounds(24, 320, 185, 42);
   btnConectar.Caption := 'CONECTAR BASCULA';
   btnConectar.Font.Size := 12; btnConectar.Font.Style := [fsBold];
+  btnConectar.Font.Color := CLR_PRIMARY;
+  
   btnConectar.OnClick := @btnConectarClick;
 
   btnTara := TButton.Create(Self);
@@ -256,6 +262,8 @@ begin
   btnTara.SetBounds(219, 320, 185, 42);
   btnTara.Caption := 'CAPTURAR TARA';
   btnTara.Font.Size := 12; btnTara.Font.Style := [fsBold];
+  btnTara.Font.Color := CLR_PRIMARY;
+  
   btnTara.Enabled := False;
   btnTara.OnClick := @btnTaraClick;
 
@@ -279,6 +287,7 @@ begin
   lblResultadoHora.Caption := 'Neto: -- kg';
   lblResultadoHora.Font.Size := 14;
   lblResultadoHora.Font.Style := [fsBold];
+  
   lblResultadoHora.Font.Color := $0F766E;
 
   lblResultadoID := TLabel.Create(Self);
@@ -304,6 +313,7 @@ begin
   Lbl.Caption := 'DATOS DEL PESAJE';
   Lbl.Font.Size := 14;
   Lbl.Font.Style := [fsBold];
+  
   Lbl.Font.Color := $333333;
 
   // Guía y Lote
@@ -364,6 +374,8 @@ begin
   btnGuardar.SetBounds(24, 520, 160, 44);
   btnGuardar.Caption := 'GUARDAR PESAJE';
   btnGuardar.Font.Size := 12; btnGuardar.Font.Style := [fsBold];
+  btnGuardar.Font.Color := CLR_PRIMARY;
+  
   btnGuardar.Enabled := False;
   btnGuardar.OnClick := @btnGuardarClick;
 
@@ -372,6 +384,8 @@ begin
   btnLimpiar.SetBounds(192, 520, 160, 44);
   btnLimpiar.Caption := 'LIMPIAR';
   btnLimpiar.Font.Size := 12; btnLimpiar.Font.Style := [fsBold];
+  btnLimpiar.Font.Color := CLR_PRIMARY;
+  
   btnLimpiar.OnClick := @btnLimpiarClick;
 end;
 
@@ -469,6 +483,7 @@ begin
 
     Lbl := TLabel.Create(F); Lbl.Parent := F;
     Lbl.SetBounds(24, 20, 350, 16); Lbl.Caption := 'Nombre *'; Lbl.Font.Style := [fsBold];
+  
     edtNombre := TEdit.Create(F); edtNombre.Parent := F;
     edtNombre.SetBounds(24, 44, 350, 32); edtNombre.Font.Size := 12;
 

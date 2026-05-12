@@ -48,6 +48,7 @@ begin
   Lbl.SetBounds(24, 14, 200, 28);
   Lbl.Caption := 'Vehículos'; Lbl.Font.Height := -18;
   Lbl.Font.Style := [fsBold]; Lbl.Font.Color := $333333;
+  
 
   edtBuscar := TEdit.Create(Self); edtBuscar.Parent := PnlTop;
   edtBuscar.SetBounds(240, 14, 250, 28); edtBuscar.Font.Size := 12;
@@ -57,6 +58,8 @@ begin
   btnNuevo := TButton.Create(Self); btnNuevo.Parent := PnlTop;
   btnNuevo.SetBounds(500, 12, 100, 32);
   btnNuevo.Caption := '+ Nuevo'; btnNuevo.Font.Style := [fsBold];
+  btnNuevo.Font.Color := CLR_PRIMARY;
+  
   btnNuevo.OnClick := @btnNuevoClick;
 
   Grid := TStringGrid.Create(Self); Grid.Parent := Self;
@@ -145,22 +148,26 @@ begin
 
     Lbl := TLabel.Create(F); Lbl.Parent := F;
     Lbl.SetBounds(24, 16, 100, 16); Lbl.Caption := 'Placa *'; Lbl.Font.Style := [fsBold];
+  
     edtPlaca := TEdit.Create(F); edtPlaca.Parent := F;
     edtPlaca.SetBounds(24, 36, 340, 32); edtPlaca.Font.Size := 12;
 
     Lbl := TLabel.Create(F); Lbl.Parent := F;
     Lbl.SetBounds(24, 76, 100, 16); Lbl.Caption := 'Tipo'; Lbl.Font.Style := [fsBold];
+  
     edtTipo := TEdit.Create(F); edtTipo.Parent := F;
     edtTipo.SetBounds(24, 96, 340, 32); edtTipo.Font.Size := 12;
 
     Lbl := TLabel.Create(F); Lbl.Parent := F;
     Lbl.SetBounds(24, 136, 100, 16); Lbl.Caption := 'Tara (kg)'; Lbl.Font.Style := [fsBold];
+  
     edtTara := TEdit.Create(F); edtTara.Parent := F;
     edtTara.SetBounds(24, 156, 120, 32); edtTara.Font.Size := 12; edtTara.Text := '0';
 
     BtnOK := TButton.Create(F); BtnOK.Parent := F;
     BtnOK.SetBounds(100, 210, 100, 36); BtnOK.Caption := 'Guardar';
     BtnOK.Font.Style := [fsBold]; BtnOK.ModalResult := mrOK;
+  
 
     BtnCancel := TButton.Create(F); BtnCancel.Parent := F;
     BtnCancel.SetBounds(210, 210, 100, 36); BtnCancel.Caption := 'Cancelar';
@@ -203,6 +210,7 @@ begin
 
     Lbl := TLabel.Create(F); Lbl.Parent := F;
     Lbl.SetBounds(24, 16, 100, 16); Lbl.Caption := 'Placa'; Lbl.Font.Style := [fsBold];
+  
     edtPlaca.SetBounds(24, 36, 340, 32); edtPlaca.Font.Size := 12;
     edtPlaca.Text := Q.FieldByName('placa').AsString;
 

@@ -39,6 +39,7 @@ begin
   Lbl := TLabel.Create(Self); Lbl.Parent := Pnl;
   Lbl.SetBounds(24, 14, 200, 28); Lbl.Caption := 'Proveedores';
   Lbl.Font.Height := -18; Lbl.Font.Style := [fsBold]; Lbl.Font.Color := $333333;
+  
 
   edtBuscar := TEdit.Create(Self); edtBuscar.Parent := Pnl;
   edtBuscar.SetBounds(240, 14, 250, 28); edtBuscar.Font.Size := 12;
@@ -48,6 +49,8 @@ begin
   btnNuevo := TButton.Create(Self); btnNuevo.Parent := Pnl;
   btnNuevo.SetBounds(500, 12, 100, 32);
   btnNuevo.Caption := '+ Nuevo'; btnNuevo.Font.Style := [fsBold];
+  btnNuevo.Font.Color := CLR_PRIMARY;
+  
   btnNuevo.OnClick := @btnNuevoClick;
 
   Grid := TStringGrid.Create(Self); Grid.Parent := Self;
