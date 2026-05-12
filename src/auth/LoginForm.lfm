@@ -135,9 +135,10 @@ object frmLogin: TfrmLogin
       end
       object edtUsuario: TEdit
         Left = 40
-        Height = 25
+        Height = 44
         Top = 331
         Width = 356
+        AutoSize = False
         Color = clWhite
         Font.Color = clBlack
         Font.Height = -17
@@ -158,9 +159,10 @@ object frmLogin: TfrmLogin
       end
       object edtContrasena: TEdit
         Left = 40
-        Height = 25
+        Height = 44
         Top = 421
         Width = 356
+        AutoSize = False
         Color = clWhite
         EchoMode = emPassword
         Font.Color = clBlack

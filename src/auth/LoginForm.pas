@@ -62,9 +62,13 @@ begin
   edtUsuario.Color := CLR_WHITE;
   edtUsuario.Font.Color := CLR_TEXT;
   edtUsuario.ParentColor := False;
+  edtUsuario.AutoSize := False;
+  edtUsuario.Height := 44;
   edtContrasena.Color := CLR_WHITE;
   edtContrasena.Font.Color := CLR_TEXT;
   edtContrasena.ParentColor := False;
+  edtContrasena.AutoSize := False;
+  edtContrasena.Height := 44;
 
   ActiveControl := edtUsuario;
 end;
