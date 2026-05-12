@@ -179,6 +179,8 @@ begin
   FSG.FixedCols := 0;
   FSG.Color := CLR_CARD;
   FSG.FixedColor := CLR_TABLE_HEADER;
+  FSG.ParentFont := False;
+  FSG.Font.Color := CLR_TEXT;
   FSG.Options := FSG.Options + [goRowSelect];
   FSG.ScrollBars := ssAutoBoth;
   FSG.GridLineWidth := 1;

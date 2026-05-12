@@ -66,6 +66,8 @@ begin
   Grid.FixedCols := 0; Grid.Options := Grid.Options + [goRowSelect];
   Grid.Color := CLR_CARD;
   Grid.FixedColor := CLR_TABLE_HEADER;
+  Grid.ParentFont := False;
+  Grid.Font.Color := CLR_TEXT;
   Grid.DefaultRowHeight := 26;
   Grid.Cells[0, 0] := 'ID'; Grid.Cells[1, 0] := 'Placa';
   Grid.Cells[2, 0] := 'Tipo'; Grid.Cells[3, 0] := 'Tara (kg)';
