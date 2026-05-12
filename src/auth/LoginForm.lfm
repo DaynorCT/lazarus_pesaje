@@ -138,7 +138,10 @@ object frmLogin: TfrmLogin
         Height = 25
         Top = 331
         Width = 356
+        Color = clWhite
+        Font.Color = clBlack
         Font.Height = -17
+        ParentColor = False
         ParentFont = False
         TabOrder = 0
         TextHint = 'Ingresa tu usuario'
@@ -158,8 +161,11 @@ object frmLogin: TfrmLogin
         Height = 25
         Top = 421
         Width = 356
+        Color = clWhite
         EchoMode = emPassword
+        Font.Color = clBlack
         Font.Height = -17
+        ParentColor = False
         ParentFont = False
         PasswordChar = '*'
         TabOrder = 1

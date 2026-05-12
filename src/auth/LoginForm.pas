@@ -59,6 +59,13 @@ begin
   pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
 
+  edtUsuario.Color := CLR_WHITE;
+  edtUsuario.Font.Color := CLR_TEXT;
+  edtUsuario.ParentColor := False;
+  edtContrasena.Color := CLR_WHITE;
+  edtContrasena.Font.Color := CLR_TEXT;
+  edtContrasena.ParentColor := False;
+
   ActiveControl := edtUsuario;
 end;
 

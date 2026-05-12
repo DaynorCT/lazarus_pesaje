@@ -52,7 +52,6 @@
         <CursorPos X="21" Y="56"/>
         <UsageCount Value="49"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/MainForm.pas"/>
@@ -62,7 +61,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
         <TopLine Value="274"/>
-        <CursorPos X="3" Y="283"/>
+        <CursorPos X="22" Y="287"/>
         <UsageCount Value="49"/>
         <Loaded Value="True"/>
       </Unit>
@@ -135,11 +134,18 @@
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="4010"/>
         <CursorPos Y="4010"/>
         <UsageCount Value="18"/>
         <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/forms/PesajeFrame.lfm"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="9">
