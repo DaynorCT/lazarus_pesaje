@@ -20,47 +20,27 @@ object frmMain: TfrmMain
     BevelOuter = bvNone
     ClientHeight = 48
     ClientWidth = 1100
-    object lblAppTitle: TLabel
+    object lblLogo: TLabel
       Left = 16
       Height = 20
-      Top = 12
+      Top = 14
       Width = 200
       Caption = 'SISTEMA DE PESAJE'
-      Font.Color = clWhite
-      Font.Height = -16
+      Font.Color = 3684425
+      Font.Height = -14
       Font.Style = [fsBold]
       ParentFont = False
     end
   end
-  object pnlLeft: TPanel
+  object pnlContent: TPanel
     Left = 0
     Height = 652
     Top = 48
-    Width = 200
-    Align = alLeft
-    BevelOuter = bvNone
-    ClientHeight = 652
-    ClientWidth = 200
-    object sbMenu: TScrollBox
-      Left = 0
-      Height = 652
-      Top = 0
-      Width = 200
-      Align = alClient
-      BorderStyle = bsNone
-      ClientHeight = 652
-      ClientWidth = 200
-    end
-  end
-  object pnlContent: TPanel
-    Left = 200
-    Height = 652
-    Top = 48
-    Width = 900
+    Width = 1100
     Align = alClient
     BevelOuter = bvNone
     Caption = ''
     ClientHeight = 652
-    ClientWidth = 900
+    ClientWidth = 1100
   end
 end

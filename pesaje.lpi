@@ -52,6 +52,7 @@
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmMain"/>
         <HasResources Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="51"/>
         <CursorPos Y="61"/>
@@ -120,7 +121,6 @@
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
         <UnitName Value="CocoaApplication"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="475"/>
         <CursorPos Y="486"/>
         <UsageCount Value="19"/>

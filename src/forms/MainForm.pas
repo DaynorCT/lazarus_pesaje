@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons, ComCtrls, Menus, AuthService, DataModule, LoginForm,
+  Buttons, AuthService, DataModule, LoginForm,
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
   ProveedoresFrame, UsuariosFrame, AbmSimpleFrame, Theme;
 
@@ -16,23 +16,24 @@ type
   { TfrmMain }
 
   TfrmMain = class(TForm)
-    pnlLeft: TPanel;
     pnlTop: TPanel;
     pnlContent: TPanel;
-    lblAppTitle: TLabel;
-    lblUserInfo: TLabel;
-    btnLogout: TSpeedButton;
-    sbMenu: TScrollBox;
+    lblLogo: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure btnLogoutClick(Sender: TObject);
   private
     FActiveFrame: TFrame;
-    procedure SidebarButtonClick(Sender: TObject);
+    FNavBtns: array of TSpeedButton;
+    FLblUser, FBtnLogout: TLabel;
+    procedure BuildNav;
+    function CrearNavBtn(const ACaption: string; ATag: Integer; X: Integer): TSpeedButton;
+    procedure NavBtnClick(Sender: TObject);
+    procedure ResetNavButtons;
+    procedure SetActiveNav(ABtn: TSpeedButton);
     procedure LoadFrame(FrameClass: TFrameClass; const Title: string);
     procedure LoadFrameInstance(NewFrame: TFrame; const Title: string);
-    procedure BuildMenu;
+    procedure LogoutClick(Sender: TObject);
   end;
 
 var
@@ -48,73 +49,55 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   FActiveFrame := nil;
   Caption := 'Sistema de Pesaje';
-  pnlLeft.Width := 220;
-  pnlLeft.Color := RGBToColor(26, 66, 128);
-  pnlTop.Color := RGBToColor(26, 66, 128);
+
   pnlTop.Height := 48;
+  pnlTop.Color := CLR_CARD;
+
   pnlContent.Color := CLR_BG;
 
-  lblAppTitle.Caption := ' SISTEMA DE PESAJE';
-  lblAppTitle.Font.Color := CLR_WHITE;
-  lblAppTitle.Font.Style := [fsBold];
-  lblAppTitle.Font.Size := 11;
+  lblLogo.Caption := 'SISTEMA DE PESAJE';
+  lblLogo.Font.Color := CLR_TEXT_HEADING;
+  lblLogo.Font.Style := [fsBold];
+  lblLogo.Font.Size := 11;
 
-  lblUserInfo := TLabel.Create(Self);
-  lblUserInfo.Parent := pnlTop;
-  lblUserInfo.Align := alRight;
-  lblUserInfo.Alignment := taRightJustify;
-  lblUserInfo.Font.Color := $CCDDFF;
-  lblUserInfo.Font.Size := 11;
-  lblUserInfo.BorderSpacing.Right := 16;
-  lblUserInfo.BorderSpacing.Top := 14;
+  BuildNav;
 
-  btnLogout := TSpeedButton.Create(Self);
-  btnLogout.Parent := pnlTop;
-  btnLogout.Align := alRight;
-  btnLogout.Width := 100;
-  btnLogout.Caption := 'Cerrar Sesion';
-  btnLogout.Flat := True;
-  btnLogout.Font.Color := $CCDDFF;
-  btnLogout.Font.Size := 11;
-  btnLogout.BorderSpacing.Right := 16;
-  btnLogout.BorderSpacing.Top := 8;
-  btnLogout.OnClick := @btnLogoutClick;
+  FLblUser := TLabel.Create(Self);
+  FLblUser.Parent := pnlTop;
+  FLblUser.Align := alRight;
+  FLblUser.Alignment := taRightJustify;
+  FLblUser.Font.Color := CLR_TEXT_SLATE;
+  FLblUser.Font.Size := 11;
+  FLblUser.BorderSpacing.Right := 12;
+  FLblUser.BorderSpacing.Top := 16;
 
-  BuildMenu;
+  FBtnLogout := TLabel.Create(Self);
+  FBtnLogout.Parent := pnlTop;
+  FBtnLogout.Align := alRight;
+  FBtnLogout.Caption := 'Cerrar Sesion';
+  FBtnLogout.Font.Color := CLR_TEXT_MUTED;
+  FBtnLogout.Font.Size := 11;
+  FBtnLogout.Cursor := crHandPoint;
+  FBtnLogout.BorderSpacing.Right := 8;
+  FBtnLogout.BorderSpacing.Top := 16;
+  FBtnLogout.OnClick := @LogoutClick;
 end;
 
 procedure TfrmMain.FormShow(Sender: TObject);
-var
-  i: Integer;
-  Btn: TSpeedButton;
 begin
-  lblUserInfo.Caption := UsuarioActual.PersonaNombre + '  |  ' + UsuarioActual.Rol;
-
-  // Activar boton Pesaje (Tag=1) visualmente
-  for i := 0 to sbMenu.ControlCount - 1 do
-  begin
-    if (sbMenu.Controls[i] is TSpeedButton) and (TSpeedButton(sbMenu.Controls[i]).Tag = 1) then
-    begin
-      Btn := TSpeedButton(sbMenu.Controls[i]);
-      Btn.Font.Color := CLR_WHITE;
-      Break;
-    end;
-  end;
-
+  FLblUser.Caption := UsuarioActual.PersonaNombre + ' | ' + UsuarioActual.Rol;
   LoadFrame(TFrameDashboard, 'Dashboard');
 end;
 
 procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
   if FActiveFrame <> nil then
-  begin
     FreeAndNil(FActiveFrame);
-  end;
 end;
 
-procedure TfrmMain.btnLogoutClick(Sender: TObject);
+procedure TfrmMain.LogoutClick(Sender: TObject);
 begin
-  if MessageDlg('Cerrar sesion', 'Esta seguro que desea cerrar sesion?',
+  if MessageDlg('Cerrar sesion', 'Seguro que desea cerrar sesion?',
     mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     ModalResult := mrCancel;
@@ -122,77 +105,59 @@ begin
   end;
 end;
 
-procedure TfrmMain.BuildMenu;
+procedure TfrmMain.BuildNav;
 var
-  Y: Integer;
-
-  function CrearBoton(const Caption: string; const Tag: Integer): TSpeedButton;
-  begin
-    Result := TSpeedButton.Create(sbMenu);
-    Result.Parent := sbMenu;
-    Result.Caption := Caption;
-    Result.Tag := Tag;
-    Result.SetBounds(0, Y, 220, 38);
-    Result.Anchors := [akTop, akLeft, akRight];
-    Result.Flat := True;
-    Result.Font.Color := $CCDDFF;
-    Result.Font.Height := -13;
-    Result.GroupIndex := 1;
-    Result.AllowAllUp := True;
-    Result.OnClick := @SidebarButtonClick;
-    Result.Margin := 6;
-    Y := Y + 38;
-  end;
-
+  I, XPos: Integer;
+  Items: array[0..9] of record Emoji, Title: string; Tag: Integer; end;
 begin
-  sbMenu.Parent := pnlLeft;
-  sbMenu.Align := alClient;
-  sbMenu.Color := CLR_PRIMARY;
-  sbMenu.BorderStyle := bsNone;
+  Items[0].Emoji := '📊'; Items[0].Title := 'Dashboard'; Items[0].Tag := 0;
+  Items[1].Emoji := '👥'; Items[1].Title := 'Usuarios';   Items[1].Tag := 10;
+  Items[2].Emoji := '👤'; Items[2].Title := 'Choferes';    Items[2].Tag := 3;
+  Items[3].Emoji := '🏭'; Items[3].Title := 'Proveedores';  Items[3].Tag := 4;
+  Items[4].Emoji := '⚖️';  Items[4].Title := 'Pesaje';      Items[4].Tag := 1;
+  Items[5].Emoji := '🚛'; Items[5].Title := 'Vehiculos';   Items[5].Tag := 6;
+  Items[6].Emoji := '📦'; Items[6].Title := 'Productos';   Items[6].Tag := 5;
+  Items[7].Emoji := '📍'; Items[7].Title := 'Origenes';    Items[7].Tag := 7;
+  Items[8].Emoji := '🎯'; Items[8].Title := 'Destinos';    Items[8].Tag := 8;
+  Items[9].Emoji := '⚙️';  Items[9].Title := 'Config';      Items[9].Tag := 12;
 
-  Y := 0;
-  CrearBoton('  Dashboard', 0);
-  CrearBoton('  Usuarios', 10);
-  CrearBoton('  Choferes', 3);
-  CrearBoton('  Proveedores', 4);
-  CrearBoton('  Pesaje', 1).Down := True;
-  CrearBoton('  Vehiculos', 6);
-  CrearBoton('  Productos', 5);
-  CrearBoton('  Origenes', 7);
-  CrearBoton('  Destinos', 8);
-  CrearBoton('  Configuracion', 12);
+  SetLength(FNavBtns, 10);
+  XPos := 230;
+
+  for I := 0 to 9 do
+  begin
+    FNavBtns[I] := CrearNavBtn(Items[I].Emoji + ' ' + Items[I].Title, Items[I].Tag, XPos);
+    XPos := XPos + FNavBtns[I].Width + 4;
+  end;
 end;
 
-procedure TfrmMain.SidebarButtonClick(Sender: TObject);
-var
-  MenuTag: Integer;
-  FrameP, FrameD, FrameO: TFrameAbmSimple;
-  i: Integer;
-  Btn: TSpeedButton;
+function TfrmMain.CrearNavBtn(const ACaption: string; ATag: Integer; X: Integer): TSpeedButton;
 begin
-  // Resetear todos los botones a estilo default
-  for i := 0 to sbMenu.ControlCount - 1 do
-  begin
-    if sbMenu.Controls[i] is TSpeedButton then
-    begin
-      Btn := TSpeedButton(sbMenu.Controls[i]);
-      Btn.Font.Color := $CCDDFF;
-    end;
-  end;
+  Result := TSpeedButton.Create(pnlTop);
+  Result.Parent := pnlTop;
+  Result.Caption := ACaption;
+  Result.Tag := ATag;
+  Result.Left := X;
+  Result.Top := 8;
+  Result.Height := 32;
+  Result.Width := Result.Canvas.TextWidth(Caption) + 20;
+  Result.Flat := True;
+  Result.Font.Size := 12;
+  Result.Font.Color := CLR_TEXT_SLATE;
+  Result.Font.Style := [];
+  Result.OnClick := @NavBtnClick;
+end;
 
-  // Activar el boton clickeado
-  if Sender is TSpeedButton then
-  begin
-    Btn := TSpeedButton(Sender);
-    Btn.Font.Color := CLR_WHITE;
-  end;
+procedure TfrmMain.NavBtnClick(Sender: TObject);
+var
+  FrameP, FrameD: TFrameAbmSimple;
+begin
+  ResetNavButtons;
+  SetActiveNav(TSpeedButton(Sender));
 
-  MenuTag := TSpeedButton(Sender).Tag;
-
-  case MenuTag of
+  case TSpeedButton(Sender).Tag of
     0: LoadFrame(TFrameDashboard, 'Dashboard');
     1: LoadFrame(TFramePesaje, 'Pesaje');
-    2: ShowMessage('Empresas - Fase 3');
     3: LoadFrame(TFrameChoferes, 'Choferes');
     4: LoadFrame(TFrameProveedores, 'Proveedores');
     5: begin
@@ -201,25 +166,36 @@ begin
     end;
     6: LoadFrame(TFrameVehiculos, 'Vehiculos');
     7: begin
-      FrameO := TFrameAbmSimple.CreateWithConfig(Self, ConfigOrigenes);
-      LoadFrameInstance(FrameO, 'Origenes');
+      FrameP := TFrameAbmSimple.CreateWithConfig(Self, ConfigOrigenes);
+      LoadFrameInstance(FrameP, 'Origenes');
     end;
     8: begin
       FrameD := TFrameAbmSimple.CreateWithConfig(Self, ConfigDestinos);
       LoadFrameInstance(FrameD, 'Destinos');
-    end;
-    9: begin
-      FrameD := TFrameAbmSimple.CreateWithConfig(Self, ConfigBodegas);
-      LoadFrameInstance(FrameD, 'Bodegas');
     end;
     10: LoadFrame(TFrameUsuarios, 'Usuarios');
     else ShowMessage('Modulo en desarrollo - Fase 3');
   end;
 end;
 
-procedure TfrmMain.LoadFrame(FrameClass: TFrameClass; const Title: string);
+procedure TfrmMain.ResetNavButtons;
 var
-  NewFrame: TFrame;
+  I: Integer;
+begin
+  for I := 0 to High(FNavBtns) do
+  begin
+    FNavBtns[I].Font.Color := CLR_TEXT_SLATE;
+    FNavBtns[I].Font.Style := [];
+  end;
+end;
+
+procedure TfrmMain.SetActiveNav(ABtn: TSpeedButton);
+begin
+  ABtn.Font.Color := CLR_PRIMARY;
+  ABtn.Font.Style := [fsBold];
+end;
+
+procedure TfrmMain.LoadFrame(FrameClass: TFrameClass; const Title: string);
 begin
   if (FActiveFrame <> nil) and (FActiveFrame.ClassType = FrameClass) then
     Exit;
