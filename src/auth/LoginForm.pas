@@ -66,9 +66,13 @@ begin
   pnlBoxUsuario.Color := CLR_WHITE;
   edtUsuario.Color := CLR_WHITE;
   edtUsuario.Top := 10;
+  edtUsuario.AutoSize := True;
+  edtUsuario.BorderStyle := bsNone;
   pnlBoxContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
   edtContrasena.Top := 10;
+  edtContrasena.AutoSize := True;
+  edtContrasena.BorderStyle := bsNone;
 
   ActiveControl := edtUsuario;
 end;

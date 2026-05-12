@@ -48,10 +48,9 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <CursorPos X="11"/>
+        <CursorPos X="55" Y="14"/>
         <UsageCount Value="49"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/MainForm.pas"/>

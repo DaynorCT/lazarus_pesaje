@@ -149,7 +149,8 @@ object frmLogin: TfrmLogin
           Height = 20
           Top = 10
           Width = 344
-          BorderStyle = bsSingle
+           AutoSize = True
+          BorderStyle = bsNone
           Color = clWhite
           Font.Color = clBlack
           Font.Height = -17
@@ -184,7 +185,8 @@ object frmLogin: TfrmLogin
           Height = 20
           Top = 10
           Width = 344
-          BorderStyle = bsSingle
+           AutoSize = True
+          BorderStyle = bsNone
           Color = clWhite
           EchoMode = emPassword
           Font.Color = clBlack
