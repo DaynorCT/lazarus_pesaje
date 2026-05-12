@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils;
+  Grids, sqldb, DataModule, Utils, Theme;
 
 type
   { TFrameChoferes }
@@ -33,9 +33,9 @@ constructor TFrameChoferes.Create(AOwner: TComponent);
 var Pnl: TPanel; Lbl: TLabel;
 begin
   inherited Create(AOwner);
-  Self.Color := $F8FAFC;
+  Self.Color := CLR_BG;
   Pnl := TPanel.Create(Self); Pnl.Parent := Self; Pnl.Align := alTop;
-  Pnl.Height := 56; Pnl.BevelOuter := bvNone; Pnl.Color := clWhite;
+  Pnl.Height := 56; Pnl.BevelOuter := bvNone; Pnl.Color := CLR_CARD;
 
   Lbl := TLabel.Create(Self); Lbl.Parent := Pnl;
   Lbl.SetBounds(24, 14, 200, 28); Lbl.Caption := 'Choferes';

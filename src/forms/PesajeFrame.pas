@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  IniFiles, sqldb, DataModule, Utils, LoginForm;
+  IniFiles, sqldb, DataModule, Utils, LoginForm, Theme;
 
 type
   { TFramePesaje }
@@ -167,15 +167,14 @@ var
   pnlReloj, pnlDisplay, pnlResultados: TPanel;
   Lbl: TLabel;
 begin
-  Self.Color := $F8FAFC;
+  Self.Color := CLR_BG;
 
-  // -- Panel izquierdo (pesaje) --
   pnlPesaje := TPanel.Create(Self);
   pnlPesaje.Parent := Self;
   pnlPesaje.Align := alLeft;
   pnlPesaje.Width := 430;
   pnlPesaje.BevelOuter := bvNone;
-  pnlPesaje.Color := $F8FAFC;
+  pnlPesaje.Color := CLR_BG;
   pnlPesaje.Caption := '';
 
   // Reloj
@@ -206,7 +205,7 @@ begin
   pnlDisplay.Parent := pnlPesaje;
   pnlDisplay.SetBounds(24, 96, 382, 160);
   pnlDisplay.BevelOuter := bvNone;
-  pnlDisplay.Color := $0F766E;
+  pnlDisplay.Color := CLR_TEAL;
 
   lblPesoDisplay := TLabel.Create(Self);
   lblPesoDisplay.Parent := pnlDisplay;
@@ -235,7 +234,7 @@ begin
   lblEstadoConexion.Caption := 'SIN CONEXION';
   lblEstadoConexion.Font.Size := 11;
   lblEstadoConexion.Font.Style := [fsBold];
-  lblEstadoConexion.Font.Color := $DC2626;
+  lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
 
   lblEstabilidad := TLabel.Create(Self);
   lblEstabilidad.Parent := pnlPesaje;
@@ -510,7 +509,7 @@ begin
     TimerLectura.Enabled := False;
     btnConectar.Caption := 'CONECTAR BASCULA';
     lblEstadoConexion.Caption := 'SIN CONEXION';
-    lblEstadoConexion.Font.Color := $DC2626;
+    lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
     lblEstabilidad.Caption := 'Esperando lectura...';
     btnTara.Enabled := False;
     btnGuardar.Enabled := False;
@@ -531,7 +530,7 @@ begin
   begin
     ShowMessage('Error al conectar al puerto ' + FPuertoSerial);
     lblEstadoConexion.Caption := 'ERROR DE CONEXION';
-    lblEstadoConexion.Font.Color := $DC2626;
+    lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
   end;
 end;
 

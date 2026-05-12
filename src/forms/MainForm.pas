@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
   Buttons, ComCtrls, Menus, AuthService, DataModule, LoginForm,
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
-  ProveedoresFrame, UsuariosFrame, AbmSimpleFrame;
+  ProveedoresFrame, UsuariosFrame, AbmSimpleFrame, Theme;
 
 type
   TFrameClass = class of TFrame;
@@ -48,14 +48,14 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   FActiveFrame := nil;
   Caption := 'Sistema de Pesaje';
-  pnlLeft.Width := 200;
-  pnlLeft.Color := $1E293B;
-  pnlTop.Color := clWhite;
+  pnlLeft.Width := 220;
+  pnlLeft.Color := CLR_SIDEBAR_BG;
+  pnlTop.Color := CLR_TOPBAR_BG;
   pnlTop.Height := 48;
-  pnlContent.Color := $F8FAFC;
+  pnlContent.Color := CLR_BG;
 
   lblAppTitle.Caption := ' SISTEMA DE PESAJE';
-  lblAppTitle.Font.Color := $1E293B;
+  lblAppTitle.Font.Color := CLR_TEXT_HEADING;
   lblAppTitle.Font.Style := [fsBold];
   lblAppTitle.Font.Size := 11;
 
@@ -63,7 +63,7 @@ begin
   lblUserInfo.Parent := pnlTop;
   lblUserInfo.Align := alRight;
   lblUserInfo.Alignment := taRightJustify;
-  lblUserInfo.Font.Color := $94A3B8;
+  lblUserInfo.Font.Color := CLR_TEXT_SLATE;
   lblUserInfo.Font.Size := 11;
   lblUserInfo.BorderSpacing.Right := 16;
   lblUserInfo.BorderSpacing.Top := 14;
@@ -74,7 +74,7 @@ begin
   btnLogout.Width := 100;
   btnLogout.Caption := 'Cerrar Sesion';
   btnLogout.Flat := True;
-  btnLogout.Font.Color := $94A3B8;
+  btnLogout.Font.Color := CLR_TEXT_MUTED;
   btnLogout.Font.Size := 11;
   btnLogout.BorderSpacing.Right := 16;
   btnLogout.BorderSpacing.Top := 8;
@@ -84,8 +84,23 @@ begin
 end;
 
 procedure TfrmMain.FormShow(Sender: TObject);
+var
+  i: Integer;
+  Btn: TSpeedButton;
 begin
   lblUserInfo.Caption := UsuarioActual.PersonaNombre + '  |  ' + UsuarioActual.Rol;
+
+  // Activar boton Pesaje (Tag=1) visualmente
+  for i := 0 to sbMenu.ControlCount - 1 do
+  begin
+    if (sbMenu.Controls[i] is TSpeedButton) and (TSpeedButton(sbMenu.Controls[i]).Tag = 1) then
+    begin
+      Btn := TSpeedButton(sbMenu.Controls[i]);
+      Btn.Font.Color := CLR_SIDEBAR_ACTIVE_TEXT;
+      Break;
+    end;
+  end;
+
   LoadFrame(TFrameDashboard, 'Dashboard');
 end;
 
@@ -117,22 +132,22 @@ var
     Result.Parent := sbMenu;
     Result.Caption := Caption;
     Result.Tag := Tag;
-    Result.SetBounds(0, Y, 200, 40);
+    Result.SetBounds(0, Y, 220, 38);
     Result.Anchors := [akTop, akLeft, akRight];
     Result.Flat := True;
-    Result.Font.Color := $94A3B8;
+    Result.Font.Color := CLR_SIDEBAR_TEXT;
     Result.Font.Height := -13;
     Result.GroupIndex := 1;
     Result.AllowAllUp := True;
     Result.OnClick := @SidebarButtonClick;
-    Result.Margin := 4;
-    Y := Y + 40;
+    Result.Margin := 6;
+    Y := Y + 38;
   end;
 
 begin
   sbMenu.Parent := pnlLeft;
   sbMenu.Align := alClient;
-  sbMenu.Color := pnlLeft.Color;
+  sbMenu.Color := CLR_SIDEBAR_BG;
   sbMenu.BorderStyle := bsNone;
 
   Y := 0;
@@ -152,7 +167,26 @@ procedure TfrmMain.SidebarButtonClick(Sender: TObject);
 var
   MenuTag: Integer;
   FrameP, FrameD, FrameO: TFrameAbmSimple;
+  i: Integer;
+  Btn: TSpeedButton;
 begin
+  // Resetear todos los botones a estilo default
+  for i := 0 to sbMenu.ControlCount - 1 do
+  begin
+    if sbMenu.Controls[i] is TSpeedButton then
+    begin
+      Btn := TSpeedButton(sbMenu.Controls[i]);
+      Btn.Font.Color := CLR_SIDEBAR_TEXT;
+    end;
+  end;
+
+  // Activar el boton clickeado
+  if Sender is TSpeedButton then
+  begin
+    Btn := TSpeedButton(Sender);
+    Btn.Font.Color := CLR_SIDEBAR_ACTIVE_TEXT;
+  end;
+
   MenuTag := TSpeedButton(Sender).Tag;
 
   case MenuTag of

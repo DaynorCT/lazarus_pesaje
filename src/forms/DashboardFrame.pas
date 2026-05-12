@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, StdCtrls,
-  sqldb, DataModule, Utils;
+  sqldb, DataModule, Utils, Theme;
 
 type
   { TFrameDashboard }
@@ -53,13 +53,13 @@ begin
   pnlMain.Parent := Self;
   pnlMain.Align := alClient;
   pnlMain.BevelOuter := bvNone;
-  pnlMain.Color := $F8FAFC;
+  pnlMain.Color := CLR_BG;
   pnlMain.Caption := '';
 
-  CrearCard('Pesajes Hoy', '0', $0F766E, 24, 24);
-  CrearCard('Peso Total', '0 kg', $2563EB, 24, 280);
-  CrearCard('Vehiculos Hoy', '0', $7C3AED, 24, 536);
-  CrearCard('Ultimo Pesaje', 'Sin registros', $EA580C, 170, 24);
+  CrearCard('Pesajes Hoy', '0', CLR_SUCCESS, 20, 20);
+  CrearCard('Peso Total', '0 kg', CLR_PRIMARY, 20, 280);
+  CrearCard('Vehiculos Hoy', '0', CLR_INFO, 20, 540);
+  CrearCard('Ultimo Pesaje', 'Sin registros', CLR_WARNING, 160, 20);
 end;
 
 function TFrameDashboard.CrearCard(const ATitulo, AValor: string;
@@ -75,7 +75,7 @@ begin
   Result.Width := 240;
   Result.Height := 110;
   Result.BevelOuter := bvNone;
-  Result.Color := clWhite;
+  Result.Color := CLR_CARD;
 
   Barra := TPanel.Create(Result);
   Barra.Parent := Result;
@@ -88,7 +88,7 @@ begin
   LblTitulo.Parent := Result;
   LblTitulo.Top := 16; LblTitulo.Left := 20;
   LblTitulo.Caption := ATitulo;
-  LblTitulo.Font.Color := $64748B;
+  LblTitulo.Font.Color := CLR_TEXT_SLATE;
   LblTitulo.Font.Height := -12;
   LblTitulo.ParentFont := False;
 
@@ -97,17 +97,17 @@ begin
   LblValor.Top := 44; LblValor.Left := 20;
   LblValor.Width := 200;
   LblValor.Caption := AValor;
-  LblValor.Font.Color := $1E293B;
+  LblValor.Font.Color := CLR_TEXT_HEADING;
   LblValor.Font.Height := -27;
   LblValor.Font.Style := [fsBold];
   LblValor.ParentFont := False;
   LblValor.Tag := 99;
 
   case AColor of
-    $0F766E: CardPesajesHoy := Result;
-    $2563EB: CardPesoTotal := Result;
-    $7C3AED: CardVehiculosHoy := Result;
-    $EA580C: CardUltimoPesaje := Result;
+    CLR_SUCCESS: CardPesajesHoy := Result;
+    CLR_PRIMARY: CardPesoTotal := Result;
+    CLR_INFO: CardVehiculosHoy := Result;
+    CLR_WARNING: CardUltimoPesaje := Result;
   end;
 end;
 

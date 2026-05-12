@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils;
+  Grids, sqldb, DataModule, Utils, Theme;
 
 type
   { TFrameVehiculos }
@@ -35,14 +35,14 @@ var
   Lbl: TLabel;
 begin
   inherited Create(AOwner);
-  Self.Color := $F8FAFC;
+  Self.Color := CLR_BG;
 
   PnlTop := TPanel.Create(Self);
   PnlTop.Parent := Self;
   PnlTop.Align := alTop;
   PnlTop.Height := 56;
   PnlTop.BevelOuter := bvNone;
-  PnlTop.Color := clWhite;
+  PnlTop.Color := CLR_CARD;
 
   Lbl := TLabel.Create(Self); Lbl.Parent := PnlTop;
   Lbl.SetBounds(24, 14, 200, 28);

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, LoginForm;
+  Grids, sqldb, DataModule, Utils, Theme, LoginForm;
 
 type
   TTablaConfig = record
@@ -138,14 +138,14 @@ var
   PnlTop: TPanel;
   i: Integer;
 begin
-  Self.Color := $F8FAFC;
+  Self.Color := CLR_BG;
 
   PnlTop := TPanel.Create(Self);
   PnlTop.Parent := Self;
   PnlTop.Align := alTop;
   PnlTop.Height := 56;
   PnlTop.BevelOuter := bvNone;
-  PnlTop.Color := clWhite;
+  PnlTop.Color := CLR_CARD;
 
   FLblTitulo := TLabel.Create(Self);
   FLblTitulo.Parent := PnlTop;
