@@ -31,9 +31,8 @@ object frmLogin: TfrmLogin
       BevelOuter = bvNone
       ClientHeight = 600
       ClientWidth = 436
-      Color = clWhite
-      ParentBackground = False
-      ParentColor = False
+      ParentBackground = True
+      ParentColor = True
       TabOrder = 0
       object pnlLogoBox: TPanel
         Left = 170
