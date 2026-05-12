@@ -62,7 +62,7 @@ begin
   FActiveFrame := nil;
   Caption := 'Sistema de Pesaje';
 
-  pnlTop.Height := 48;
+  pnlTop.Height := 56;
   pnlTop.Color := CLR_CARD;
 
   pnlContent.Color := CLR_BG;
@@ -71,7 +71,7 @@ begin
   lblLogo.Caption := 'SISTEMA DE PESAJE';
   lblLogo.Font.Color := CLR_PRIMARY;
   lblLogo.Font.Style := [fsBold];
-  lblLogo.Font.Size := 12;
+  lblLogo.Font.Size := 14;
 
   // Orden exacto del sistema web
   Items[0].Emoji := '📊'; Items[0].Title := 'Inicio';       Items[0].Tag := 0;
@@ -91,7 +91,7 @@ begin
   begin
     Btn := CrearNavBtn(Items[I].Emoji + ' ' + Items[I].Title, Items[I].Tag, XPos);
     FNavBtns[I] := Btn;
-    XPos := XPos + Btn.Width + 4;
+    XPos := XPos + Btn.Width + 14;
   end;
 
   // Submenu Catálogo
@@ -125,12 +125,12 @@ begin
   FUserBtn := TSpeedButton.Create(pnlTop);
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
-  FUserBtn.Width := 44; FUserBtn.Height := 34;
-  FUserBtn.Top := 7;
+  FUserBtn.Width := 36; FUserBtn.Height := 36;
+  FUserBtn.Top := 10;
   FUserBtn.Caption := '👤';
   FUserBtn.Flat := True;
-  FUserBtn.Font.Size := 16;
-  FUserBtn.BorderSpacing.Right := 8;
+  FUserBtn.Font.Size := 18;
+  FUserBtn.BorderSpacing.Right := 12;
   FUserBtn.BorderSpacing.Top := 0;
   FUserBtn.OnClick := @UserBtnClick;
 
@@ -239,11 +239,11 @@ begin
   Result.Caption := ACaption;
   Result.Tag := ATag;
   Result.Left := X;
-  Result.Top := 7;
-  Result.Height := 34;
-  Result.Width := Result.Canvas.TextWidth(ACaption) + 18;
+  Result.Top := 10;
+  Result.Height := 36;
+  Result.Width := Result.Canvas.TextWidth(ACaption) + 28;
   Result.Flat := True;
-  Result.Font.Size := 12;
+  Result.Font.Size := 13;
   Result.Font.Color := CLR_TEXT_SLATE;
   Result.Font.Style := [];
   Result.OnClick := @NavBtnClick;
@@ -353,7 +353,7 @@ end;
 
 procedure TfrmMain.SetActiveNav(ABtn: TSpeedButton);
 begin
-  ABtn.Font.Color := CLR_PRIMARY;
+  ABtn.Font.Color := CLR_TEXT;
   ABtn.Font.Style := [fsBold];
 end;
 
