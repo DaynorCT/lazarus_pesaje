@@ -55,7 +55,7 @@ object frmLogin: TfrmLogin
           Alignment = taCenter
           Caption = '🚛'
           Font.Color = 15788258
-          Font.Height = -32
+          Font.Height = -72
           Layout = tlCenter
           ParentFont = False
         end

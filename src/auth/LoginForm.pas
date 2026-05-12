@@ -58,6 +58,7 @@ begin
   pnlBG.Color := CLR_LOGIN_BG;
   pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
+  lblLogoIcon.Font.Height := -72;
 
   edtUsuario.Color := CLR_WHITE;
   edtUsuario.Font.Color := CLR_TEXT;
