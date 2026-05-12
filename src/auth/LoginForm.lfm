@@ -61,11 +61,12 @@ object frmLogin: TfrmLogin
         end
       end
       object lblTitulo: TLabel
-        Left = 40
+        Left = 0
         Height = 27
         Top = 144
-        Width = 180
+        Width = 436
         Alignment = taCenter
+        AutoSize = False
         Caption = 'Sistema de Pesaje'
         Font.Color = 5587251
         Font.Height = -23
@@ -73,11 +74,12 @@ object frmLogin: TfrmLogin
         ParentFont = False
       end
       object lblSubtitulo: TLabel
-        Left = 40
+        Left = 0
         Height = 27
         Top = 184
-        Width = 272
+        Width = 436
         Alignment = taCenter
+        AutoSize = False
         Caption = 'Medición y registro de peso'
         Font.Color = 5587251
         Font.Height = -23
