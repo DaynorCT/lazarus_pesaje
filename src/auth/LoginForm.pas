@@ -56,7 +56,7 @@ begin
   pnlError.Visible := False;
 
   pnlBG.Color := CLR_LOGIN_BG;
-  pnlCard.Color := CLR_LOGIN_CARD;
+
   pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
 

@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 0
+  Left = 6
   Height = 808
-  Top = 259
+  Top = 89
   Width = 1440
   Caption = 'Sistema de Pesaje'
   ClientHeight = 808
@@ -17,24 +17,36 @@ object frmLogin: TfrmLogin
     Width = 1440
     Align = alClient
     BevelOuter = bvNone
+    ClientHeight = 808
+    ClientWidth = 1440
     Color = 15788258
+    ParentBackground = False
     ParentColor = False
+    TabOrder = 0
     object pnlCard: TPanel
-      Left = 32
+      Left = 512
       Height = 600
-      Top = 32
+      Top = 112
       Width = 436
       BevelOuter = bvNone
+      ClientHeight = 600
+      ClientWidth = 436
       Color = clWhite
+      ParentBackground = False
       ParentColor = False
+      TabOrder = 0
       object pnlLogoBox: TPanel
         Left = 170
         Height = 96
         Top = 24
         Width = 96
         BevelOuter = bvNone
+        ClientHeight = 96
+        ClientWidth = 96
         Color = 5587251
+        ParentBackground = False
         ParentColor = False
+        TabOrder = 2
         object lblLogoIcon: TLabel
           Left = 0
           Height = 96
@@ -80,7 +92,9 @@ object frmLogin: TfrmLogin
         Width = 356
         BevelOuter = bvNone
         Color = 14800331
+        ParentBackground = False
         ParentColor = False
+        TabOrder = 3
       end
       object pnlError: TPanel
         Left = 40
@@ -88,8 +102,12 @@ object frmLogin: TfrmLogin
         Top = 249
         Width = 356
         BevelOuter = bvNone
+        ClientHeight = 44
+        ClientWidth = 356
         Color = 15921918
+        ParentBackground = False
         ParentColor = False
+        TabOrder = 4
         Visible = False
         object lblError: TLabel
           Left = 0
@@ -116,7 +134,7 @@ object frmLogin: TfrmLogin
       end
       object edtUsuario: TEdit
         Left = 40
-        Height = 48
+        Height = 25
         Top = 331
         Width = 356
         Font.Height = -17
@@ -136,7 +154,7 @@ object frmLogin: TfrmLogin
       end
       object edtContrasena: TEdit
         Left = 40
-        Height = 48
+        Height = 25
         Top = 421
         Width = 356
         EchoMode = emPassword
@@ -153,7 +171,9 @@ object frmLogin: TfrmLogin
         Width = 356
         BevelOuter = bvNone
         Color = 14800331
+        ParentBackground = False
         ParentColor = False
+        TabOrder = 5
       end
       object pnlIngresar: TPanel
         Cursor = crHandPoint
@@ -162,8 +182,12 @@ object frmLogin: TfrmLogin
         Top = 510
         Width = 356
         BevelOuter = bvNone
+        ClientHeight = 48
+        ClientWidth = 356
         Color = 8405530
+        ParentBackground = False
         ParentColor = False
+        TabOrder = 6
         OnClick = btnIngresarClick
         object lblIngresar: TLabel
           Left = 0
