@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 6
+  Left = 0
   Height = 808
-  Top = 89
+  Top = 64
   Width = 1440
   Caption = 'Sistema de Pesaje'
   ClientHeight = 808
@@ -31,8 +31,7 @@ object frmLogin: TfrmLogin
       BevelOuter = bvNone
       ClientHeight = 600
       ClientWidth = 436
-      ParentBackground = True
-      ParentColor = True
+      ParentBackground = False
       TabOrder = 0
       object pnlLogoBox: TPanel
         Left = 170
@@ -45,7 +44,7 @@ object frmLogin: TfrmLogin
         Color = 15788258
         ParentBackground = False
         ParentColor = False
-        TabOrder = 2
+        TabOrder = 0
         object lblLogoIcon: TLabel
           Left = 0
           Height = 96
@@ -69,7 +68,7 @@ object frmLogin: TfrmLogin
         AutoSize = False
         Caption = 'Sistema de Pesaje'
         Font.Color = 5587251
-        Font.Height = -23
+        Font.Height = -26
         Layout = tlCenter
         ParentFont = False
       end
@@ -82,7 +81,7 @@ object frmLogin: TfrmLogin
         AutoSize = False
         Caption = 'Medición y registro de peso'
         Font.Color = 5587251
-        Font.Height = -23
+        Font.Height = -26
         Layout = tlCenter
         ParentFont = False
       end
@@ -95,7 +94,7 @@ object frmLogin: TfrmLogin
         Color = 14800331
         ParentBackground = False
         ParentColor = False
-        TabOrder = 3
+        TabOrder = 2
       end
       object pnlError: TPanel
         Left = 40
@@ -133,19 +132,30 @@ object frmLogin: TfrmLogin
         Font.Height = -15
         ParentFont = False
       end
-      object edtUsuario: TEdit
+      object pnlBoxUsuario: TPanel
         Left = 40
         Height = 44
         Top = 331
         Width = 356
-        AutoSize = False
+        BevelOuter = bvNone
+        ClientHeight = 44
+        ClientWidth = 356
         Color = clWhite
-        Font.Color = clBlack
-        Font.Height = -17
+        ParentBackground = False
         ParentColor = False
-        ParentFont = False
-        TabOrder = 0
-        TextHint = 'Ingresa tu usuario'
+        TabOrder = 1
+        object edtUsuario: TEdit
+          Left = 6
+          Height = 20
+          Top = 10
+          Width = 344
+          BorderStyle = bsSingle
+          Color = clWhite
+          Font.Color = clBlack
+          Font.Height = -17
+          ParentFont = False
+          TabOrder = 0
+        end
       end
       object lblContrasena: TLabel
         Left = 40
@@ -157,21 +167,32 @@ object frmLogin: TfrmLogin
         Font.Height = -15
         ParentFont = False
       end
-      object edtContrasena: TEdit
+      object pnlBoxContrasena: TPanel
         Left = 40
         Height = 44
         Top = 421
         Width = 356
-        AutoSize = False
+        BevelOuter = bvNone
+        ClientHeight = 44
+        ClientWidth = 356
         Color = clWhite
-        EchoMode = emPassword
-        Font.Color = clBlack
-        Font.Height = -17
+        ParentBackground = False
         ParentColor = False
-        ParentFont = False
-        PasswordChar = '*'
         TabOrder = 1
-        TextHint = 'Ingresa tu contraseña'
+        object edtContrasena: TEdit
+          Left = 6
+          Height = 20
+          Top = 10
+          Width = 344
+          BorderStyle = bsSingle
+          Color = clWhite
+          EchoMode = emPassword
+          Font.Color = clBlack
+          Font.Height = -17
+          ParentFont = False
+          PasswordChar = '*'
+          TabOrder = 0
+        end
       end
       object pnlDiv2: TPanel
         Left = 40

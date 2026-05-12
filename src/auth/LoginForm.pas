@@ -24,8 +24,10 @@ type
     pnlError: TPanel;
     lblError: TLabel;
     lblUsuario: TLabel;
+    pnlBoxUsuario: TPanel;
     edtUsuario: TEdit;
     lblContrasena: TLabel;
+    pnlBoxContrasena: TPanel;
     edtContrasena: TEdit;
     pnlDiv2: TPanel;
     pnlIngresar: TPanel;
@@ -56,20 +58,17 @@ begin
   pnlError.Visible := False;
 
   pnlBG.Color := CLR_LOGIN_BG;
+  pnlCard.Color := CLR_LOGIN_BG;
   pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
   lblLogoIcon.Font.Height := -72;
 
+  pnlBoxUsuario.Color := CLR_WHITE;
   edtUsuario.Color := CLR_WHITE;
-  edtUsuario.Font.Color := CLR_TEXT;
-  edtUsuario.ParentColor := False;
-  edtUsuario.AutoSize := False;
-  edtUsuario.Height := 44;
+  edtUsuario.Top := 10;
+  pnlBoxContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
-  edtContrasena.Font.Color := CLR_TEXT;
-  edtContrasena.ParentColor := False;
-  edtContrasena.AutoSize := False;
-  edtContrasena.Height := 44;
+  edtContrasena.Top := 10;
 
   ActiveControl := edtUsuario;
 end;
