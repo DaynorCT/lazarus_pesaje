@@ -26,12 +26,13 @@ type
   private
     FActiveFrame: TFrame;
     FNavBtns: array of TSpeedButton;
-    FSubCatalogo, FSubConfig: TPanel;
-    FLblUser, FBtnLogout: TLabel;
+    FSubCatalogo, FSubConfig, FUserMenu: TPanel;
+    FUserBtn: TSpeedButton;
 
     function CrearNavBtn(const ACaption: string; ATag: Integer; X: Integer): TSpeedButton;
     procedure NavBtnClick(Sender: TObject);
     procedure SubItemClick(Sender: TObject);
+    procedure UserBtnClick(Sender: TObject);
     procedure ResetNavButtons;
     procedure SetActiveNav(ABtn: TSpeedButton);
     procedure CerrarSubmenus;
@@ -68,12 +69,12 @@ begin
   pnlContent.OnClick := @ContentClick;
 
   lblLogo.Caption := 'SISTEMA DE PESAJE';
-  lblLogo.Font.Color := CLR_TEXT_HEADING;
+  lblLogo.Font.Color := CLR_PRIMARY;
   lblLogo.Font.Style := [fsBold];
-  lblLogo.Font.Size := 11;
+  lblLogo.Font.Size := 12;
 
   // Orden exacto del sistema web
-  Items[0].Emoji := '📊'; Items[0].Title := 'Dashboard';   Items[0].Tag := 0;
+  Items[0].Emoji := '📊'; Items[0].Title := 'Inicio';       Items[0].Tag := 0;
   Items[1].Emoji := '👥'; Items[1].Title := 'Usuarios';     Items[1].Tag := 10;
   Items[2].Emoji := '🏢'; Items[2].Title := 'Empresas';     Items[2].Tag := 2;
   Items[3].Emoji := '👤'; Items[3].Title := 'Choferes';     Items[3].Tag := 3;
@@ -120,32 +121,93 @@ begin
 
   CrearSubItem(FSubConfig, '📋 Boleta', 12, 0);
 
-  // User + logout
-  FLblUser := TLabel.Create(Self);
-  FLblUser.Parent := pnlTop;
-  FLblUser.Align := alRight;
-  FLblUser.Alignment := taRightJustify;
-  FLblUser.Font.Color := CLR_TEXT_SLATE;
-  FLblUser.Font.Size := 11;
-  FLblUser.BorderSpacing.Right := 12;
-  FLblUser.BorderSpacing.Top := 16;
+  // Botón usuario (derecha)
+  FUserBtn := TSpeedButton.Create(pnlTop);
+  FUserBtn.Parent := pnlTop;
+  FUserBtn.Align := alRight;
+  FUserBtn.Width := 44; FUserBtn.Height := 34;
+  FUserBtn.Top := 7;
+  FUserBtn.Caption := '👤';
+  FUserBtn.Flat := True;
+  FUserBtn.Font.Size := 16;
+  FUserBtn.BorderSpacing.Right := 8;
+  FUserBtn.BorderSpacing.Top := 0;
+  FUserBtn.OnClick := @UserBtnClick;
 
-  FBtnLogout := TLabel.Create(Self);
-  FBtnLogout.Parent := pnlTop;
-  FBtnLogout.Align := alRight;
-  FBtnLogout.Caption := 'Cerrar Sesion';
-  FBtnLogout.Font.Color := CLR_TEXT_MUTED;
-  FBtnLogout.Font.Size := 11;
-  FBtnLogout.Cursor := crHandPoint;
-  FBtnLogout.BorderSpacing.Right := 8;
-  FBtnLogout.BorderSpacing.Top := 16;
-  FBtnLogout.OnClick := @LogoutClick;
+  // Menú desplegable usuario
+  FUserMenu := TPanel.Create(Self);
+  FUserMenu.Parent := Self;
+  FUserMenu.Visible := False;
+  FUserMenu.Color := CLR_CARD;
+  FUserMenu.BevelOuter := bvNone;
+  FUserMenu.BorderStyle := bsSingle;
+  FUserMenu.Width := 200;
+  FUserMenu.Height := 130;
+end;
+
+procedure TfrmMain.UserBtnClick(Sender: TObject);
+var
+  Lbl: TLabel;
+  YPos: Integer;
+begin
+  // Cerrar otros submenús
+  CerrarSubmenus;
+
+  if FUserMenu.Visible then
+  begin
+    FUserMenu.Visible := False;
+    Exit;
+  end;
+
+  // Limpiar y reconstruir menú de usuario
+  FUserMenu.DestroyComponents;
+  FUserMenu.Left := FUserBtn.Left + FUserBtn.Width - FUserMenu.Width;
+  FUserMenu.Top := pnlTop.Height + 2;
+  YPos := 8;
+
+  Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
+  Lbl.SetBounds(12, YPos, 176, 16);
+  Lbl.Caption := UsuarioActual.PersonaNombre;
+  Lbl.Font.Size := 12; Lbl.Font.Style := [fsBold]; Lbl.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 22;
+
+  Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
+  Lbl.SetBounds(12, YPos, 176, 14);
+  Lbl.Caption := UsuarioActual.Email;
+  Lbl.Font.Size := 10; Lbl.Font.Color := CLR_TEXT_SLATE;
+  YPos := YPos + 24;
+
+  // Separador
+  with TPanel.Create(FUserMenu) do begin
+    Parent := FUserMenu; SetBounds(8, YPos, 184, 1); Color := CLR_BORDER; BevelOuter := bvNone;
+  end;
+  YPos := YPos + 8;
+
+  Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
+  Lbl.SetBounds(12, YPos, 176, 14);
+  Lbl.Caption := 'Rol: ' + UsuarioActual.Rol;
+  Lbl.Font.Size := 10; Lbl.Font.Color := CLR_TEXT_SLATE;
+  YPos := YPos + 22;
+
+  // Separador
+  with TPanel.Create(FUserMenu) do begin
+    Parent := FUserMenu; SetBounds(8, YPos, 184, 1); Color := CLR_BORDER; BevelOuter := bvNone;
+  end;
+  YPos := YPos + 8;
+
+  Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
+  Lbl.SetBounds(12, YPos, 176, 16);
+  Lbl.Caption := 'Cerrar Sesion';
+  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_DESTRUCTIVE;
+  Lbl.Cursor := crHandPoint;
+  Lbl.OnClick := @LogoutClick;
+
+  FUserMenu.Visible := True;
 end;
 
 procedure TfrmMain.FormShow(Sender: TObject);
 begin
-  FLblUser.Caption := UsuarioActual.PersonaNombre + ' | ' + UsuarioActual.Rol;
-  LoadFrame(TFrameDashboard, 'Dashboard');
+  LoadFrame(TFrameDashboard, 'Inicio');
 end;
 
 procedure TfrmMain.FormDestroy(Sender: TObject);
@@ -157,6 +219,7 @@ end;
 procedure TfrmMain.ContentClick(Sender: TObject);
 begin
   CerrarSubmenus;
+  FUserMenu.Visible := False;
 end;
 
 procedure TfrmMain.LogoutClick(Sender: TObject);
