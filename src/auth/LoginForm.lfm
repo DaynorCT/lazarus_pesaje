@@ -3,6 +3,7 @@ object frmLogin: TfrmLogin
   Height = 808
   Top = 64
   Width = 1440
+  BorderStyle = bsNone
   Caption = 'Sistema de Pesaje'
   ClientHeight = 808
   ClientWidth = 1440
@@ -143,13 +144,12 @@ object frmLogin: TfrmLogin
         Color = clWhite
         ParentBackground = False
         ParentColor = False
-        TabOrder = 1
+        TabOrder = 3
         object edtUsuario: TEdit
           Left = 6
           Height = 20
           Top = 10
           Width = 344
-           AutoSize = True
           BorderStyle = bsNone
           Color = clWhite
           Font.Color = clBlack
@@ -185,7 +185,6 @@ object frmLogin: TfrmLogin
           Height = 20
           Top = 10
           Width = 344
-           AutoSize = True
           BorderStyle = bsNone
           Color = clWhite
           EchoMode = emPassword

@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, AuthService, DataModule, Theme;
+  ExtCtrls, AuthService, DataModule, Theme
+  {$IFDEF LCLCocoa}, CocoaAll {$ENDIF};
 
 type
   TUserRecord = DataModule.TUserRecord;
@@ -68,11 +69,18 @@ begin
   edtUsuario.Top := 10;
   edtUsuario.AutoSize := True;
   edtUsuario.BorderStyle := bsNone;
+  edtUsuario.ParentColor := False;
   pnlBoxContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
   edtContrasena.Top := 10;
   edtContrasena.AutoSize := True;
   edtContrasena.BorderStyle := bsNone;
+  edtContrasena.ParentColor := False;
+
+  {$IFDEF LCLCocoa}
+  NSTextField(edtUsuario.Handle).setFocusRingType(1);
+  NSTextField(edtContrasena.Handle).setFocusRingType(1);
+  {$ENDIF}
 
   ActiveControl := edtUsuario;
 end;
