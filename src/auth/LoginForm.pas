@@ -20,6 +20,7 @@ type
     lblTitulo: TLabel;
     lblSubtitulo: TLabel;
     pnlDiv1: TPanel;
+    pnlError: TPanel;
     lblError: TLabel;
     lblUsuario: TLabel;
     edtUsuario: TEdit;
@@ -51,6 +52,7 @@ procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
   FillChar(FUser, SizeOf(FUser), 0);
   lblError.Caption := '';
+  pnlError.Visible := False;
   ActiveControl := edtUsuario;
 end;
 
@@ -67,6 +69,7 @@ begin
   if Trim(edtUsuario.Text) = '' then
   begin
     lblError.Caption := 'Ingrese su usuario';
+    pnlError.Visible := True;
     edtUsuario.SetFocus;
     Exit;
   end;
@@ -74,11 +77,13 @@ begin
   if Trim(edtContrasena.Text) = '' then
   begin
     lblError.Caption := 'Ingrese su contraseña';
+    pnlError.Visible := True;
     edtContrasena.SetFocus;
     Exit;
   end;
 
   lblError.Caption := '';
+  pnlError.Visible := False;
   Screen.Cursor := crHourGlass;
   try
     Resultado := TAuthService.Login(Trim(edtUsuario.Text), Trim(edtContrasena.Text), FUser);
@@ -93,13 +98,25 @@ begin
         ModalResult := mrOK;
       end;
     arInvalidEmail:
-      lblError.Caption := 'Usuario no registrado';
+      begin
+        lblError.Caption := 'Usuario no registrado';
+        pnlError.Visible := True;
+      end;
     arInvalidPassword:
-      lblError.Caption := 'Contraseña incorrecta';
+      begin
+        lblError.Caption := 'Contraseña incorrecta';
+        pnlError.Visible := True;
+      end;
     arInactiveUser:
-      lblError.Caption := 'Usuario inactivo';
+      begin
+        lblError.Caption := 'Usuario inactivo';
+        pnlError.Visible := True;
+      end;
     arError:
-      lblError.Caption := 'Error de conexión con la base de datos';
+      begin
+        lblError.Caption := 'Error de conexión con la base de datos';
+        pnlError.Visible := True;
+      end;
   end;
 end;
 

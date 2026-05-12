@@ -13,7 +13,7 @@ object frmLogin: TfrmLogin
   OnResize = FormResize
   object pnlCard: TPanel
     Left = 32
-    Height = 556
+    Height = 600
     Top = 32
     Width = 436
     BevelOuter = bvNone
@@ -84,20 +84,33 @@ object frmLogin: TfrmLogin
       ParentColor = False
       TabOrder = 3
     end
-    object lblError: TLabel
+    object pnlError: TPanel
       Left = 40
-      Height = 1
+      Height = 44
       Top = 249
-      Width = 1
-      Alignment = taCenter
-      Font.Color = 2500316
-      Font.Height = -15
-      ParentFont = False
+      Width = 356
+      BevelOuter = bvNone
+      Color = 15921918
+      ParentColor = False
+      Visible = False
+      object lblError: TLabel
+        Left = 0
+        Height = 44
+        Top = 0
+        Width = 356
+        Align = alClient
+        Alignment = taCenter
+        Caption = ''
+        Font.Color = 2500316
+        Font.Size = 11
+        Layout = tlCenter
+        ParentFont = False
+      end
     end
     object lblUsuario: TLabel
       Left = 40
       Height = 18
-      Top = 285
+      Top = 309
       Width = 53
       Caption = 'Usuario'
       Font.Color = 2758431
@@ -106,8 +119,8 @@ object frmLogin: TfrmLogin
     end
     object edtUsuario: TEdit
       Left = 40
-      Height = 25
-      Top = 305
+      Height = 48
+      Top = 331
       Width = 356
       Font.Height = -17
       ParentFont = False
@@ -117,7 +130,7 @@ object frmLogin: TfrmLogin
     object lblContrasena: TLabel
       Left = 40
       Height = 18
-      Top = 369
+      Top = 399
       Width = 79
       Caption = 'Contraseña'
       Font.Color = 2758431
@@ -126,8 +139,8 @@ object frmLogin: TfrmLogin
     end
     object edtContrasena: TEdit
       Left = 40
-      Height = 25
-      Top = 389
+      Height = 48
+      Top = 421
       Width = 356
       EchoMode = emPassword
       Font.Height = -17
@@ -139,7 +152,7 @@ object frmLogin: TfrmLogin
     object pnlDiv2: TPanel
       Left = 40
       Height = 1
-      Top = 453
+      Top = 489
       Width = 356
       BevelOuter = bvNone
       Color = 14800331
@@ -151,7 +164,7 @@ object frmLogin: TfrmLogin
       Cursor = crHandPoint
       Left = 40
       Height = 48
-      Top = 474
+      Top = 510
       Width = 356
       BevelOuter = bvNone
       ClientHeight = 48
@@ -180,11 +193,11 @@ object frmLogin: TfrmLogin
       Cursor = crHandPoint
       Left = 40
       Height = 18
-      Top = 534
+      Top = 570
       Width = 32
       Alignment = taCenter
       Caption = 'Salir'
-      Font.Color = 8778852
+      Font.Color = 9139300
       Font.Height = -16
       ParentFont = False
       OnClick = lblSalirClick
