@@ -56,10 +56,10 @@ begin
   pnlMain.Color := CLR_BG;
   pnlMain.Caption := '';
 
-  CrearCard('Pesajes Hoy', '0', CLR_SUCCESS, 20, 20);
+  CrearCard('Pesajes Hoy', '0', CLR_PRIMARY, 20, 20);
   CrearCard('Peso Total', '0 kg', CLR_PRIMARY, 20, 280);
-  CrearCard('Vehiculos Hoy', '0', CLR_INFO, 20, 540);
-  CrearCard('Ultimo Pesaje', 'Sin registros', CLR_WARNING, 160, 20);
+  CrearCard('Vehiculos Hoy', '0', CLR_PRIMARY, 20, 540);
+  CrearCard('Ultimo Pesaje', 'Sin registros', CLR_PRIMARY, 160, 20);
 end;
 
 function TFrameDashboard.CrearCard(const ATitulo, AValor: string;
@@ -103,12 +103,11 @@ begin
   LblValor.ParentFont := False;
   LblValor.Tag := 99;
 
-  case AColor of
-    CLR_SUCCESS: CardPesajesHoy := Result;
-    CLR_PRIMARY: CardPesoTotal := Result;
-    CLR_INFO: CardVehiculosHoy := Result;
-    CLR_WARNING: CardUltimoPesaje := Result;
-  end;
+  // Asignar referencia segun posicion (orden de creacion)
+  if CardPesajesHoy = nil then CardPesajesHoy := Result
+  else if CardPesoTotal = nil then CardPesoTotal := Result
+  else if CardVehiculosHoy = nil then CardVehiculosHoy := Result
+  else CardUltimoPesaje := Result;
 end;
 
 procedure TFrameDashboard.ActualizarStats;

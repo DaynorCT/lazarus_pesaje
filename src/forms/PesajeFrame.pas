@@ -207,7 +207,7 @@ begin
   pnlDisplay.Parent := pnlPesaje;
   pnlDisplay.SetBounds(24, 96, 382, 160);
   pnlDisplay.BevelOuter := bvNone;
-  pnlDisplay.Color := CLR_TEAL;
+  pnlDisplay.Color := CLR_PRIMARY;
 
   lblPesoDisplay := TLabel.Create(Self);
   lblPesoDisplay.Parent := pnlDisplay;
@@ -219,7 +219,7 @@ begin
   lblPesoDisplay.Font.Height := -48;
   lblPesoDisplay.Font.Style := [fsBold];
   
-  lblPesoDisplay.Font.Color := clWhite;
+  lblPesoDisplay.Font.Color := CLR_WHITE;
 
   lblUnidad := TLabel.Create(Self);
   lblUnidad.Parent := pnlDisplay;
@@ -228,7 +228,7 @@ begin
   lblUnidad.Alignment := taCenter;
   lblUnidad.Caption := 'KILOGRAMOS';
   lblUnidad.Font.Size := 13;
-  lblUnidad.Font.Color := $99F6E0;
+  lblUnidad.Font.Color := $CCDDFF;
 
   // Estado conexión
   lblEstadoConexion := TLabel.Create(Self);
@@ -272,7 +272,7 @@ begin
   pnlResultados.Parent := pnlPesaje;
   pnlResultados.SetBounds(24, 376, 382, 88);
   pnlResultados.BevelOuter := bvNone;
-  pnlResultados.Color := clWhite;
+  pnlResultados.Color := CLR_CARD;
 
   lblResultadoPeso := TLabel.Create(Self);
   lblResultadoPeso.Parent := pnlResultados;
@@ -288,7 +288,7 @@ begin
   lblResultadoHora.Font.Size := 14;
   lblResultadoHora.Font.Style := [fsBold];
   
-  lblResultadoHora.Font.Color := $0F766E;
+  lblResultadoHora.Font.Color := CLR_PRIMARY;
 
   lblResultadoID := TLabel.Create(Self);
   lblResultadoID.Parent := pnlResultados;
@@ -304,7 +304,7 @@ begin
   pnlForm.Parent := Self;
   pnlForm.Align := alClient;
   pnlForm.BevelOuter := bvNone;
-  pnlForm.Color := clWhite;
+  pnlForm.Color := CLR_CARD;
   pnlForm.Caption := '';
 
   Lbl := TLabel.Create(Self);
@@ -537,7 +537,7 @@ begin
     TimerLectura.Enabled := True;
     btnConectar.Caption := 'DESCONECTAR';
     lblEstadoConexion.Caption := 'CONECTADO - ' + FPuertoSerial;
-    lblEstadoConexion.Font.Color := $2D6A4F;
+    lblEstadoConexion.Font.Color := CLR_PRIMARY;
     lblEstabilidad.Caption := 'Esperando datos...';
     btnTara.Enabled := True;
   end
@@ -563,7 +563,7 @@ begin
   FPesoBruto := 0;
   lblResultadoPeso.Caption := 'Bruto: -- kg  |  Tara: ' + FormatFloat('0.00', FTara) + ' kg';
   lblResultadoHora.Caption := 'Neto: PENDIENTE. Capture peso bruto';
-  lblResultadoHora.Font.Color := $E63946;
+  lblResultadoHora.Font.Color := CLR_DESTRUCTIVE;
   btnGuardar.Enabled := False;
 end;
 
@@ -589,7 +589,7 @@ begin
   btnGuardar.Enabled := False;
   lblResultadoPeso.Caption := 'Bruto: -- kg  |  Tara: -- kg';
   lblResultadoHora.Caption := 'Neto: -- kg';
-  lblResultadoHora.Font.Color := $0F766E;
+  lblResultadoHora.Font.Color := CLR_PRIMARY;
   lblResultadoID.Caption := 'ID: --';
 end;
 
@@ -653,7 +653,7 @@ var
 begin
   lblPesoDisplay.Caption := Peso;
   lblEstabilidad.Caption := 'Peso estable';
-  lblEstabilidad.Font.Color := $2D6A4F;
+  lblEstabilidad.Font.Color := CLR_PRIMARY;
 
   PesoVal := ParseFloatESP(Peso);
   if (FTara > 0) and (PesoVal > 0) then
@@ -666,7 +666,7 @@ begin
     if PesoNeto >= 0 then
       lblResultadoHora.Font.Color := $2D6A4F
     else
-      lblResultadoHora.Font.Color := $E63946;
+      lblResultadoHora.Font.Color := CLR_DESTRUCTIVE;
     btnGuardar.Enabled := True;
   end;
 end;

@@ -60,7 +60,7 @@ begin
   Grid.ColCount := 6; Grid.RowCount := 2; Grid.FixedRows := 1;
   Grid.FixedCols := 0; Grid.Options := Grid.Options + [goRowSelect];
   Grid.Color := CLR_CARD;
-  Grid.FixedColor := CLR_TABLE_HEADER;
+  Grid.FixedColor := CLR_CARD;
   Grid.ParentFont := False;
   Grid.Font.Color := CLR_TEXT;
   Grid.DefaultRowHeight := 26;
