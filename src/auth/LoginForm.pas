@@ -70,12 +70,17 @@ begin
   edtUsuario.AutoSize := True;
   edtUsuario.BorderStyle := bsNone;
   edtUsuario.ParentColor := False;
+  edtUsuario.Font.Height := -14;
   pnlBoxContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
   edtContrasena.Top := 10;
   edtContrasena.AutoSize := True;
   edtContrasena.BorderStyle := bsNone;
   edtContrasena.ParentColor := False;
+  edtContrasena.Font.Height := -14;
+
+  lblUsuario.Font.Height := -14;
+  lblContrasena.Font.Height := -14;
 
   {$IFDEF LCLCocoa}
   NSTextField(edtUsuario.Handle).setFocusRingType(1);

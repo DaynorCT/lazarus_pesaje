@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 2
+  Left = 83
   Height = 808
-  Top = 0
+  Top = 100
   Width = 1440
   BorderStyle = bsNone
   Caption = 'Sistema de Pesaje'
