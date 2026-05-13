@@ -104,9 +104,9 @@ begin
 
   for I := 0 to 8 do
   begin
-    Pnl := CrearNavItem(Items[I].Emoji + ' ' + Items[I].Title, Items[I].Tag, XPos);
+    Pnl := CrearNavItem(Items[I].Emoji + '  ' + Items[I].Title, Items[I].Tag, XPos);
     FNavItems[I] := Pnl;
-    XPos := XPos + Pnl.Width + 4;
+    XPos := XPos + Pnl.Width + 16;
   end;
 
   // Submenu Catálogo
@@ -183,7 +183,7 @@ begin
   Lbl.Alignment := taCenter;
   Lbl.Layout := tlCenter;
   Lbl.Caption := ACaption;
-  Lbl.Font.Size := 16;
+  Lbl.Font.Size := 12;
   Lbl.Font.Color := CLR_TEXT;
   Lbl.Font.Style := [];
   Lbl.ControlStyle := Lbl.ControlStyle + [csNoStdEvents];
