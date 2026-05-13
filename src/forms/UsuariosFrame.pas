@@ -106,16 +106,18 @@ begin
   Grid.RowCount := 2;
   Grid.FixedRows := 1;
   Grid.FixedCols := 0;
-  Grid.Options := Grid.Options + [goRowSelect, goDrawFocusSelected];
+  Grid.Options := Grid.Options + [goRowSelect];
   Grid.DefaultRowHeight := 36;
+  Grid.RowHeights[0] := 40;
   Grid.Color := CLR_CARD;
-  Grid.FixedColor := CLR_TABLE_HEADER;
-  Grid.Font.Size := 14;
-  Grid.Font.Color := CLR_TEXT;
-  Grid.TitleFont.Size := 14;
+  Grid.FixedColor := CLR_CARD;
+  Grid.Font.Height := -12;
+  Grid.Font.Color := CLR_TEXT_HEADING;
+  Grid.TitleFont.Height := -10;
   Grid.TitleFont.Style := [fsBold];
-  Grid.TitleFont.Color := CLR_TEXT_HEADING;
-  Grid.GridLineWidth := 0;
+  Grid.TitleFont.Color := CLR_TEXT_SLATE;
+  Grid.GridLineWidth := 1;
+  Grid.GridLineColor := CLR_BORDER_LIGHT;
   Grid.Flat := True;
 
   Grid.Cells[0, 0] := 'Nro. Documento';
@@ -207,30 +209,64 @@ procedure TFrameUsuarios.GridDrawCell(Sender: TObject; aCol, aRow: Integer;
   aRect: TRect; aState: TGridDrawState);
 var
   Ts: TTextStyle;
+  IsSelected: Boolean;
 begin
-  if aRow = 0 then Exit;
-  if aCol <> 5 then Exit; // Solo columna Estado
+  // Header row: fondo blanco + borde inferior
+  if aRow = 0 then
+  begin
+    Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+    Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+    Ts := Grid.Canvas.TextStyle;
+    Ts.Alignment := taCenter;
+    Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
+    Exit;
+  end;
 
+  IsSelected := gdSelected in aState;
+
+  // Columna Estado: badge coloreado
+  if aCol = 5 then
+  begin
+    Ts := Grid.Canvas.TextStyle;
+    Ts.Alignment := taCenter;
+    Ts.Layout := tlCenter;
+    Grid.Canvas.Font.Height := -11;
+    Grid.Canvas.Font.Style := [fsBold];
+
+    if Grid.Cells[5, aRow] = 'ACTIVO' then
+    begin
+      Grid.Canvas.Brush.Color := CLR_SUCCESS_BG;
+      Grid.Canvas.Font.Color := CLR_TEAL;
+    end
+    else
+    begin
+      Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG;
+      Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
+    end;
+    Grid.Canvas.FillRect(aRect);
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[5, aRow], Ts);
+    Exit;
+  end;
+
+  // Fondo de fila seleccionada (gris sutil, sin azul)
+  if IsSelected then
+    Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+  else
+    Grid.Canvas.Brush.Color := CLR_CARD;
+
+  Grid.Canvas.FillRect(aRect);
+
+  // Texto normal de celda
   Ts := Grid.Canvas.TextStyle;
   Ts.Alignment := taCenter;
   Ts.Layout := tlCenter;
-
-  Grid.Canvas.Font.Size := 11;
-  Grid.Canvas.Font.Style := [fsBold];
-
-  if Grid.Cells[5, aRow] = 'ACTIVO' then
-  begin
-    Grid.Canvas.Brush.Color := CLR_SUCCESS_BG;
-    Grid.Canvas.Font.Color := CLR_SUCCESS;
-  end
-  else
-  begin
-    Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG;
-    Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
-  end;
-
-  Grid.Canvas.FillRect(aRect);
-  Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[5, aRow], Ts);
+  Grid.Canvas.Font.Height := -12;
+  Grid.Canvas.Font.Color := CLR_TEXT_HEADING;
+  Grid.Canvas.Font.Style := [];
+  Grid.Canvas.TextRect(aRect, aRect.Left + 6, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
 end;
 
 procedure TFrameUsuarios.GridMouseDown(Sender: TObject; Button: TMouseButton;
