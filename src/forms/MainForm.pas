@@ -35,6 +35,7 @@ type
 
     procedure LogoClick(Sender: TObject);
     procedure CargarLogo;
+    procedure NavPaint(Sender: TObject);
     function CrearNavItem(const ACaption: string; ATag: Integer; X: Integer): TPanel;
     procedure NavClick(Sender: TObject);
     procedure NavMouseEnter(Sender: TObject);
@@ -175,6 +176,7 @@ begin
   Result.BevelOuter := bvNone;
   Result.Color := CLR_CARD;
   Result.Cursor := crHandPoint;
+  Result.OnPaint := @NavPaint;
   Result.OnClick := @NavClick;
   Result.OnMouseEnter := @NavMouseEnter;
   Result.OnMouseLeave := @NavMouseLeave;
@@ -261,6 +263,20 @@ begin
     Exit;
   if Pnl <> FActiveNav then
     Pnl.Color := CLR_CARD;
+end;
+
+procedure TfrmMain.NavPaint(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  // Rellenar todo con el fondo del navbar para que las esquinas queden "transparentes"
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  // Dibujar el panel redondeado con su propio color
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
 end;
 
 procedure TfrmMain.CrearSubItem(AParent: TPanel; const ACaption: string; ATag, Y: Integer);
@@ -434,6 +450,7 @@ begin
   pnlLogoFallback.Color := CLR_PRIMARY;
   pnlLogoFallback.Cursor := crHandPoint;
   pnlLogoFallback.OnClick := @LogoClick;
+  pnlLogoFallback.OnPaint := @NavPaint;
 
   lblLogoFallback := TLabel.Create(pnlLogoFallback);
   lblLogoFallback.Parent := pnlLogoFallback;
