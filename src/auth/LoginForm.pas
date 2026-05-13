@@ -64,6 +64,7 @@ begin
   pnlCard.ParentColor := True;
   pnlCard.ParentBackground := True;
   pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
+  pnlLogoBox.Top := 120;
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
   lblLogoIcon.Font.Height := -72;
 

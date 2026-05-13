@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = -3
+  Left = 0
   Height = 872
-  Top = 86
+  Top = 0
   Width = 1440
   Caption = 'Sistema de Pesaje'
   ClientHeight = 872
@@ -48,7 +48,7 @@ object frmLogin: TfrmLogin
         object lblLogoIcon: TLabel
           Left = 0
           Height = 96
-          Top = 0
+          Top = 200
           Width = 96
           Align = alClient
           Alignment = taCenter
