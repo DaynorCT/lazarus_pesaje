@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 49
+  Left = 0
   Height = 872
-  Top = 234
+  Top = 113
   Width = 1440
   Caption = 'Sistema de Pesaje'
   ClientHeight = 872
@@ -128,7 +128,7 @@ object frmLogin: TfrmLogin
         Top = 309
         Width = 53
         Caption = 'Usuario'
-        Font.Color = 2758431
+        Font.Color = 9139300
         Font.Height = -15
         ParentFont = False
       end
@@ -152,7 +152,7 @@ object frmLogin: TfrmLogin
           BorderStyle = bsNone
           Color = clWhite
           Font.Color = clBlack
-          Font.Height = -17
+          Font.Height = -12
           ParentFont = False
           TabOrder = 0
           TextHint = 'Ingresa tu usuario'
@@ -164,7 +164,7 @@ object frmLogin: TfrmLogin
         Top = 399
         Width = 79
         Caption = 'Contraseña'
-        Font.Color = 2758431
+        Font.Color = 9139300
         Font.Height = -15
         ParentFont = False
       end
