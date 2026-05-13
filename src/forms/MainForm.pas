@@ -65,8 +65,20 @@ begin
   FActiveNav := nil;
   Caption := 'Sistema de Pesaje';
 
-  pnlTop.Height := 56;
+  pnlTop.Height := 80;
   pnlTop.Color := CLR_CARD;
+
+  // Borde inferior (border-bottom: 1px #E2E8F0)
+  with TPanel.Create(pnlTop) do
+  begin
+    Parent := pnlTop;
+    Align := alBottom;
+    Height := 1;
+    BevelOuter := bvNone;
+    Color := CLR_TOPBAR_BORDER;
+  end;
+
+  lblLogo.Top := 30;
 
   pnlContent.Color := CLR_BG;
   pnlContent.OnClick := @ContentClick;
@@ -94,7 +106,7 @@ begin
   begin
     Pnl := CrearNavItem(Items[I].Emoji + ' ' + Items[I].Title, Items[I].Tag, XPos);
     FNavItems[I] := Pnl;
-    XPos := XPos + Pnl.Width + 16;
+    XPos := XPos + Pnl.Width + 4;
   end;
 
   // Submenu Catálogo
@@ -130,7 +142,7 @@ begin
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
   FUserBtn.Width := 40; FUserBtn.Height := 40;
-  FUserBtn.Top := 13;
+  FUserBtn.Top := 20;
   FUserBtn.Caption := '👤';
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;
@@ -157,7 +169,7 @@ begin
   Result.Parent := pnlTop;
   Result.Tag := ATag;
   W := Result.Canvas.TextWidth(ACaption) + 24;
-  Result.SetBounds(X, 15, W, 40);
+  Result.SetBounds(X, 20, W, 40);
   Result.BevelOuter := bvNone;
   Result.Color := CLR_CARD;
   Result.Cursor := crHandPoint;
@@ -171,7 +183,7 @@ begin
   Lbl.Alignment := taCenter;
   Lbl.Layout := tlCenter;
   Lbl.Caption := ACaption;
-  Lbl.Font.Size := 13;
+  Lbl.Font.Size := 16;
   Lbl.Font.Color := CLR_TEXT;
   Lbl.Font.Style := [];
   Lbl.ControlStyle := Lbl.ControlStyle + [csNoStdEvents];
@@ -259,7 +271,7 @@ begin
   Btn.Tag := ATag;
   Btn.SetBounds(0, Y, 180, 36);
   Btn.Flat := True;
-  Btn.Font.Size := 12;
+  Btn.Font.Size := 14;
   Btn.Font.Color := CLR_TEXT;
   Btn.Alignment := taLeftJustify;
   Btn.OnClick := @SubItemClick;
