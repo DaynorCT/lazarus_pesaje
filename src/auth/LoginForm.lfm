@@ -132,18 +132,29 @@ object frmLogin: TfrmLogin
         Font.Height = -15
         ParentFont = False
       end
-      object edtUsuario: TEdit
+      object pnlBoxUsuario: TPanel
         Left = 40
-        Height = 44
+        Height = 52
         Top = 331
         Width = 356
-        BorderStyle = bsNone
+        BevelOuter = bvNone
         Color = clWhite
-        Font.Color = clBlack
-        Font.Height = -17
-        ParentFont = False
-        TabOrder = 0
-        TextHint = 'Ingresa tu usuario'
+        ParentColor = False
+        object edtUsuario: TEdit
+          Left = 6
+          Height = 25
+          Top = 10
+          Width = 344
+          AutoSize = True
+          BorderStyle = bsNone
+          Color = clWhite
+          Font.Color = clBlack
+          Font.Height = -17
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 0
+          TextHint = 'Ingresa tu usuario'
+        end
       end
       object lblContrasena: TLabel
         Left = 40
@@ -155,20 +166,31 @@ object frmLogin: TfrmLogin
         Font.Height = -15
         ParentFont = False
       end
-      object edtContrasena: TEdit
+      object pnlBoxContrasena: TPanel
         Left = 40
-        Height = 44
+        Height = 52
         Top = 421
         Width = 356
-        BorderStyle = bsNone
+        BevelOuter = bvNone
         Color = clWhite
-        EchoMode = emPassword
-        Font.Color = clBlack
-        Font.Height = -17
-        ParentFont = False
-        PasswordChar = '*'
-        TabOrder = 1
-        TextHint = 'Ingresa tu contraseña'
+        ParentColor = False
+        object edtContrasena: TEdit
+          Left = 6
+          Height = 25
+          Top = 10
+          Width = 344
+          AutoSize = True
+          BorderStyle = bsNone
+          Color = clWhite
+          EchoMode = emPassword
+          Font.Color = clBlack
+          Font.Height = -17
+          ParentColor = False
+          ParentFont = False
+          PasswordChar = '*'
+          TabOrder = 1
+          TextHint = 'Ingresa tu contraseña'
+        end
       end
       object pnlDiv2: TPanel
         Left = 40
