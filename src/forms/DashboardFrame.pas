@@ -13,10 +13,10 @@ type
 
   TFrameDashboard = class(TFrame)
     TimerRefresh: TTimer;
+    pnlMain: TPanel;
     constructor Create(AOwner: TComponent); override;
     procedure TimerRefreshTimer(Sender: TObject);
   private
-    pnlMain: TPanel;
     CardPesajesHoy: TPanel;
     CardPesoTotal: TPanel;
     CardVehiculosHoy: TPanel;
@@ -49,8 +49,6 @@ end;
 
 procedure TFrameDashboard.CrearDashboard;
 begin
-  pnlMain := TPanel.Create(Self);
-  pnlMain.Parent := Self;
   pnlMain.Align := alClient;
   pnlMain.BevelOuter := bvNone;
   pnlMain.Color := CLR_BG;

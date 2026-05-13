@@ -6,8 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, AuthService, DataModule, Theme
-  {$IFDEF LCLCocoa}, CocoaAll {$ENDIF};
+  ExtCtrls, AuthService, DataModule, Theme;
 
 type
   TUserRecord = DataModule.TUserRecord;
@@ -25,10 +24,8 @@ type
     pnlError: TPanel;
     lblError: TLabel;
     lblUsuario: TLabel;
-    pnlBoxUsuario: TPanel;
     edtUsuario: TEdit;
     lblContrasena: TLabel;
-    pnlBoxContrasena: TPanel;
     edtContrasena: TEdit;
     pnlDiv2: TPanel;
     pnlIngresar: TPanel;
@@ -60,32 +57,23 @@ begin
 
   pnlBG.Color := CLR_LOGIN_BG;
   pnlCard.Color := CLR_LOGIN_BG;
+  pnlCard.ParentColor := True;
+  pnlCard.ParentBackground := True;
   pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
   lblLogoIcon.Font.Height := -72;
 
-  pnlBoxUsuario.Color := CLR_WHITE;
   edtUsuario.Color := CLR_WHITE;
-  edtUsuario.Top := 10;
-  edtUsuario.AutoSize := True;
   edtUsuario.BorderStyle := bsNone;
   edtUsuario.ParentColor := False;
   edtUsuario.Font.Height := -14;
-  pnlBoxContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
-  edtContrasena.Top := 10;
-  edtContrasena.AutoSize := True;
   edtContrasena.BorderStyle := bsNone;
   edtContrasena.ParentColor := False;
   edtContrasena.Font.Height := -14;
 
   lblUsuario.Font.Height := -14;
   lblContrasena.Font.Height := -14;
-
-  {$IFDEF LCLCocoa}
-  NSTextField(edtUsuario.Handle).setFocusRingType(1);
-  NSTextField(edtContrasena.Handle).setFocusRingType(1);
-  {$ENDIF}
 
   ActiveControl := edtUsuario;
 end;
