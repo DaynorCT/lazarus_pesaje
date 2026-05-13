@@ -64,7 +64,6 @@ begin
   pnlCard.ParentColor := True;
   pnlCard.ParentBackground := True;
   pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
-  pnlLogoBox.Top := 120;
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
   lblLogoIcon.Font.Height := -72;
 
@@ -96,6 +95,7 @@ end;
 
 procedure TfrmLogin.FormResize(Sender: TObject);
 begin
+  pnlLogoBox.SetBounds(170, 70, 96, 96);
   lblTitulo.Left := (pnlCard.ClientWidth - lblTitulo.Width) div 2;
   lblSubtitulo.Left := (pnlCard.ClientWidth - lblSubtitulo.Width) div 2;
   pnlCard.Left := (pnlBG.ClientWidth - pnlCard.Width) div 2;

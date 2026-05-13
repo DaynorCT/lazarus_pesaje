@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 0
+  Left = 49
   Height = 872
-  Top = 0
+  Top = 234
   Width = 1440
   Caption = 'Sistema de Pesaje'
   ClientHeight = 872
@@ -24,9 +24,9 @@ object frmLogin: TfrmLogin
     ParentColor = False
     TabOrder = 0
     object pnlCard: TPanel
-      Left = 512
+      Left = 504
       Height = 600
-      Top = 96
+      Top = 104
       Width = 436
       BevelOuter = bvNone
       ClientHeight = 600
@@ -48,7 +48,7 @@ object frmLogin: TfrmLogin
         object lblLogoIcon: TLabel
           Left = 0
           Height = 96
-          Top = 200
+          Top = 0
           Width = 96
           Align = alClient
           Alignment = taCenter
@@ -147,7 +147,7 @@ object frmLogin: TfrmLogin
         object edtUsuario: TEdit
           Left = 6
           Height = 20
-          Top = 10
+          Top = 16
           Width = 344
           BorderStyle = bsNone
           Color = clWhite
@@ -183,7 +183,7 @@ object frmLogin: TfrmLogin
         object edtContrasena: TEdit
           Left = 6
           Height = 20
-          Top = 10
+          Top = 16
           Width = 344
           BorderStyle = bsNone
           Color = clWhite
