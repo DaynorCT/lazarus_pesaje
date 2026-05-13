@@ -56,6 +56,8 @@ begin
   FillChar(FUser, SizeOf(FUser), 0);
   lblError.Caption := '';
   pnlError.Visible := False;
+  pnlError.Top := 10;
+  pnlError.Left := 40;
 
   pnlBG.Color := CLR_LOGIN_BG;
   pnlCard.Color := CLR_LOGIN_BG;

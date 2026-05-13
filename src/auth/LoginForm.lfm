@@ -99,7 +99,7 @@ object frmLogin: TfrmLogin
       object pnlError: TPanel
         Left = 40
         Height = 44
-        Top = 249
+        Top = 10
         Width = 356
         BevelOuter = bvNone
         ClientHeight = 44
