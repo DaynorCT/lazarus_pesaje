@@ -32,15 +32,29 @@ begin
 
     TAuthService.SeedAdminUser;
 
-    frmLogin := TfrmLogin.Create(nil);
-    try
-      if frmLogin.ShowModal <> mrOK then begin Application.Terminate; Exit; end;
-    finally
-      frmLogin.Free;
-    end;
+    repeat
+      frmLogin := TfrmLogin.Create(nil);
+      try
+        if frmLogin.ShowModal <> mrOK then
+        begin
+          Application.Terminate;
+          Exit;
+        end;
+      finally
+        frmLogin.Free;
+      end;
 
-    Application.CreateForm(TfrmMain, frmMain);
-    Application.Run;
+      frmMain := TfrmMain.Create(nil);
+      try
+        frmMain.ShowModal;
+        if frmMain.ModalResult <> mrCancel then
+          break;
+      finally
+        frmMain.Free;
+        frmMain := nil;
+      end;
+    until False;
+
   finally
     DM.Free;
   end;

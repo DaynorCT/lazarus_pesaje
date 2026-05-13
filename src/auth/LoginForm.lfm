@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 0
+  Left = 16
   Height = 872
-  Top = 113
+  Top = 100
   Width = 1440
   Caption = 'Sistema de Pesaje'
   ClientHeight = 872
@@ -146,13 +146,13 @@ object frmLogin: TfrmLogin
         TabOrder = 2
         object edtUsuario: TEdit
           Left = 6
-          Height = 20
+          Height = 15
           Top = 16
           Width = 344
           BorderStyle = bsNone
           Color = clWhite
           Font.Color = clBlack
-          Font.Height = -12
+          Font.Height = -15
           ParentFont = False
           TabOrder = 0
           TextHint = 'Ingresa tu usuario'
