@@ -11,11 +11,11 @@ echo "Compilando..."
 "$LAZARUS_DIR/lazbuild" \
     --pcp="$FPCUP_CONFIG" \
     --lazarusdir="$LAZARUS_DIR" \
-    project1.lpi
+    pesaje.lpi
 
-if [ -f "project1" ]; then
+if [ -f "pesaje" ]; then
     echo "COMPILACION EXITOSA"
-    ls -lh project1
+    ls -lh pesaje
 else
     echo "ERROR: La compilacion no genero el ejecutable"
     exit 1

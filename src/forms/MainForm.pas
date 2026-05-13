@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
   Buttons, AuthService, DataModule, LoginForm,
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
-  ProveedoresFrame, UsuariosFrame, AbmSimpleFrame, Theme;
+  ProveedoresFrame, UsuariosFrame, AbmSimpleFrame, Theme, base64, SQLDB;
 
 type
   TFrameClass = class of TFrame;
@@ -29,7 +29,12 @@ type
     FActiveNav: TPanel;
     FSubCatalogo, FSubConfig, FUserMenu: TPanel;
     FUserBtn: TSpeedButton;
+    imgLogo: TImage;
+    pnlLogoFallback: TPanel;
+    lblLogoFallback: TLabel;
 
+    procedure LogoClick(Sender: TObject);
+    procedure CargarLogo;
     function CrearNavItem(const ACaption: string; ATag: Integer; X: Integer): TPanel;
     procedure NavClick(Sender: TObject);
     procedure NavMouseEnter(Sender: TObject);
@@ -78,15 +83,12 @@ begin
     Color := CLR_TOPBAR_BORDER;
   end;
 
-  lblLogo.Top := 30;
+  lblLogo.Visible := False;
 
   pnlContent.Color := CLR_BG;
   pnlContent.OnClick := @ContentClick;
 
-  lblLogo.Caption := 'SISTEMA DE PESAJE';
-  lblLogo.Font.Color := CLR_PRIMARY;
-  lblLogo.Font.Style := [fsBold];
-  lblLogo.Font.Size := 14;
+  CargarLogo;
 
   // Orden exacto del sistema web
   Items[0].Emoji := '📊'; Items[0].Title := 'Inicio';       Items[0].Tag := 0;
@@ -408,6 +410,86 @@ begin
   begin
     ModalResult := mrCancel;
     Close;
+  end;
+end;
+
+procedure TfrmMain.LogoClick(Sender: TObject);
+begin
+  NavigateTo(2);
+end;
+
+procedure TfrmMain.CargarLogo;
+var
+  Q: TSQLQuery;
+  LogoStr, Base64Str: string;
+  Stream: TMemoryStream;
+  RawBytes: RawByteString;
+  P: Integer;
+begin
+  // Fallback: panel azul 48x48 con emoji
+  pnlLogoFallback := TPanel.Create(pnlTop);
+  pnlLogoFallback.Parent := pnlTop;
+  pnlLogoFallback.SetBounds(16, 16, 48, 48);
+  pnlLogoFallback.BevelOuter := bvNone;
+  pnlLogoFallback.Color := CLR_PRIMARY;
+  pnlLogoFallback.Cursor := crHandPoint;
+  pnlLogoFallback.OnClick := @LogoClick;
+
+  lblLogoFallback := TLabel.Create(pnlLogoFallback);
+  lblLogoFallback.Parent := pnlLogoFallback;
+  lblLogoFallback.Align := alClient;
+  lblLogoFallback.Alignment := taCenter;
+  lblLogoFallback.Layout := tlCenter;
+  lblLogoFallback.Caption := '🚛';
+  lblLogoFallback.Font.Size := 22;
+  lblLogoFallback.Font.Color := CLR_WHITE;
+  lblLogoFallback.Cursor := crHandPoint;
+  lblLogoFallback.OnClick := @LogoClick;
+
+  // Imagen del logo
+  imgLogo := TImage.Create(pnlTop);
+  imgLogo.Parent := pnlTop;
+  imgLogo.SetBounds(16, 12, 56, 56);
+  imgLogo.Visible := False;
+  imgLogo.Cursor := crHandPoint;
+  imgLogo.OnClick := @LogoClick;
+  imgLogo.Stretch := True;
+  imgLogo.Proportional := True;
+  imgLogo.Center := True;
+
+  // Consultar logo de la BD
+  if (DM = nil) or (not DM.Conexion.Connected) then Exit;
+
+  Q := DM.AbrirQuery(
+    'SELECT nombre_empresa, logo FROM empresas WHERE estado = ''ACTIVO'' ORDER BY id DESC LIMIT 1'
+  );
+  try
+    if not Q.EOF then
+    begin
+      LogoStr := Q.FieldByName('logo').AsString;
+      if LogoStr <> '' then
+      begin
+        // Extraer base64 del data URI (formato: data:image/png;base64,...)
+        P := Pos('base64,', LogoStr);
+        if P > 0 then
+        begin
+          Base64Str := Copy(LogoStr, P + 7, MaxInt);
+          RawBytes := DecodeStringBase64(Base64Str);
+          Stream := TMemoryStream.Create;
+          try
+            Stream.Write(RawBytes[1], Length(RawBytes));
+            Stream.Position := 0;
+            imgLogo.Picture.LoadFromStream(Stream);
+            imgLogo.Visible := True;
+            pnlLogoFallback.Visible := False;
+          finally
+            Stream.Free;
+          end;
+        end;
+      end;
+    end;
+  finally
+    Q.Close;
   end;
 end;
 
