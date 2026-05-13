@@ -81,7 +81,14 @@ begin
   edtContrasena.Font.Height := -14;
 
   lblUsuario.Font.Height := -14;
+  lblUsuario.Top := 248;
+  pnlBoxUsuario.Top := 270;
   lblContrasena.Font.Height := -14;
+  lblContrasena.Top := 338;
+  pnlBoxContrasena.Top := 360;
+  pnlDiv2.Top := 428;
+  pnlIngresar.Top := 449;
+  lblSalir.Top := 509;
 
   ActiveControl := edtUsuario;
 end;

@@ -1,7 +1,7 @@
 object frmLogin: TfrmLogin
-  Left = 103
+  Left = -3
   Height = 872
-  Top = 104
+  Top = 86
   Width = 1440
   Caption = 'Sistema de Pesaje'
   ClientHeight = 872
@@ -62,7 +62,7 @@ object frmLogin: TfrmLogin
       object lblTitulo: TLabel
         Left = 0
         Height = 27
-        Top = 136
+        Top = 176
         Width = 436
         Alignment = taCenter
         AutoSize = False
@@ -75,7 +75,7 @@ object frmLogin: TfrmLogin
       object lblSubtitulo: TLabel
         Left = 0
         Height = 40
-        Top = 176
+        Top = 208
         Width = 436
         Alignment = taCenter
         AutoSize = False
@@ -88,13 +88,13 @@ object frmLogin: TfrmLogin
       object pnlDiv1: TPanel
         Left = 40
         Height = 1
-        Top = 228
+        Top = 280
         Width = 356
         BevelOuter = bvNone
         Color = 14800331
         ParentBackground = False
         ParentColor = False
-        TabOrder = 2
+        TabOrder = 1
       end
       object pnlError: TPanel
         Left = 40
@@ -138,19 +138,21 @@ object frmLogin: TfrmLogin
         Top = 331
         Width = 356
         BevelOuter = bvNone
+        ClientHeight = 52
+        ClientWidth = 356
         Color = clWhite
+        ParentBackground = False
         ParentColor = False
+        TabOrder = 2
         object edtUsuario: TEdit
           Left = 6
-          Height = 25
+          Height = 20
           Top = 10
           Width = 344
-          AutoSize = True
           BorderStyle = bsNone
           Color = clWhite
           Font.Color = clBlack
           Font.Height = -17
-          ParentColor = False
           ParentFont = False
           TabOrder = 0
           TextHint = 'Ingresa tu usuario'
@@ -172,23 +174,25 @@ object frmLogin: TfrmLogin
         Top = 421
         Width = 356
         BevelOuter = bvNone
+        ClientHeight = 52
+        ClientWidth = 356
         Color = clWhite
+        ParentBackground = False
         ParentColor = False
+        TabOrder = 3
         object edtContrasena: TEdit
           Left = 6
-          Height = 25
+          Height = 20
           Top = 10
           Width = 344
-          AutoSize = True
           BorderStyle = bsNone
           Color = clWhite
           EchoMode = emPassword
           Font.Color = clBlack
           Font.Height = -17
-          ParentColor = False
           ParentFont = False
           PasswordChar = '*'
-          TabOrder = 1
+          TabOrder = 0
           TextHint = 'Ingresa tu contraseña'
         end
       end

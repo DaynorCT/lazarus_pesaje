@@ -48,9 +48,10 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <CursorPos X="11"/>
+        <CursorPos X="37" Y="17"/>
         <UsageCount Value="52"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/MainForm.pas"/>
@@ -206,6 +207,7 @@
       </Position>
       <Position>
         <Filename Value="src/auth/LoginForm.pas"/>
+        <Caret Column="11"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
