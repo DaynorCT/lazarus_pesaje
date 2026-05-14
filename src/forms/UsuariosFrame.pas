@@ -438,19 +438,31 @@ var
     Result.Parent := F;
     Result.SetBounds(ALeft, ATop, 200, 16);
     Result.Caption := ACaption;
-    Result.Font.Size := 14;
+    Result.Font.Size := 12;
     Result.Font.Style := [fsBold];
     Result.Font.Color := CLR_TEXT_HEADING;
   end;
 
-  function MakeEdit(ATop, ALeft, AWidth: Integer; APassword: Boolean = False): TEdit;
+  function MakeEditConBorde(ATop, ALeft, AWidth: Integer; APassword: Boolean = False): TEdit;
+  var
+    pnl: TPanel;
   begin
-    Result := TEdit.Create(F);
-    Result.Parent := F;
-    Result.SetBounds(ALeft, ATop, AWidth, 36);
-    Result.Font.Size := 14;
+    pnl := TPanel.Create(F);
+    pnl.Parent := F;
+    pnl.SetBounds(ALeft, ATop, AWidth, 36);
+    pnl.BevelOuter := bvNone;
+    pnl.BevelInner := bvNone;
+    pnl.BorderWidth := 1;
+    pnl.Color := CLR_BORDER;
+
+    Result := TEdit.Create(pnl);
+    Result.Parent := pnl;
+    Result.Align := alClient;
+    Result.BorderStyle := bsNone;
+    Result.Font.Size := 12;
     Result.Font.Color := CLR_TEXT;
     Result.CharCase := ecUpperCase;
+    Result.Color := CLR_WHITE;
     if APassword then
     begin
       Result.PasswordChar := '*';
@@ -529,7 +541,7 @@ begin
     LblSection.Parent := F;
     LblSection.SetBounds(24, YPos, 300, 20);
     LblSection.Caption := 'Datos personales';
-    LblSection.Font.Size := 14;
+    LblSection.Font.Size := 12;
     LblSection.Font.Style := [fsBold];
     LblSection.Font.Color := CLR_TEXT_HEADING;
 
@@ -541,11 +553,11 @@ begin
     MakeLabel(YPos, 400, 'Apellido materno');
     YPos := YPos + 20;
 
-    eNom := MakeEdit(YPos, 24, 180);
+    eNom := MakeEditConBorde(YPos, 24, 180);
     eNom.Text := Nombre;
-    ePat := MakeEdit(YPos, 212, 180);
+    ePat := MakeEditConBorde(YPos, 212, 180);
     ePat.Text := ApPat;
-    eMat := MakeEdit(YPos, 400, 180);
+    eMat := MakeEditConBorde(YPos, 400, 180);
     eMat.Text := ApMat;
     YPos := YPos + 48;
 
@@ -555,9 +567,9 @@ begin
     MakeLabel(YPos, 400, 'Rol');
     YPos := YPos + 20;
 
-    eCI := MakeEdit(YPos, 24, 180);
+    eCI := MakeEditConBorde(YPos, 24, 180);
     eCI.Text := CIStr;
-    eTel := MakeEdit(YPos, 212, 180);
+    eTel := MakeEditConBorde(YPos, 212, 180);
     eTel.Text := Tel;
 
     cmbRol := TComboBox.Create(F);
@@ -589,7 +601,7 @@ begin
     LblSection.Parent := F;
     LblSection.SetBounds(24, YPos, 300, 20);
     LblSection.Caption := 'Datos de usuario';
-    LblSection.Font.Size := 14;
+    LblSection.Font.Size := 12;
     LblSection.Font.Style := [fsBold];
     LblSection.Font.Color := CLR_TEXT_HEADING;
     YPos := YPos + 28;
@@ -597,7 +609,7 @@ begin
     // Email
     MakeLabel(YPos, 24, 'Correo electrónico *');
     YPos := YPos + 20;
-    eEmail := MakeEdit(YPos, 24, 290);
+    eEmail := MakeEditConBorde(YPos, 24, 290);
     eEmail.Text := Email;
     eEmail.CharCase := ecNormal;
     YPos := YPos + 48;
@@ -607,7 +619,7 @@ begin
     if not IsNew then
       Lbl.Caption := 'Contraseña (dejar en blanco para mantener)';
     YPos := YPos + 20;
-    ePass := MakeEdit(YPos, 24, 290, True);
+    ePass := MakeEditConBorde(YPos, 24, 290, True);
     ePass.CharCase := ecNormal;
     YPos := YPos + 56;
 
