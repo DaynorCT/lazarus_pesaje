@@ -26,6 +26,7 @@ type
     procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
     procedure GridMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ToggleEstado(ID: Integer; EstadoActual: string);
+    procedure PaintRounded(Sender: TObject);
     function GetColByName(const ColName: string): Integer;
     procedure ShowUserForm(ID: Integer);
   end;
@@ -93,11 +94,12 @@ begin
   pnlNuevo.Anchors := [akTop, akRight];
   pnlNuevo.BorderSpacing.Right := 24;
   pnlNuevo.BevelOuter := bvNone;
-  pnlNuevo.Color := CLR_PRIMARY;
+  pnlNuevo.Color := $A65E25;  // #255EA6 primary base
   pnlNuevo.ParentBackground := False;
   pnlNuevo.ParentColor := False;
   pnlNuevo.Cursor := crHandPoint;
   pnlNuevo.OnClick := @btnNuevoClick;
+  pnlNuevo.OnPaint := @PaintRounded;
 
   lblNuevo := TLabel.Create(Self);
   lblNuevo.Parent := pnlNuevo;
@@ -364,6 +366,18 @@ begin
     ''', fecha_modificacion=''' + FechaHoraActual +
     ''' WHERE id=(SELECT persona_id FROM usuarios WHERE id=' + IntToStr(ID) + ')');
   Refrescar(nil);
+end;
+
+procedure TFrameUsuarios.PaintRounded(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_BG;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
 end;
 
 procedure TFrameUsuarios.ShowUserForm(ID: Integer);
