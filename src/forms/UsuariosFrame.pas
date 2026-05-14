@@ -164,7 +164,7 @@ begin
   Grid.ColWidths[3] := 120;
   Grid.ColWidths[4] := 120;
   Grid.ColWidths[5] := 90;
-  Grid.ColWidths[6] := 80;
+  Grid.ColWidths[6] := 130;
   Grid.ColWidths[7] := 0; // ID oculto
 
   Grid.OnDblClick := @GridDblClick;
@@ -256,6 +256,46 @@ begin
 
   IsSelected := gdSelected in aState;
 
+  // Columna Acciones: switch (izquierda) + lápiz (derecha)
+  if aCol = 6 then
+  begin
+    if IsSelected then
+      Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else
+      Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+
+    Ts := Grid.Canvas.TextStyle;
+    Ts.Layout := tlCenter;
+
+    // Switch toggle (mitad izquierda)
+    Grid.Canvas.Font.Height := -13;
+    Grid.Canvas.Font.Style := [fsBold];
+    if Grid.Cells[5, aRow] = 'ACTIVO' then
+    begin
+      Grid.Canvas.Font.Color := CLR_SUCCESS;
+      Ts.Alignment := taCenter;
+      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 65, aRect.Bottom),
+        aRect.Left, aRect.Top + 2, '◉ ────', Ts);
+    end
+    else
+    begin
+      Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
+      Ts.Alignment := taCenter;
+      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 65, aRect.Bottom),
+        aRect.Left, aRect.Top + 2, '──── ○', Ts);
+    end;
+
+    // Lápiz editar (mitad derecha)
+    Grid.Canvas.Font.Height := -13;
+    Grid.Canvas.Font.Color := CLR_PRIMARY;
+    Grid.Canvas.Font.Style := [fsBold];
+    Ts.Alignment := taCenter;
+    Grid.Canvas.TextRect(Rect(aRect.Left + 65, aRect.Top, aRect.Right, aRect.Bottom),
+      aRect.Left + 65, aRect.Top + 2, '✏️', Ts);
+    Exit;
+  end;
+
   // Columna Estado: badge coloreado
   if aCol = 5 then
   begin
@@ -326,13 +366,12 @@ begin
 
   // Columna Acciones
   if Col = 6 then
-    ShowUserForm(PtrInt(Grid.Objects[0, Row]));
-
-  // Toggle estado click en la columna estado
-  if Col = 5 then
   begin
     ID := PtrInt(Grid.Objects[0, Row]);
-    ToggleEstado(ID, Grid.Cells[5, Row]);
+    if X < Grid.CellRect(Col, Row).Left + 65 then
+      ToggleEstado(ID, Grid.Cells[5, Row])
+    else
+      ShowUserForm(ID);
   end;
 end;
 
