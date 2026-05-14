@@ -63,7 +63,7 @@ begin
   // Búsqueda por nombre
   edtBuscarNombre := TEdit.Create(Self);
   edtBuscarNombre.Parent := Pnl;
-  edtBuscarNombre.SetBounds(240, 14, 212, 36);
+  edtBuscarNombre.SetBounds(240, 20, 212, 36);
   edtBuscarNombre.Font.Size := 14;
   edtBuscarNombre.Font.Color := CLR_TEXT;
   edtBuscarNombre.Color := CLR_CARD;
@@ -75,7 +75,7 @@ begin
   // Búsqueda por CI
   edtBuscarCI := TEdit.Create(Self);
   edtBuscarCI.Parent := Pnl;
-  edtBuscarCI.SetBounds(460, 14, 142, 36);
+  edtBuscarCI.SetBounds(460, 20, 142, 36);
   edtBuscarCI.Font.Size := 14;
   edtBuscarCI.Font.Color := CLR_TEXT;
   edtBuscarCI.Color := CLR_CARD;
@@ -104,9 +104,9 @@ begin
   lblNuevo.Align := alClient;
   lblNuevo.Alignment := taCenter;
   lblNuevo.Layout := tlCenter;
-  lblNuevo.Caption := '+ CREAR';
-  lblNuevo.Font.Size := 14;
-  lblNuevo.Font.Style := [fsBold];
+  lblNuevo.Caption := '+ Agregar';
+  lblNuevo.Font.Size := 12;
+  lblNuevo.Font.Style := [];
   lblNuevo.Font.Color := CLR_WHITE;
   lblNuevo.Transparent := True;
   lblNuevo.ParentColor := False;

@@ -28,7 +28,7 @@ const
   CLR_TOPBAR_BORDER  = $F0E8E2;  // #E2E8F0
 
   // Primario
-  CLR_PRIMARY        = $80421A;  // #1A4280 - azul corporativo sistema base
+  CLR_PRIMARY        = $A65E25;  // #1A4280 - azul corporativo sistema base
   CLR_PRIMARY_DARK   = $802E12;  // #122E80 - más oscuro
   CLR_PRIMARY_FG     = $FFFFFF;
 
