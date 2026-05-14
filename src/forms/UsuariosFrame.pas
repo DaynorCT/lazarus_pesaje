@@ -319,12 +319,11 @@ begin
   Grid.MouseToCell(X, Y, Col, Row);
   if (Row < 1) or (Row >= Grid.RowCount) then Exit;
 
+  if (Y < Grid.CellRect(Col, Row).Top) or (Y >= Grid.CellRect(Col, Row).Bottom) then Exit;
+
   // Columna Acciones
   if Col = 6 then
-  begin
-    if Grid.Cells[5, Row] = 'ACTIVO' then
-      ShowUserForm(PtrInt(Grid.Objects[0, Row]));
-  end;
+    ShowUserForm(PtrInt(Grid.Objects[0, Row]));
 
   // Toggle estado click en la columna estado
   if Col = 5 then
