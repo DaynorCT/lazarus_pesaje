@@ -49,6 +49,7 @@ begin
   Pnl.Height := 64;
   Pnl.BevelOuter := bvNone;
   Pnl.Color := CLR_CARD;
+  Pnl.BorderSpacing.Top := 15;
 
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
@@ -101,7 +102,7 @@ begin
   // Card contenedor de la tabla
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.SetBounds(24, 96, Self.ClientWidth - 48, Self.ClientHeight - 116);
+  pnlCard.SetBounds(24, 90, Self.ClientWidth - 48, Self.ClientHeight - 116);
   pnlCard.Anchors := [akTop, akLeft, akRight, akBottom];
   pnlCard.BevelOuter := bvLowered;
   pnlCard.BevelInner := bvNone;
