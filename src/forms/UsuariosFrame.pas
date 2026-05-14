@@ -15,6 +15,7 @@ type
     constructor Create(AOwner: TComponent); override;
   private
     Grid: TStringGrid;
+    pnlCard: TPanel;
     edtBuscarNombre, edtBuscarCI: TEdit;
     btnNuevo, btnRefresh: TButton;
     FEditingID: Integer;
@@ -97,10 +98,20 @@ begin
   btnNuevo.Font.Color := CLR_PRIMARY;
   btnNuevo.OnClick := @btnNuevoClick;
 
+  // Card contenedor de la tabla
+  pnlCard := TPanel.Create(Self);
+  pnlCard.Parent := Self;
+  pnlCard.SetBounds(24, 80, Self.ClientWidth - 48, Self.ClientHeight - 100);
+  pnlCard.Anchors := [akTop, akLeft, akRight, akBottom];
+  pnlCard.BevelOuter := bvLowered;
+  pnlCard.BevelInner := bvNone;
+  pnlCard.BevelWidth := 1;
+  pnlCard.Color := CLR_CARD;
+
   // Grid
   Grid := TStringGrid.Create(Self);
-  Grid.Parent := Self;
-  Grid.SetBounds(24, 80, Self.ClientWidth - 48, Self.ClientHeight - 100);
+  Grid.Parent := pnlCard;
+  Grid.SetBounds(2, 2, pnlCard.ClientWidth - 4, pnlCard.ClientHeight - 4);
   Grid.Anchors := [akTop, akLeft, akRight, akBottom];
   Grid.ColCount := 8;
   Grid.RowCount := 2;
@@ -120,6 +131,7 @@ begin
   Grid.GridLineColor := CLR_BORDER_LIGHT;
   Grid.Flat := True;
   Grid.FocusRectVisible := False;
+  Grid.BorderStyle := bsNone;
 
   Grid.Cells[0, 0] := 'Nro. Documento';
   Grid.Cells[1, 0] := 'Nombres';
