@@ -534,7 +534,7 @@ begin
       end;
     end;
 
-    YPos := 68;
+    YPos := 80;
 
     // Sección: Datos personales
     LblSection := TLabel.Create(F);
@@ -586,16 +586,6 @@ begin
 
     YPos := YPos + 56;
 
-    // Línea divisora
-    with TPanel.Create(F) do
-    begin
-      Parent := F;
-      SetBounds(24, YPos, 556, 1);
-      BevelOuter := bvNone;
-      Color := CLR_BORDER;
-    end;
-    YPos := YPos + 16;
-
     // Sección: Datos de usuario
     LblSection := TLabel.Create(F);
     LblSection.Parent := F;
@@ -623,8 +613,18 @@ begin
     ePass.CharCase := ecNormal;
     YPos := YPos + 56;
 
-    F.Height := YPos + 70;
+    // Línea divisora
+    with TPanel.Create(F) do
+    begin
+      Parent := F;
+      SetBounds(24, YPos, 556, 1);
+      BevelOuter := bvNone;
+      Color := CLR_BORDER;
+    end;
+    YPos := YPos + 16;
 
+    F.Height := YPos + 70;
+   
     // Botones
     with TButton.Create(F) do
     begin
