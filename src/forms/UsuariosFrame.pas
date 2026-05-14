@@ -158,13 +158,13 @@ begin
   Grid.Cells[6, 0] := 'Acciones';
   Grid.Cells[7, 0] := 'ID';
 
-  Grid.ColWidths[0] := 120;
-  Grid.ColWidths[1] := 260;
-  Grid.ColWidths[2] := 220;
-  Grid.ColWidths[3] := 120;
-  Grid.ColWidths[4] := 120;
-  Grid.ColWidths[5] := 90;
-  Grid.ColWidths[6] := 130;
+  Grid.ColWidths[0] := 200;
+  Grid.ColWidths[1] := 200;
+  Grid.ColWidths[2] := 200;
+  Grid.ColWidths[3] := 200;
+  Grid.ColWidths[4] := 200;
+  Grid.ColWidths[5] := 200;
+  Grid.ColWidths[6] := 200;
   Grid.ColWidths[7] := 0; // ID oculto
 
   Grid.OnDblClick := @GridDblClick;
@@ -275,14 +275,14 @@ begin
     begin
       Grid.Canvas.Font.Color := CLR_SUCCESS;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 65, aRect.Bottom),
+      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 110, aRect.Bottom),
         aRect.Left, aRect.Top + 2, '● ──', Ts);
     end
     else
     begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 65, aRect.Bottom),
+      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 110, aRect.Bottom),
         aRect.Left, aRect.Top + 2, '○ ──', Ts);
     end;
 
@@ -291,8 +291,8 @@ begin
     Grid.Canvas.Font.Color := CLR_PRIMARY;
     Grid.Canvas.Font.Style := [fsBold];
     Ts.Alignment := taCenter;
-    Grid.Canvas.TextRect(Rect(aRect.Left + 65, aRect.Top, aRect.Right, aRect.Bottom),
-      aRect.Left + 65, aRect.Top + 2, '✏️', Ts);
+    Grid.Canvas.TextRect(Rect(aRect.Left + 110, aRect.Top, aRect.Right, aRect.Bottom),
+      aRect.Left + 110, aRect.Top + 2, '✏️', Ts);
     Exit;
   end;
 
@@ -368,7 +368,7 @@ begin
   if Col = 6 then
   begin
     ID := PtrInt(Grid.Objects[0, Row]);
-    if X < Grid.CellRect(Col, Row).Left + 65 then
+    if X < Grid.CellRect(Col, Row).Left + 110 then
       ToggleEstado(ID, Grid.Cells[5, Row])
     else
       ShowUserForm(ID);
