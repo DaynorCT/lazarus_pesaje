@@ -65,6 +65,8 @@ begin
   edtBuscarNombre.SetBounds(240, 11, 220, 30);
   edtBuscarNombre.Font.Size := 14;
   edtBuscarNombre.Font.Color := CLR_TEXT;
+  edtBuscarNombre.Color := CLR_CARD;
+  edtBuscarNombre.ParentColor := False;
   edtBuscarNombre.TextHint := 'Buscar por nombre...';
   edtBuscarNombre.OnChange := @Refrescar;
 
@@ -74,6 +76,8 @@ begin
   edtBuscarCI.SetBounds(468, 11, 160, 30);
   edtBuscarCI.Font.Size := 14;
   edtBuscarCI.Font.Color := CLR_TEXT;
+  edtBuscarCI.Color := CLR_CARD;
+  edtBuscarCI.ParentColor := False;
   edtBuscarCI.TextHint := 'Buscar por CI...';
   edtBuscarCI.OnChange := @Refrescar;
 
