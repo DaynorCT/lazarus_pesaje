@@ -18,6 +18,7 @@ type
     pnlCard: TPanel;
     pnlNuevo: TPanel;
     lblNuevo: TLabel;
+    pnlBoxNombre, pnlBoxCI: TPanel;
     edtBuscarNombre, edtBuscarCI: TEdit;
     FEditingID: Integer;
     procedure Refrescar(Sender: TObject);
@@ -61,27 +62,45 @@ begin
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  // Búsqueda por nombre
+  // Búsqueda por nombre (panel + edit)
+  pnlBoxNombre := TPanel.Create(Self);
+  pnlBoxNombre.Parent := Pnl;
+  pnlBoxNombre.SetBounds(240, 14, 220, 36);
+  pnlBoxNombre.BevelOuter := bvNone;
+  pnlBoxNombre.Color := CLR_CARD;
+  pnlBoxNombre.ParentBackground := False;
+  pnlBoxNombre.ParentColor := False;
+  pnlBoxNombre.OnPaint := @PaintRounded;
+
   edtBuscarNombre := TEdit.Create(Self);
-  edtBuscarNombre.Parent := Pnl;
-  edtBuscarNombre.SetBounds(240, 20, 212, 36);
+  edtBuscarNombre.Parent := pnlBoxNombre;
+  edtBuscarNombre.SetBounds(6, 8, 208, 20);
   edtBuscarNombre.Font.Size := 14;
   edtBuscarNombre.Font.Color := CLR_TEXT;
   edtBuscarNombre.Color := CLR_CARD;
   edtBuscarNombre.ParentColor := False;
-  edtBuscarNombre.BorderStyle := bsSingle;
+  edtBuscarNombre.BorderStyle := bsNone;
   edtBuscarNombre.TextHint := 'Buscar por nombre...';
   edtBuscarNombre.OnChange := @Refrescar;
 
-  // Búsqueda por CI
+  // Búsqueda por CI (panel + edit)
+  pnlBoxCI := TPanel.Create(Self);
+  pnlBoxCI.Parent := Pnl;
+  pnlBoxCI.SetBounds(468, 14, 160, 36);
+  pnlBoxCI.BevelOuter := bvNone;
+  pnlBoxCI.Color := CLR_CARD;
+  pnlBoxCI.ParentBackground := False;
+  pnlBoxCI.ParentColor := False;
+  pnlBoxCI.OnPaint := @PaintRounded;
+
   edtBuscarCI := TEdit.Create(Self);
-  edtBuscarCI.Parent := Pnl;
-  edtBuscarCI.SetBounds(460, 20, 142, 36);
+  edtBuscarCI.Parent := pnlBoxCI;
+  edtBuscarCI.SetBounds(6, 8, 148, 20);
   edtBuscarCI.Font.Size := 14;
   edtBuscarCI.Font.Color := CLR_TEXT;
   edtBuscarCI.Color := CLR_CARD;
   edtBuscarCI.ParentColor := False;
-  edtBuscarCI.BorderStyle := bsSingle;
+  edtBuscarCI.BorderStyle := bsNone;
   edtBuscarCI.TextHint := 'Buscar por CI...';
   edtBuscarCI.OnChange := @Refrescar;
 
