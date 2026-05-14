@@ -575,8 +575,10 @@ begin
     cmbRol := TComboBox.Create(F);
     cmbRol.Parent := F;
     cmbRol.SetBounds(400, YPos, 180, 36);
+    cmbRol.AutoSize := False;
     cmbRol.Style := csDropDownList;
-    cmbRol.Font.Size := 14;
+    cmbRol.Font.Size := 12;
+    cmbRol.Color := CLR_WHITE;
     cmbRol.Items.Add('administrador');
     cmbRol.Items.Add('coordinador');
     cmbRol.Items.Add('operador');
