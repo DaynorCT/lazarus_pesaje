@@ -119,6 +119,7 @@ begin
   Grid.GridLineWidth := 1;
   Grid.GridLineColor := CLR_BORDER_LIGHT;
   Grid.Flat := True;
+  Grid.DefaultDrawing := False;
 
   Grid.Cells[0, 0] := 'Nro. Documento';
   Grid.Cells[1, 0] := 'Nombres';
@@ -247,7 +248,18 @@ begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
     end;
     Grid.Canvas.FillRect(aRect);
+    if gdFocused in aState then
+    begin
+      Grid.Canvas.Brush.Style := bsClear;
+      Grid.Canvas.Pen.Color := CLR_BORDER;
+      Grid.Canvas.Pen.Style := psSolid;
+      Grid.Canvas.Rectangle(aRect.Left + 1, aRect.Top + 1, aRect.Right - 1, aRect.Bottom - 1);
+      Grid.Canvas.Brush.Style := bsSolid;
+    end;
     Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[5, aRow], Ts);
+    // Divisor horizontal inferior
+    Grid.Canvas.Pen.Color := CLR_BORDER_LIGHT;
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
     Exit;
   end;
 
@@ -259,6 +271,15 @@ begin
 
   Grid.Canvas.FillRect(aRect);
 
+  if gdFocused in aState then
+  begin
+    Grid.Canvas.Brush.Style := bsClear;
+    Grid.Canvas.Pen.Color := CLR_BORDER;
+    Grid.Canvas.Pen.Style := psSolid;
+    Grid.Canvas.Rectangle(aRect.Left + 1, aRect.Top + 1, aRect.Right - 1, aRect.Bottom - 1);
+    Grid.Canvas.Brush.Style := bsSolid;
+  end;
+
   // Texto normal de celda
   Ts := Grid.Canvas.TextStyle;
   Ts.Alignment := taCenter;
@@ -267,6 +288,9 @@ begin
   Grid.Canvas.Font.Color := CLR_TEXT_HEADING;
   Grid.Canvas.Font.Style := [];
   Grid.Canvas.TextRect(aRect, aRect.Left + 6, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
+  // Divisor horizontal inferior
+  Grid.Canvas.Pen.Color := CLR_BORDER_LIGHT;
+  Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
 end;
 
 procedure TFrameUsuarios.GridMouseDown(Sender: TObject; Button: TMouseButton;
