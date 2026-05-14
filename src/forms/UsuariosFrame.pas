@@ -16,8 +16,9 @@ type
   private
     Grid: TStringGrid;
     pnlCard: TPanel;
+    pnlNuevo: TPanel;
+    lblNuevo: TLabel;
     edtBuscarNombre, edtBuscarCI: TEdit;
-    btnNuevo, btnRefresh: TButton;
     FEditingID: Integer;
     procedure Refrescar(Sender: TObject);
     procedure btnNuevoClick(Sender: TObject);
@@ -62,46 +63,54 @@ begin
   // Búsqueda por nombre
   edtBuscarNombre := TEdit.Create(Self);
   edtBuscarNombre.Parent := Pnl;
-  edtBuscarNombre.SetBounds(240, 11, 220, 30);
+  edtBuscarNombre.SetBounds(240, 14, 212, 36);
   edtBuscarNombre.Font.Size := 14;
   edtBuscarNombre.Font.Color := CLR_TEXT;
   edtBuscarNombre.Color := CLR_CARD;
   edtBuscarNombre.ParentColor := False;
+  edtBuscarNombre.BorderStyle := bsSingle;
   edtBuscarNombre.TextHint := 'Buscar por nombre...';
   edtBuscarNombre.OnChange := @Refrescar;
 
   // Búsqueda por CI
   edtBuscarCI := TEdit.Create(Self);
   edtBuscarCI.Parent := Pnl;
-  edtBuscarCI.SetBounds(468, 11, 160, 30);
+  edtBuscarCI.SetBounds(460, 14, 142, 36);
   edtBuscarCI.Font.Size := 14;
   edtBuscarCI.Font.Color := CLR_TEXT;
   edtBuscarCI.Color := CLR_CARD;
   edtBuscarCI.ParentColor := False;
+  edtBuscarCI.BorderStyle := bsSingle;
   edtBuscarCI.TextHint := 'Buscar por CI...';
   edtBuscarCI.OnChange := @Refrescar;
 
-  // Botón refrescar
-  btnRefresh := TButton.Create(Self);
-  btnRefresh.Parent := Pnl;
-  btnRefresh.SetBounds(636, 10, 44, 44);
-  btnRefresh.Caption := '↻';
-  btnRefresh.Font.Size := 18;
-  btnRefresh.OnClick := @Refrescar;
+  // Botón + CREAR (panel azul + label blanco)
+  pnlNuevo := TPanel.Create(Self);
+  pnlNuevo.Parent := Pnl;
+  pnlNuevo.Width := 120;
+  pnlNuevo.Height := 36;
+  pnlNuevo.Top := 14;
+  pnlNuevo.Anchors := [akTop, akRight];
+  pnlNuevo.BorderSpacing.Right := 24;
+  pnlNuevo.BevelOuter := bvNone;
+  pnlNuevo.Color := CLR_PRIMARY;
+  pnlNuevo.ParentBackground := False;
+  pnlNuevo.ParentColor := False;
+  pnlNuevo.Cursor := crHandPoint;
+  pnlNuevo.OnClick := @btnNuevoClick;
 
-  // Botón nuevo
-  btnNuevo := TButton.Create(Self);
-  btnNuevo.Parent := Pnl;
-  btnNuevo.Width := 120;
-  btnNuevo.Height := 36;
-  btnNuevo.Left := Self.ClientWidth - btnNuevo.Width - 24;
-  btnNuevo.Top := 14;
-  btnNuevo.Anchors := [akTop, akRight];
-  btnNuevo.Caption := '+ Agregar';
-  btnNuevo.Font.Size := 14;
-  btnNuevo.Font.Style := [fsBold];
-  btnNuevo.Font.Color := CLR_PRIMARY;
-  btnNuevo.OnClick := @btnNuevoClick;
+  lblNuevo := TLabel.Create(Self);
+  lblNuevo.Parent := pnlNuevo;
+  lblNuevo.Align := alClient;
+  lblNuevo.Alignment := taCenter;
+  lblNuevo.Layout := tlCenter;
+  lblNuevo.Caption := '+ CREAR';
+  lblNuevo.Font.Size := 14;
+  lblNuevo.Font.Style := [fsBold];
+  lblNuevo.Font.Color := CLR_WHITE;
+  lblNuevo.Transparent := True;
+  lblNuevo.ParentColor := False;
+  lblNuevo.OnClick := @btnNuevoClick;
 
   // Card contenedor de la tabla
   pnlCard := TPanel.Create(Self);
