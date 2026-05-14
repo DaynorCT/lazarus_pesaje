@@ -439,7 +439,7 @@ var
     Result.SetBounds(ALeft, ATop, 200, 16);
     Result.Caption := ACaption;
     Result.Font.Size := 12;
-    Result.Font.Style := [fsBold];
+    Result.Font.Style := [];
     Result.Font.Color := CLR_TEXT_HEADING;
   end;
 
@@ -510,7 +510,7 @@ begin
     begin
       Parent := F;
       Align := alTop;
-      Height := 52;
+      Height := 60;
       BevelOuter := bvNone;
       Color := CLR_WHITE;
       with TLabel.Create(F) do
@@ -519,8 +519,8 @@ begin
         SetBounds(24, 14, 400, 24);
         if IsNew then Caption := 'Nuevo usuario'
         else Caption := 'Editar usuario';
-        Font.Size := 18;
-        Font.Style := [fsBold];
+        Font.Size := 14;
+        Font.Style := [];
         Font.Color := CLR_TEXT_HEADING;
       end;
       // Línea separadora
@@ -542,7 +542,7 @@ begin
     LblSection.SetBounds(24, YPos, 300, 20);
     LblSection.Caption := 'Datos personales';
     LblSection.Font.Size := 12;
-    LblSection.Font.Style := [fsBold];
+    LblSection.Font.Style := [];
     LblSection.Font.Color := CLR_TEXT_HEADING;
 
     YPos := YPos + 28;
@@ -602,7 +602,7 @@ begin
     LblSection.SetBounds(24, YPos, 300, 20);
     LblSection.Caption := 'Datos de usuario';
     LblSection.Font.Size := 12;
-    LblSection.Font.Style := [fsBold];
+    LblSection.Font.Style := [];
     LblSection.Font.Color := CLR_TEXT_HEADING;
     YPos := YPos + 28;
 
