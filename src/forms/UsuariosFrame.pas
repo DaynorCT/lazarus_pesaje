@@ -268,31 +268,31 @@ begin
     Ts := Grid.Canvas.TextStyle;
     Ts.Layout := tlCenter;
 
-    // Switch toggle (mitad izquierda)
+    // Switch toggle (izquierda del grupo centrado)
     Grid.Canvas.Font.Height := -13;
     Grid.Canvas.Font.Style := [fsBold];
     if Grid.Cells[5, aRow] = 'ACTIVO' then
     begin
       Grid.Canvas.Font.Color := CLR_SUCCESS;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 110, aRect.Bottom),
-        aRect.Left, aRect.Top + 2, '● ──', Ts);
+      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, '● ──', Ts);
     end
     else
     begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 110, aRect.Bottom),
-        aRect.Left, aRect.Top + 2, '○ ──', Ts);
+      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, '○ ──', Ts);
     end;
 
-    // Lápiz editar (mitad derecha)
+    // Lápiz editar (derecha del grupo centrado)
     Grid.Canvas.Font.Height := -13;
     Grid.Canvas.Font.Color := CLR_PRIMARY;
     Grid.Canvas.Font.Style := [fsBold];
     Ts.Alignment := taCenter;
-    Grid.Canvas.TextRect(Rect(aRect.Left + 110, aRect.Top, aRect.Right, aRect.Bottom),
-      aRect.Left + 110, aRect.Top + 2, '✏️', Ts);
+    Grid.Canvas.TextRect(Rect(aRect.Left + 105, aRect.Top, aRect.Left + 155, aRect.Bottom),
+      aRect.Left + 105, aRect.Top + 2, '✏️', Ts);
     Exit;
   end;
 
@@ -368,7 +368,7 @@ begin
   if Col = 6 then
   begin
     ID := PtrInt(Grid.Objects[0, Row]);
-    if X < Grid.CellRect(Col, Row).Left + 110 then
+    if X < Grid.CellRect(Col, Row).Left + 105 then
       ToggleEstado(ID, Grid.Cells[5, Row])
     else
       ShowUserForm(ID);
