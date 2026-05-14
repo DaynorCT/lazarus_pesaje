@@ -48,7 +48,7 @@ begin
   Pnl.Align := alTop;
   Pnl.Height := 64;
   Pnl.BevelOuter := bvNone;
-  Pnl.Color := CLR_CARD;
+  Pnl.Color := CLR_BG;
   Pnl.BorderSpacing.Top := 15;
 
   Lbl := TLabel.Create(Self);
