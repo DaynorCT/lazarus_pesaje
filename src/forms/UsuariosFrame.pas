@@ -313,13 +313,16 @@ procedure TFrameUsuarios.GridMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
   Col, Row: Integer;
-  ID: Integer;
+  ID, TotalH, I: Integer;
 begin
   if Button <> mbLeft then Exit;
   Grid.MouseToCell(X, Y, Col, Row);
   if (Row < 1) or (Row >= Grid.RowCount) then Exit;
 
-  if (Y < Grid.CellRect(Col, Row).Top) or (Y >= Grid.CellRect(Col, Row).Bottom) then Exit;
+  TotalH := 0;
+  for I := 0 to Grid.RowCount - 1 do
+    TotalH := TotalH + Grid.RowHeights[I];
+  if Y > TotalH then Exit;
 
   // Columna Acciones
   if Col = 6 then
