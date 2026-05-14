@@ -18,7 +18,6 @@ type
     pnlCard: TPanel;
     pnlNuevo: TPanel;
     lblNuevo: TLabel;
-    pnlBoxNombre, pnlBoxCI: TPanel;
     edtBuscarNombre, edtBuscarCI: TEdit;
     FEditingID: Integer;
     procedure Refrescar(Sender: TObject);
@@ -62,45 +61,27 @@ begin
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  // Búsqueda por nombre (panel + edit)
-  pnlBoxNombre := TPanel.Create(Self);
-  pnlBoxNombre.Parent := Pnl;
-  pnlBoxNombre.SetBounds(240, 14, 220, 36);
-  pnlBoxNombre.BevelOuter := bvNone;
-  pnlBoxNombre.Color := CLR_CARD;
-  pnlBoxNombre.ParentBackground := False;
-  pnlBoxNombre.ParentColor := False;
-  pnlBoxNombre.OnPaint := @PaintRounded;
-
+  // Búsqueda por nombre
   edtBuscarNombre := TEdit.Create(Self);
-  edtBuscarNombre.Parent := pnlBoxNombre;
-  edtBuscarNombre.SetBounds(6, 8, 208, 20);
-  edtBuscarNombre.Font.Size := 14;
+  edtBuscarNombre.Parent := Pnl;
+  edtBuscarNombre.SetBounds(240, 19, 238, 36);
+  edtBuscarNombre.Font.Size := 12;
   edtBuscarNombre.Font.Color := CLR_TEXT;
   edtBuscarNombre.Color := CLR_CARD;
   edtBuscarNombre.ParentColor := False;
-  edtBuscarNombre.BorderStyle := bsNone;
+  edtBuscarNombre.BorderStyle := bsSingle;
   edtBuscarNombre.TextHint := 'Buscar por nombre...';
   edtBuscarNombre.OnChange := @Refrescar;
 
-  // Búsqueda por CI (panel + edit)
-  pnlBoxCI := TPanel.Create(Self);
-  pnlBoxCI.Parent := Pnl;
-  pnlBoxCI.SetBounds(468, 14, 160, 36);
-  pnlBoxCI.BevelOuter := bvNone;
-  pnlBoxCI.Color := CLR_CARD;
-  pnlBoxCI.ParentBackground := False;
-  pnlBoxCI.ParentColor := False;
-  pnlBoxCI.OnPaint := @PaintRounded;
-
+  // Búsqueda por CI
   edtBuscarCI := TEdit.Create(Self);
-  edtBuscarCI.Parent := pnlBoxCI;
-  edtBuscarCI.SetBounds(6, 8, 148, 20);
-  edtBuscarCI.Font.Size := 14;
+  edtBuscarCI.Parent := Pnl;
+  edtBuscarCI.SetBounds(482, 19, 238, 36);
+  edtBuscarCI.Font.Size := 12;
   edtBuscarCI.Font.Color := CLR_TEXT;
   edtBuscarCI.Color := CLR_CARD;
   edtBuscarCI.ParentColor := False;
-  edtBuscarCI.BorderStyle := bsNone;
+  edtBuscarCI.BorderStyle := bsSingle;
   edtBuscarCI.TextHint := 'Buscar por CI...';
   edtBuscarCI.OnChange := @Refrescar;
 
@@ -111,7 +92,7 @@ begin
   pnlNuevo.Height := 36;
   pnlNuevo.Top := 14;
   pnlNuevo.Anchors := [akTop, akRight];
-  pnlNuevo.BorderSpacing.Right := 24;
+  pnlNuevo.BorderSpacing.Right := 8;
   pnlNuevo.BevelOuter := bvNone;
   pnlNuevo.Color := $A65E25;  // #255EA6 primary base
   pnlNuevo.ParentBackground := False;
