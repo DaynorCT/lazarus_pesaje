@@ -276,14 +276,14 @@ begin
       Grid.Canvas.Font.Color := CLR_SUCCESS;
       Ts.Alignment := taCenter;
       Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 65, aRect.Bottom),
-        aRect.Left, aRect.Top + 2, '◉ ────', Ts);
+        aRect.Left, aRect.Top + 2, '● ──', Ts);
     end
     else
     begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
       Ts.Alignment := taCenter;
       Grid.Canvas.TextRect(Rect(aRect.Left, aRect.Top, aRect.Left + 65, aRect.Bottom),
-        aRect.Left, aRect.Top + 2, '──── ○', Ts);
+        aRect.Left, aRect.Top + 2, '○ ──', Ts);
     end;
 
     // Lápiz editar (mitad derecha)
