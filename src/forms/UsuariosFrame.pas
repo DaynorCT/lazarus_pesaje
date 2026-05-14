@@ -116,7 +116,7 @@ begin
   Grid.TitleFont.Height := -10;
   Grid.TitleFont.Style := [fsBold];
   Grid.TitleFont.Color := CLR_TEXT_SLATE;
-  Grid.GridLineWidth := 1;
+  Grid.GridLineWidth := 0;
   Grid.GridLineColor := CLR_BORDER_LIGHT;
   Grid.Flat := True;
   Grid.FocusRectVisible := False;
@@ -249,6 +249,11 @@ begin
     end;
     Grid.Canvas.FillRect(aRect);
     Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[5, aRow], Ts);
+    if aCol = 0 then
+    begin
+      Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+      Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+    end;
     Exit;
   end;
 
@@ -268,6 +273,12 @@ begin
   Grid.Canvas.Font.Color := CLR_TEXT_HEADING;
   Grid.Canvas.Font.Style := [];
   Grid.Canvas.TextRect(aRect, aRect.Left + 6, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
+  // Línea divisora horizontal suave (solo en col 0)
+  if aCol = 0 then
+  begin
+    Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+  end;
 end;
 
 procedure TFrameUsuarios.GridMouseDown(Sender: TObject; Button: TMouseButton;
