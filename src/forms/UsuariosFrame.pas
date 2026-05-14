@@ -545,13 +545,13 @@ begin
     LblSection.Font.Style := [];
     LblSection.Font.Color := CLR_TEXT_HEADING;
 
-    YPos := YPos + 28;
+    YPos := YPos + 33;
 
     // Fila 1: Nombre | Apellido paterno | Apellido materno
     MakeLabel(YPos, 24, 'Nombre *');
     MakeLabel(YPos, 212, 'Apellido paterno');
     MakeLabel(YPos, 400, 'Apellido materno');
-    YPos := YPos + 20;
+    YPos := YPos + 28;
 
     eNom := MakeEditConBorde(YPos, 24, 180);
     eNom.Text := Nombre;
@@ -565,7 +565,7 @@ begin
     MakeLabel(YPos, 24, 'Nro. Documento');
     MakeLabel(YPos, 212, 'Teléfono');
     MakeLabel(YPos, 400, 'Rol');
-    YPos := YPos + 20;
+    YPos := YPos + 28;
 
     eCI := MakeEditConBorde(YPos, 24, 180);
     eCI.Text := CIStr;
@@ -584,7 +584,7 @@ begin
     cmbRol.ItemIndex := cmbRol.Items.IndexOf(Rol);
     if cmbRol.ItemIndex < 0 then cmbRol.ItemIndex := 2;
 
-    YPos := YPos + 56;
+    YPos := YPos + 60;
 
     // Sección: Datos de usuario
     LblSection := TLabel.Create(F);
@@ -594,11 +594,11 @@ begin
     LblSection.Font.Size := 12;
     LblSection.Font.Style := [];
     LblSection.Font.Color := CLR_TEXT_HEADING;
-    YPos := YPos + 28;
+    YPos := YPos + 33;
 
     // Email
     MakeLabel(YPos, 24, 'Correo electrónico *');
-    YPos := YPos + 20;
+    YPos := YPos + 28;
     eEmail := MakeEditConBorde(YPos, 24, 290);
     eEmail.Text := Email;
     eEmail.CharCase := ecNormal;
@@ -608,7 +608,7 @@ begin
     Lbl := MakeLabel(YPos, 24, 'Contraseña');
     if not IsNew then
       Lbl.Caption := 'Contraseña (dejar en blanco para mantener)';
-    YPos := YPos + 20;
+    YPos := YPos + 28;
     ePass := MakeEditConBorde(YPos, 24, 290, True);
     ePass.CharCase := ecNormal;
     YPos := YPos + 56;
