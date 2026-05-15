@@ -636,19 +636,19 @@ begin
     MakeLabel(YPos, 24, 'Logo');
     YPos := YPos + 28;
 
-    FModalImgPreview := TImage.Create(F);
-    FModalImgPreview.Parent := F;
-    FModalImgPreview.SetBounds(24, YPos, 56, 56);
-    FModalImgPreview.Stretch := True;
-    FModalImgPreview.Proportional := True;
-    FModalImgPreview.Center := True;
-
     FModalPnlLogo := TPanel.Create(F);
     FModalPnlLogo.Parent := F;
     FModalPnlLogo.SetBounds(24, YPos, 56, 56);
     FModalPnlLogo.BevelOuter := bvNone;
     FModalPnlLogo.Color := CLR_WHITE;
     FModalPnlLogo.Visible := FLogoBase64 <> '';
+
+    FModalImgPreview := TImage.Create(FModalPnlLogo);
+    FModalImgPreview.Parent := FModalPnlLogo;
+    FModalImgPreview.Align := alClient;
+    FModalImgPreview.Stretch := True;
+    FModalImgPreview.Proportional := True;
+    FModalImgPreview.Center := True;
 
     if FLogoBase64 <> '' then
     begin
