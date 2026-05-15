@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
   Buttons, AuthService, DataModule, LoginForm,
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
-  ProveedoresFrame, UsuariosFrame, AbmSimpleFrame, Theme, base64, SQLDB;
+  ProveedoresFrame, UsuariosFrame, EmpresasFrame, AbmSimpleFrame, Theme, base64, SQLDB;
 
 type
   TFrameClass = class of TFrame;
@@ -387,7 +387,7 @@ begin
   case TagVal of
     0: LoadFrame(TFrameDashboard, 'Inicio');
     1: LoadFrame(TFramePesaje, 'Pesaje');
-    2: ShowMessage('Empresas - Fase 3');
+    2: LoadFrame(TFrameEmpresas, 'Empresas');
     3: LoadFrame(TFrameChoferes, 'Choferes');
     4: LoadFrame(TFrameProveedores, 'Proveedores');
     5: begin FrameP := TFrameAbmSimple.CreateWithConfig(Self, ConfigProductos); LoadFrameInstance(FrameP, 'Productos'); end;

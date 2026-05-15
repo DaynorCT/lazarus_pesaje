@@ -13,6 +13,7 @@ uses
   MainForm in 'src/forms/MainForm.pas' {frmMain: TfrmMain},
   PesajeFrame in 'src/forms/PesajeFrame.pas' {FramePesaje: TFramePesaje},
   DashboardFrame in 'src/forms/DashboardFrame.pas' {FrameDashboard: TFrameDashboard},
+  EmpresasFrame in 'src/forms/EmpresasFrame.pas' {FrameEmpresas: TFrameEmpresas},
   Utils in 'src/utils/Utils.pas';
 
 {$linkframework UserNotifications}
