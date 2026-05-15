@@ -729,6 +729,8 @@ begin
         Exit;
       end;
 
+      if DM.Transaccion.Active then
+        DM.Transaccion.Rollback;
       DM.Transaccion.StartTransaction;
       try
         if IsNew then
