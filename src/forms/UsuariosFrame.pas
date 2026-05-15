@@ -531,7 +531,7 @@ var
 
 begin
   IsNew := ID = 0;
-  Nombre := ''; ApPat := ''; ApMat := ''; CIStr := ''; Tel := ''; Email := ''; Rol := 'operador'; PassStr := '';
+  Nombre := ''; ApPat := ''; ApMat := ''; CIStr := ''; Tel := ''; Email := ''; Rol := 'OPERADOR'; PassStr := '';
 
   // Cargar datos si editar
   if not IsNew then
@@ -661,8 +661,8 @@ begin
     MakeLabel(YPos, 24, 'Correo electrónico *');
     YPos := YPos + 28;
     eEmail := MakeEditConBorde(YPos, 24, 290);
-    eEmail.Text := Email;
     eEmail.CharCase := ecNormal;
+    eEmail.Text := Email;
     YPos := YPos + 48;
 
     // Contraseña
