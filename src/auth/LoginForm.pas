@@ -5,7 +5,7 @@ unit LoginForm;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Classes, SysUtils, SQLDB, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, AuthService, DataModule, Theme;
 
 type
@@ -33,6 +33,7 @@ type
     pnlIngresar: TPanel;
     lblIngresar: TLabel;
     lblSalir: TLabel;
+    SQLScript1: TSQLScript;
     procedure btnIngresarClick(Sender: TObject);
     procedure lblSalirClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -73,12 +74,15 @@ begin
   edtUsuario.Top := (pnlBoxUsuario.ClientHeight - edtUsuario.Height) div 2;
   edtUsuario.ParentColor := False;
   edtUsuario.Font.Height := -14;
+  edtUsuario.Font.Color := CLR_TEXT;
   pnlBoxContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
   edtContrasena.BorderStyle := bsNone;
   edtContrasena.Top := (pnlBoxContrasena.ClientHeight - edtContrasena.Height) div 2;
   edtContrasena.ParentColor := False;
   edtContrasena.Font.Height := -14;
+  edtContrasena.Font.Color := CLR_TEXT;
+  edtContrasena.PasswordChar := '*';
 
   lblUsuario.Font.Height := -14;
   lblUsuario.Top := 248;

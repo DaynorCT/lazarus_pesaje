@@ -52,8 +52,13 @@ implementation
 {$R *.lfm}
 
 function TDM.DBPath: string;
+var
+  ExePath: string;
 begin
-  Result := ExtractFilePath(ParamStr(0)) + 'pesaje.db';
+  ExePath := ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
+  if Pos('.app/Contents/MacOS', ExePath) > 0 then
+    ExePath := ExtractFilePath(ExpandFileName(ExePath + '/../../..'));
+  Result := ExePath + 'pesaje.db';
 end;
 
 procedure TDM.DataModuleCreate(Sender: TObject);
