@@ -16,7 +16,9 @@ uses
   EmpresasFrame in 'src/forms/EmpresasFrame.pas' {FrameEmpresas: TFrameEmpresas},
   Utils in 'src/utils/Utils.pas';
 
+{$IFDEF DARWIN}
 {$linkframework UserNotifications}
+{$ENDIF}
 
 begin
   Randomize;

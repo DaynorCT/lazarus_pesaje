@@ -71,18 +71,13 @@ begin
   pnlBoxUsuario.Color := CLR_WHITE;
   edtUsuario.Color := CLR_WHITE;
   edtUsuario.BorderStyle := bsNone;
-  edtUsuario.Top := (pnlBoxUsuario.ClientHeight - edtUsuario.Height) div 2;
   edtUsuario.ParentColor := False;
-  edtUsuario.Font.Height := -14;
   edtUsuario.Font.Color := CLR_TEXT;
   pnlBoxContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
   edtContrasena.BorderStyle := bsNone;
-  edtContrasena.Top := (pnlBoxContrasena.ClientHeight - edtContrasena.Height) div 2;
   edtContrasena.ParentColor := False;
-  edtContrasena.Font.Height := -14;
   edtContrasena.Font.Color := CLR_TEXT;
-  edtContrasena.PasswordChar := '*';
 
   lblUsuario.Font.Height := -14;
   lblUsuario.Top := 248;

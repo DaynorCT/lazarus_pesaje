@@ -10,11 +10,32 @@ Sistema de escritorio para gestión de pesaje con básculas RS232, desarrollado 
 
 ## Compilación
 
+### macOS
+
 ```bash
 ./compilar.sh
 ```
 
-Esto genera el ejecutable `pesaje` y actualiza `pesaje.app`.
+### Windows (cross-compilación desde macOS)
+
+Requiere instalar el cross-compiler **i386-win32** una sola vez desde fpcupdeluxe:
+
+1. Abrir fpcupdeluxe
+2. Pestaña **Cross** (o **Setup+**)
+3. Seleccionar OS: **Windows**, CPU: **i386**
+4. Clic en **Install cross compiler**
+
+Luego:
+
+```bash
+./compilar_win32.sh
+```
+
+Genera `pesaje.exe` — compatible con Windows XP, 7, 8, 10, 11.
+
+Para distribuir en Windows solo se necesita:
+- `pesaje.exe`
+- `sqlite3.dll` (descargar de sqlite.org, misma carpeta que el .exe)
 
 ## Ejecución
 
