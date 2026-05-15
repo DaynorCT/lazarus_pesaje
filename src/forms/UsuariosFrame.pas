@@ -299,14 +299,14 @@ begin
     Exit;
   end;
 
-  // Columna Estado: badge coloreado
+  // Columna Estado: badge coloreado centrado
   if aCol = 5 then
   begin
-    Ts := Grid.Canvas.TextStyle;
-    Ts.Alignment := taCenter;
-    Ts.Layout := tlCenter;
-    Grid.Canvas.Font.Height := -11;
-    Grid.Canvas.Font.Style := [fsBold];
+    if IsSelected then
+      Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else
+      Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
 
     if Grid.Cells[5, aRow] = 'ACTIVO' then
     begin
@@ -318,13 +318,20 @@ begin
       Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG;
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
     end;
-    Grid.Canvas.FillRect(aRect);
-    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[5, aRow], Ts);
-    if aCol = 0 then
-    begin
-      Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
-      Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
-    end;
+
+    Grid.Canvas.Pen.Style := psClear;
+    Grid.Canvas.RoundRect(
+      aRect.Left + 55, aRect.Top + 6,
+      aRect.Left + 145, aRect.Top + 30,
+      12, 12);
+
+    Grid.Canvas.Font.Height := -11;
+    Grid.Canvas.Font.Style := [fsBold];
+    Ts := Grid.Canvas.TextStyle;
+    Ts.Alignment := taCenter;
+    Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top,
+      Grid.Cells[5, aRow], Ts);
     Exit;
   end;
 
