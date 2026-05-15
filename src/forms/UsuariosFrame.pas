@@ -467,25 +467,28 @@ var
 
   function MakeEditConBorde(ATop, ALeft, AWidth: Integer; APassword: Boolean = False): TEdit;
   var
-    pnl: TPanel;
+    pnlOuter, pnlInner: TPanel;
   begin
-    pnl := TPanel.Create(F);
-    pnl.Parent := F;
-    pnl.SetBounds(ALeft, ATop, AWidth, 40);
-    pnl.BevelOuter := bvNone;
-    pnl.BevelInner := bvNone;
-    pnl.Color := CLR_BORDER;
+    pnlOuter := TPanel.Create(F);
+    pnlOuter.Parent := F;
+    pnlOuter.SetBounds(ALeft, ATop, AWidth, 40);
+    pnlOuter.BevelOuter := bvNone;
+    pnlOuter.Color := CLR_BORDER;
 
-    Result := TEdit.Create(pnl);
-    Result.Parent := pnl;
+    pnlInner := TPanel.Create(pnlOuter);
+    pnlInner.Parent := pnlOuter;
+    pnlInner.SetBounds(1, 1, AWidth - 2, 38);
+    pnlInner.BevelOuter := bvNone;
+    pnlInner.Color := CLR_WHITE;
+
+    Result := TEdit.Create(pnlInner);
+    Result.Parent := pnlInner;
+    Result.Align := alClient;
     Result.BorderStyle := bsNone;
     Result.Font.Size := 12;
     Result.Font.Color := CLR_TEXT;
     Result.CharCase := ecUpperCase;
     Result.Color := CLR_WHITE;
-    Result.Left := 1;
-    Result.Width := AWidth - 2;
-    Result.Top := 1 + (pnl.ClientHeight - 2 - Result.Height) div 2;
     if APassword then
     begin
       Result.PasswordChar := '*';
