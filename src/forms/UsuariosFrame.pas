@@ -471,20 +471,21 @@ var
   begin
     pnl := TPanel.Create(F);
     pnl.Parent := F;
-    pnl.SetBounds(ALeft, ATop, AWidth, 36);
+    pnl.SetBounds(ALeft, ATop, AWidth, 40);
     pnl.BevelOuter := bvNone;
     pnl.BevelInner := bvNone;
-    pnl.BorderWidth := 1;
     pnl.Color := CLR_BORDER;
 
     Result := TEdit.Create(pnl);
     Result.Parent := pnl;
-    Result.Align := alClient;
     Result.BorderStyle := bsNone;
     Result.Font.Size := 12;
     Result.Font.Color := CLR_TEXT;
     Result.CharCase := ecUpperCase;
     Result.Color := CLR_WHITE;
+    Result.Left := 1;
+    Result.Width := AWidth - 2;
+    Result.Top := 1 + (pnl.ClientHeight - 2 - Result.Height) div 2;
     if APassword then
     begin
       Result.PasswordChar := '*';
@@ -597,7 +598,7 @@ begin
 
     cmbRol := TComboBox.Create(F);
     cmbRol.Parent := F;
-    cmbRol.SetBounds(400, YPos, 180, 36);
+    cmbRol.SetBounds(400, YPos, 180, 40);
     cmbRol.AutoSize := False;
     cmbRol.Style := csDropDownList;
     cmbRol.Font.Size := 12;
