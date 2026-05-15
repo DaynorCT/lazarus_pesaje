@@ -46,19 +46,15 @@ type
 
 var
   DM: TDM;
+  DirectorioApp: string = '';
 
 implementation
 
 {$R *.lfm}
 
 function TDM.DBPath: string;
-var
-  ExePath: string;
 begin
-  ExePath := ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
-  if Pos('.app/Contents/MacOS', ExePath) > 0 then
-    ExePath := ExtractFilePath(ExpandFileName(ExePath + '/../../..'));
-  Result := ExePath + 'pesaje.db';
+  Result := DirectorioApp + 'pesaje.db';
 end;
 
 procedure TDM.DataModuleCreate(Sender: TObject);
