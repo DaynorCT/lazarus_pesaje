@@ -41,6 +41,9 @@ type
 
 implementation
 
+uses
+  MainForm;
+
 {$R *.lfm}
 
 constructor TFrameEmpresas.Create(AOwner: TComponent);
@@ -804,6 +807,8 @@ begin
         end;
         DM.Transaccion.Commit;
         Refrescar(nil);
+        if Assigned(frmMain) then
+          frmMain.CargarLogo;
       except
         DM.Transaccion.Rollback;
         ShowMessage('Error al guardar empresa');

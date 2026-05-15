@@ -34,7 +34,6 @@ type
     lblLogoFallback: TLabel;
 
     procedure LogoClick(Sender: TObject);
-    procedure CargarLogo;
     procedure NavPaint(Sender: TObject);
     function CrearNavItem(const ACaption: string; ATag: Integer; X: Integer): TPanel;
     procedure NavClick(Sender: TObject);
@@ -50,6 +49,8 @@ type
     procedure LoadFrame(FrameClass: TFrameClass; const Title: string);
     procedure LoadFrameInstance(NewFrame: TFrame; const Title: string);
     procedure LogoutClick(Sender: TObject);
+  public
+    procedure CargarLogo;
   end;
 
 var
@@ -442,37 +443,43 @@ var
   RawBytes: RawByteString;
   P: Integer;
 begin
-  // Fallback: panel azul 48x48 con emoji
-  pnlLogoFallback := TPanel.Create(pnlTop);
-  pnlLogoFallback.Parent := pnlTop;
-  pnlLogoFallback.SetBounds(16, 16, 48, 48);
-  pnlLogoFallback.BevelOuter := bvNone;
-  pnlLogoFallback.Color := CLR_PRIMARY;
-  pnlLogoFallback.Cursor := crHandPoint;
-  pnlLogoFallback.OnClick := @LogoClick;
-  pnlLogoFallback.OnPaint := @NavPaint;
+  // Crear componentes solo la primera vez
+  if pnlLogoFallback = nil then
+  begin
+    pnlLogoFallback := TPanel.Create(pnlTop);
+    pnlLogoFallback.Parent := pnlTop;
+    pnlLogoFallback.SetBounds(16, 16, 48, 48);
+    pnlLogoFallback.BevelOuter := bvNone;
+    pnlLogoFallback.Color := CLR_PRIMARY;
+    pnlLogoFallback.Cursor := crHandPoint;
+    pnlLogoFallback.OnClick := @LogoClick;
+    pnlLogoFallback.OnPaint := @NavPaint;
 
-  lblLogoFallback := TLabel.Create(pnlLogoFallback);
-  lblLogoFallback.Parent := pnlLogoFallback;
-  lblLogoFallback.Align := alClient;
-  lblLogoFallback.Alignment := taCenter;
-  lblLogoFallback.Layout := tlCenter;
-  lblLogoFallback.Caption := '🚛';
-  lblLogoFallback.Font.Size := 22;
-  lblLogoFallback.Font.Color := CLR_WHITE;
-  lblLogoFallback.Cursor := crHandPoint;
-  lblLogoFallback.OnClick := @LogoClick;
+    lblLogoFallback := TLabel.Create(pnlLogoFallback);
+    lblLogoFallback.Parent := pnlLogoFallback;
+    lblLogoFallback.Align := alClient;
+    lblLogoFallback.Alignment := taCenter;
+    lblLogoFallback.Layout := tlCenter;
+    lblLogoFallback.Caption := '🚛';
+    lblLogoFallback.Font.Size := 22;
+    lblLogoFallback.Font.Color := CLR_WHITE;
+    lblLogoFallback.Cursor := crHandPoint;
+    lblLogoFallback.OnClick := @LogoClick;
 
-  // Imagen del logo
-  imgLogo := TImage.Create(pnlTop);
-  imgLogo.Parent := pnlTop;
-  imgLogo.SetBounds(16, 12, 56, 56);
+    imgLogo := TImage.Create(pnlTop);
+    imgLogo.Parent := pnlTop;
+    imgLogo.SetBounds(16, 12, 56, 56);
+    imgLogo.Visible := False;
+    imgLogo.Cursor := crHandPoint;
+    imgLogo.OnClick := @LogoClick;
+    imgLogo.Stretch := True;
+    imgLogo.Proportional := True;
+    imgLogo.Center := True;
+  end;
+
+  // Mostrar fallback por defecto
+  pnlLogoFallback.Visible := True;
   imgLogo.Visible := False;
-  imgLogo.Cursor := crHandPoint;
-  imgLogo.OnClick := @LogoClick;
-  imgLogo.Stretch := True;
-  imgLogo.Proportional := True;
-  imgLogo.Center := True;
 
   // Consultar logo de la BD
   if (DM = nil) or (not DM.Conexion.Connected) then Exit;
@@ -486,7 +493,6 @@ begin
       LogoStr := Q.FieldByName('logo').AsString;
       if LogoStr <> '' then
       begin
-        // Extraer base64 del data URI (formato: data:image/png;base64,...)
         P := Pos('base64,', LogoStr);
         if P > 0 then
         begin
