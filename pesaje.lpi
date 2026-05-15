@@ -290,7 +290,7 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="pesaje"/>
+      <Filename Value="/Users/jaru/dev/lazarus-pesaje/pesaje"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="/Users/jaru/synapse/"/>
