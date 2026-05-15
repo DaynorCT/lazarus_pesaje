@@ -42,6 +42,7 @@ constructor TFrameUsuarios.Create(AOwner: TComponent);
 var
   Pnl: TPanel;
   Lbl: TLabel;
+  pnlOuter, pnlInner: TPanel;
 begin
   inherited Create(AOwner);
   FEditingID := 0;
@@ -65,54 +66,52 @@ begin
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
   // Búsqueda por nombre
-  with TPanel.Create(Pnl) do
-  begin
-    Parent := Pnl;
-    SetBounds(240, 19, 300, 40);
-    BevelOuter := bvNone;
-    Color := CLR_BORDER;
-    with TPanel.Create(TPanel(Pnl.Controls[Pnl.ControlCount - 1])) do
-    begin
-      Parent := TPanel(Pnl.Controls[Pnl.ControlCount - 1]);
-      SetBounds(1, 1, 298, 38);
-      BevelOuter := bvNone;
-      Color := CLR_WHITE;
-      edtBuscarNombre := TEdit.Create(Self);
-      edtBuscarNombre.Parent := TPanel(Pnl.Controls[Pnl.ControlCount - 1]);
-      edtBuscarNombre.Align := alClient;
-      edtBuscarNombre.BorderStyle := bsNone;
-      edtBuscarNombre.Font.Size := 12;
-      edtBuscarNombre.Font.Color := CLR_TEXT;
-      edtBuscarNombre.Color := CLR_WHITE;
-      edtBuscarNombre.TextHint := 'Buscar por nombre...';
-      edtBuscarNombre.OnChange := @Refrescar;
-    end;
-  end;
+  pnlOuter := TPanel.Create(Pnl);
+  pnlOuter.Parent := Pnl;
+  pnlOuter.SetBounds(240, 19, 300, 40);
+  pnlOuter.BevelOuter := bvNone;
+  pnlOuter.Color := CLR_BORDER;
+
+  pnlInner := TPanel.Create(pnlOuter);
+  pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 298, 38);
+  pnlInner.BevelOuter := bvNone;
+  pnlInner.Color := CLR_WHITE;
+  pnlInner.BorderWidth := 8;
+
+  edtBuscarNombre := TEdit.Create(pnlInner);
+  edtBuscarNombre.Parent := pnlInner;
+  edtBuscarNombre.Align := alClient;
+  edtBuscarNombre.BorderStyle := bsNone;
+  edtBuscarNombre.Font.Size := 11;
+  edtBuscarNombre.Font.Color := CLR_TEXT;
+  edtBuscarNombre.Color := CLR_WHITE;
+  edtBuscarNombre.TextHint := 'Buscar por nombre...';
+  edtBuscarNombre.OnChange := @Refrescar;
 
   // Búsqueda por CI
-  with TPanel.Create(Pnl) do
-  begin
-    Parent := Pnl;
-    SetBounds(554, 19, 300, 40);
-    BevelOuter := bvNone;
-    Color := CLR_BORDER;
-    with TPanel.Create(TPanel(Pnl.Controls[Pnl.ControlCount - 1])) do
-    begin
-      Parent := TPanel(Pnl.Controls[Pnl.ControlCount - 1]);
-      SetBounds(1, 1, 298, 38);
-      BevelOuter := bvNone;
-      Color := CLR_WHITE;
-      edtBuscarCI := TEdit.Create(Self);
-      edtBuscarCI.Parent := TPanel(Pnl.Controls[Pnl.ControlCount - 1]);
-      edtBuscarCI.Align := alClient;
-      edtBuscarCI.BorderStyle := bsNone;
-      edtBuscarCI.Font.Size := 12;
-      edtBuscarCI.Font.Color := CLR_TEXT;
-      edtBuscarCI.Color := CLR_WHITE;
-      edtBuscarCI.TextHint := 'Buscar por CI...';
-      edtBuscarCI.OnChange := @Refrescar;
-    end;
-  end;
+  pnlOuter := TPanel.Create(Pnl);
+  pnlOuter.Parent := Pnl;
+  pnlOuter.SetBounds(554, 19, 300, 40);
+  pnlOuter.BevelOuter := bvNone;
+  pnlOuter.Color := CLR_BORDER;
+
+  pnlInner := TPanel.Create(pnlOuter);
+  pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 298, 38);
+  pnlInner.BevelOuter := bvNone;
+  pnlInner.Color := CLR_WHITE;
+  pnlInner.BorderWidth := 8;
+
+  edtBuscarCI := TEdit.Create(pnlInner);
+  edtBuscarCI.Parent := pnlInner;
+  edtBuscarCI.Align := alClient;
+  edtBuscarCI.BorderStyle := bsNone;
+  edtBuscarCI.Font.Size := 11;
+  edtBuscarCI.Font.Color := CLR_TEXT;
+  edtBuscarCI.Color := CLR_WHITE;
+  edtBuscarCI.TextHint := 'Buscar por CI...';
+  edtBuscarCI.OnChange := @Refrescar;
 
   // Botón + CREAR (panel azul + label blanco)
   pnlNuevo := TPanel.Create(Self);
