@@ -608,12 +608,10 @@ begin
     cmbRol.Font.Size := 12;
     cmbRol.Color := CLR_WHITE;
     cmbRol.Font.Color := CLR_TEXT;
-    cmbRol.Items.Add('administrador');
-    cmbRol.Items.Add('coordinador');
-    cmbRol.Items.Add('operador');
-    cmbRol.Items.Add('usuario');
+    cmbRol.Items.Add('ADMINISTRADOR');
+    cmbRol.Items.Add('OPERADOR');
     cmbRol.ItemIndex := cmbRol.Items.IndexOf(Rol);
-    if cmbRol.ItemIndex < 0 then cmbRol.ItemIndex := 2;
+    if cmbRol.ItemIndex < 0 then cmbRol.ItemIndex := 1;
 
     YPos := YPos + 60;
 
