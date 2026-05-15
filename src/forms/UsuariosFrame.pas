@@ -460,7 +460,7 @@ var
     Result.Parent := F;
     Result.SetBounds(ALeft, ATop, 200, 16);
     Result.Caption := ACaption;
-    Result.Font.Size := 12;
+    Result.Font.Size := 11;
     Result.Font.Style := [];
     Result.Font.Color := CLR_TEXT_HEADING;
   end;
@@ -480,12 +480,13 @@ var
     pnlInner.SetBounds(1, 1, AWidth - 2, 38);
     pnlInner.BevelOuter := bvNone;
     pnlInner.Color := CLR_WHITE;
+    pnlInner.BorderWidth := 6;  
 
     Result := TEdit.Create(pnlInner);
     Result.Parent := pnlInner;
     Result.Align := alClient;
     Result.BorderStyle := bsNone;
-    Result.Font.Size := 12;
+    Result.Font.Size := 11;
     Result.Font.Color := CLR_TEXT;
     Result.CharCase := ecUpperCase;
     Result.Color := CLR_WHITE;
@@ -568,7 +569,7 @@ begin
     LblSection.Parent := F;
     LblSection.SetBounds(24, YPos, 300, 20);
     LblSection.Caption := 'Datos personales';
-    LblSection.Font.Size := 12;
+    LblSection.Font.Size := 11;
     LblSection.Font.Style := [];
     LblSection.Font.Color := CLR_TEXT_HEADING;
 
@@ -621,7 +622,7 @@ begin
     LblSection.Parent := F;
     LblSection.SetBounds(24, YPos, 300, 20);
     LblSection.Caption := 'Datos de usuario';
-    LblSection.Font.Size := 12;
+    LblSection.Font.Size := 11;
     LblSection.Font.Style := [];
     LblSection.Font.Color := CLR_TEXT_HEADING;
     YPos := YPos + 33;
