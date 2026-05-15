@@ -20,8 +20,11 @@ type
     lblNuevo: TLabel;
     edtBuscarNombre, edtBuscarCI: TEdit;
     FEditingID: Integer;
+    FModalForm: TForm;
     procedure Refrescar(Sender: TObject);
     procedure btnNuevoClick(Sender: TObject);
+    procedure GuardarClick(Sender: TObject);
+    procedure CancelarClick(Sender: TObject);
     procedure GridDblClick(Sender: TObject);
     procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
     procedure GridMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -94,7 +97,7 @@ begin
   pnlNuevo.Anchors := [akTop, akRight];
   pnlNuevo.BorderSpacing.Right := 8;
   pnlNuevo.BevelOuter := bvNone;
-  pnlNuevo.Color := $A65E25;  // #255EA6 primary base
+  pnlNuevo.Color := CLR_PRIMARY;
   pnlNuevo.ParentBackground := False;
   pnlNuevo.ParentColor := False;
   pnlNuevo.Cursor := crHandPoint;
@@ -391,6 +394,16 @@ begin
   ShowUserForm(0);
 end;
 
+procedure TFrameUsuarios.GuardarClick(Sender: TObject);
+begin
+  FModalForm.ModalResult := mrOK;
+end;
+
+procedure TFrameUsuarios.CancelarClick(Sender: TObject);
+begin
+  FModalForm.ModalResult := mrCancel;
+end;
+
 procedure TFrameUsuarios.ToggleEstado(ID: Integer; EstadoActual: string);
 var
   NuevoEstado: string;
@@ -417,8 +430,17 @@ begin
   Pnl.Canvas.Brush.Color := CLR_BG;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
   Pnl.Canvas.Brush.Color := Pnl.Color;
-  Pnl.Canvas.Pen.Style := psClear;
-  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  if Pnl.Tag = 1 then
+  begin
+    Pnl.Canvas.Pen.Color := CLR_INFO;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end
+  else
+  begin
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  end;
 end;
 
 procedure TFrameUsuarios.ShowUserForm(ID: Integer);
@@ -498,6 +520,7 @@ begin
   end;
 
   F := TForm.Create(nil);
+  FModalForm := F;
   try
     F.Caption := '';
     F.Width := 600;
@@ -579,6 +602,7 @@ begin
     cmbRol.Style := csDropDownList;
     cmbRol.Font.Size := 12;
     cmbRol.Color := CLR_WHITE;
+    cmbRol.Font.Color := CLR_TEXT;
     cmbRol.Items.Add('administrador');
     cmbRol.Items.Add('coordinador');
     cmbRol.Items.Add('operador');
@@ -628,24 +652,53 @@ begin
     F.Height := YPos + 70;
    
     // Botones
-    with TButton.Create(F) do
+    // CANCELAR: panel blanco con borde info
+    with TPanel.Create(F) do
     begin
       Parent := F;
-      SetBounds(310, YPos, 130, 40);
-      Caption := 'CANCELAR';
-      Font.Size := 14;
-      Font.Style := [];
-      ModalResult := mrCancel;
+      SetBounds(310, YPos, 130, 36);
+      BevelOuter := bvNone;
+      Color := CLR_WHITE;
+      Tag := 1;
+      Cursor := crHandPoint;
+      OnPaint := @PaintRounded;
+      OnClick := @CancelarClick;
+      with TLabel.Create(F) do
+      begin
+        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        Align := alClient;
+        Alignment := taCenter;
+        Layout := tlCenter;
+        Caption := 'CANCELAR';
+        Font.Size := 12;
+        Font.Style := [];
+        Font.Color := CLR_PRIMARY;
+        OnClick := @CancelarClick;
+      end;
     end;
 
-    with TButton.Create(F) do
+    // GUARDAR: panel azul con letra blanca
+    with TPanel.Create(F) do
     begin
       Parent := F;
-      SetBounds(450, YPos, 130, 40);
-      Caption := 'GUARDAR';
-      Font.Size := 14;
-      Font.Style := [fsBold];
-      ModalResult := mrOK;
+      SetBounds(450, YPos, 130, 36);
+      BevelOuter := bvNone;
+      Color := CLR_PRIMARY;
+      Cursor := crHandPoint;
+      OnPaint := @PaintRounded;
+      OnClick := @GuardarClick;
+      with TLabel.Create(F) do
+      begin
+        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        Align := alClient;
+        Alignment := taCenter;
+        Layout := tlCenter;
+        Caption := 'GUARDAR';
+        Font.Size := 12;
+        Font.Style := [];
+        Font.Color := CLR_WHITE;
+        OnClick := @GuardarClick;
+      end;
     end;
 
     if F.ShowModal = mrOK then
