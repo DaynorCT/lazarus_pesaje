@@ -81,8 +81,8 @@ end;
 constructor TFramePesaje.Create(AOwner: TComponent);
 const
   COL1 = 24;
-  COL2 = 212;
-  COL3 = 400;
+  COL2 = 300;
+  COL3 = 570;
   FIELD_W = 180;
   COMBO_W = 148;
 var
@@ -220,7 +220,7 @@ begin
   // ── RIGHT PANEL ──
   pnlForm := TPanel.Create(Self);
   pnlForm.Parent := Self;
-  pnlForm.SetBounds(0, 60, 775, Self.ClientHeight - 400);
+  pnlForm.SetBounds(0, 60, 775, Self.ClientHeight - 330);
   pnlForm.Anchors := [akTop, akRight, akBottom];
   pnlForm.BevelOuter := bvLowered;
   pnlForm.BevelInner := bvNone;
@@ -233,10 +233,21 @@ begin
   lblFormTitle.Parent := pnlForm;
   lblFormTitle.SetBounds(COL1, YPos, 300, 20);
   lblFormTitle.Caption := 'Datos del Pesaje';
-  lblFormTitle.Font.Size := 11;
+  lblFormTitle.Font.Size := 13;
   lblFormTitle.Font.Style := [];
   lblFormTitle.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 33;
+  YPos := YPos + 38;
+
+    // LINEA AQUI
+  with TPanel.Create(pnlForm) do
+  begin
+    Parent := pnlForm;
+    SetBounds(COL1, YPos, COL3 + FIELD_W - COL1, 1);
+    BevelOuter := bvNone;
+    Color := CLR_BORDER;
+  end;
+  
+  YPos := YPos + 28;
 
   // ════ Fila 1: Chofer | Placa * | Licencia ════
   MakeLabel(YPos, COL1, 'Chofer');
@@ -324,7 +335,7 @@ begin
   // ── BOTTOM GRID ──
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.SetBounds(24, Self.ClientHeight - 330, Self.ClientWidth - 48, 310);
+  pnlCard.SetBounds(24, Self.ClientHeight - 260, Self.ClientWidth - 48, 310);
   pnlCard.Anchors := [akLeft, akRight, akBottom];
   pnlCard.BevelOuter := bvLowered; pnlCard.BevelInner := bvNone;
   pnlCard.BevelWidth := 1; pnlCard.Color := CLR_CARD;
