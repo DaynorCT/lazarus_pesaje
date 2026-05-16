@@ -110,7 +110,7 @@ begin
   // ── LEFT PANEL ──
   pnlLeft := TPanel.Create(Self);
   pnlLeft.Parent := Self;
-  pnlLeft.SetBounds(24, 80, 260, Self.ClientHeight - 330);
+  pnlLeft.SetBounds(24, 80, 380, Self.ClientHeight - 400);
   pnlLeft.Anchors := [akTop, akLeft, akBottom];
   pnlLeft.BevelOuter := bvNone;
   pnlLeft.Color := CLR_BG;
