@@ -174,7 +174,7 @@ begin
     EjecutarSQL('CREATE TABLE IF NOT EXISTS choferes (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ' +
       'persona_id INTEGER NOT NULL UNIQUE REFERENCES personas(id) ON DELETE CASCADE, ' +
-      'licencia TEXT, telefono TEXT, ' +
+       'licencia TEXT, ' +
       'estado TEXT NOT NULL DEFAULT ''ACTIVO'', ' +
       'usuario_creacion INTEGER, usuario_modificacion INTEGER, ' +
       'fecha_creacion TEXT, fecha_modificacion TEXT)');
