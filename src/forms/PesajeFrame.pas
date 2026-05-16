@@ -79,11 +79,67 @@ begin
 end;
 
 constructor TFramePesaje.Create(AOwner: TComponent);
+const
+  COL1 = 24;
+  COL2 = 212;
+  COL3 = 400;
+  FIELD_W = 180;
+  COMBO_W = 148;
 var
   Pnl, pnlForm, pnlLeft: TPanel;
-  Lbl, LblSection: TLabel;
-  pnlOuter, pnlInner: TPanel;
+  Lbl: TLabel;
   YPos: Integer;
+
+  function MakeLabel(ATop, ALeft: Integer; const ACaption: string): TLabel;
+  begin
+    Result := TLabel.Create(pnlForm);
+    Result.Parent := pnlForm;
+    Result.SetBounds(ALeft, ATop, 200, 16);
+    Result.Caption := ACaption;
+    Result.Font.Size := 11;
+    Result.Font.Style := [];
+    Result.Font.Color := CLR_TEXT_HEADING;
+  end;
+
+  function MakeEditConBorde(ATop, ALeft, AWidth: Integer; AReadOnly: Boolean): TEdit;
+  var
+    po, pi: TPanel;
+  begin
+    po := TPanel.Create(pnlForm);
+    po.Parent := pnlForm;
+    po.SetBounds(ALeft, ATop, AWidth, 40);
+    po.BevelOuter := bvNone;
+    po.Color := CLR_BORDER;
+
+    pi := TPanel.Create(po);
+    pi.Parent := po;
+    pi.SetBounds(1, 1, AWidth - 2, 38);
+    pi.BevelOuter := bvNone;
+    pi.Color := CLR_WHITE;
+    pi.BorderWidth := 6;
+
+    Result := TEdit.Create(pi);
+    Result.Parent := pi;
+    Result.Align := alClient;
+    Result.BorderStyle := bsNone;
+    Result.Font.Size := 11;
+    Result.Font.Color := CLR_TEXT;
+    Result.Color := CLR_WHITE;
+    if AReadOnly then
+      Result.ReadOnly := True;
+  end;
+
+  procedure ConfigCombo(Cmb: TComboBox; ATop, ALeft, AWidth: Integer);
+  begin
+    Cmb.Parent := pnlForm;
+    Cmb.SetBounds(ALeft, ATop, AWidth, 40);
+    Cmb.AutoSize := False;
+    Cmb.Style := csDropDownList;
+    Cmb.Font.Size := 12;
+    Cmb.Color := CLR_WHITE;
+    Cmb.Font.Color := CLR_TEXT;
+  end;
+
 begin
   inherited Create(AOwner);
   FTara := 0; FPesoBruto := 0; FPesoNeto := 0; FConectado := False;
@@ -171,119 +227,99 @@ begin
   pnlForm.BevelWidth := 1;
   pnlForm.Color := CLR_CARD;
 
-  YPos := 0;
+  YPos := 20;
 
   lblFormTitle := TLabel.Create(pnlForm);
   lblFormTitle.Parent := pnlForm;
-  lblFormTitle.SetBounds(20, YPos, 300, 20);
+  lblFormTitle.SetBounds(COL1, YPos, 300, 20);
   lblFormTitle.Caption := 'Datos del Pesaje';
   lblFormTitle.Font.Size := 11;
   lblFormTitle.Font.Style := [];
   lblFormTitle.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 26;
+  YPos := YPos + 33;
 
-  // ════ ROW 1: Chofer | Placa * | Licencia ════
-  // Col 1: Chofer
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(20, YPos, 100, 14); Lbl.Caption := 'Chofer'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 18;
-  cmbChofer := TComboBox.Create(pnlForm); cmbChofer.Parent := pnlForm;
-  cmbChofer.SetBounds(20, YPos, 152, 28); cmbChofer.Style := csDropDownList; cmbChofer.Font.Size := 11;
+  // ════ Fila 1: Chofer | Placa * | Licencia ════
+  MakeLabel(YPos, COL1, 'Chofer');
+  MakeLabel(YPos, COL2, 'Placa');
+  Lbl := TLabel.Create(pnlForm);
+  Lbl.Parent := pnlForm;
+  Lbl.SetBounds(COL2 + 36, YPos, 20, 16);
+  Lbl.Caption := '*';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_DESTRUCTIVE;
+  Lbl.Font.Style := [fsBold];
+  MakeLabel(YPos, COL3, 'Licencia');
+  YPos := YPos + 28;
+
+  cmbChofer := TComboBox.Create(pnlForm);
+  ConfigCombo(cmbChofer, YPos, COL1, COMBO_W);
   cmbChofer.OnChange := @ChoferChange;
-  btnChoNuevo := CrearBoton(pnlForm, YPos, 174, 24, 28, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickChoferClick);
+  btnChoNuevo := CrearBoton(pnlForm, YPos, COL1 + COMBO_W + 4, 24, 40, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickChoferClick);
 
-  // Col 2: Placa *
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(212, YPos - 18, 80, 14); Lbl.Caption := 'Placa'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(246, YPos - 18, 20, 14); Lbl.Caption := '*'; Lbl.Font.Size := 11;
-  Lbl.Font.Color := CLR_DESTRUCTIVE; Lbl.Font.Style := [fsBold];
-  cmbVehiculo := TComboBox.Create(pnlForm); cmbVehiculo.Parent := pnlForm;
-  cmbVehiculo.SetBounds(212, YPos, 152, 28); cmbVehiculo.Style := csDropDownList; cmbVehiculo.Font.Size := 11;
+  cmbVehiculo := TComboBox.Create(pnlForm);
+  ConfigCombo(cmbVehiculo, YPos, COL2, COMBO_W);
   cmbVehiculo.OnChange := @VehiculoChange;
-  btnVehNuevo := CrearBoton(pnlForm, YPos, 366, 24, 28, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickVehiculoClick);
+  btnVehNuevo := CrearBoton(pnlForm, YPos, COL2 + COMBO_W + 4, 24, 40, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickVehiculoClick);
 
-  // Col 3: Licencia
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(404, YPos - 18, 100, 14); Lbl.Caption := 'Licencia'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
-  pnlOuter.SetBounds(404, YPos, 168, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
-  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 166, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
-  edtLicencia := TEdit.Create(pnlInner); edtLicencia.Parent := pnlInner;
-  edtLicencia.Align := alClient; edtLicencia.BorderStyle := bsNone; edtLicencia.Font.Size := 11;
-  edtLicencia.ReadOnly := True; edtLicencia.Color := CLR_WHITE; edtLicencia.Text := '';
-  YPos := YPos + 34;
+  edtLicencia := MakeEditConBorde(YPos, COL3, FIELD_W, True);
+  edtLicencia.Text := '';
+  YPos := YPos + 48;
 
-  // ════ ROW 2: Tipo | Proveedor | Producto ════
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(20, YPos, 100, 14); Lbl.Caption := 'Tipo vehiculo'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  // ════ Fila 2: Tipo | Proveedor | Producto ════
+  MakeLabel(YPos, COL1, 'Tipo vehiculo');
+  MakeLabel(YPos, COL2, 'Proveedor');
+  MakeLabel(YPos, COL3, 'Producto');
+  YPos := YPos + 28;
+
+  edtTipo := MakeEditConBorde(YPos, COL1, FIELD_W, True);
+  edtTipo.Text := '';
+
+  cmbProveedor := TComboBox.Create(pnlForm);
+  ConfigCombo(cmbProveedor, YPos, COL2, FIELD_W);
+
+  cmbProducto := TComboBox.Create(pnlForm);
+  ConfigCombo(cmbProducto, YPos, COL3, FIELD_W);
+  YPos := YPos + 48;
+
+  // ════ Fila 3: Origen | Destino | Costo ════
+  MakeLabel(YPos, COL1, 'Origen');
+  MakeLabel(YPos, COL2, 'Destino');
+  MakeLabel(YPos, COL3, 'Costo (Bs)');
+  YPos := YPos + 28;
+
+  cmbOrigen := TComboBox.Create(pnlForm);
+  ConfigCombo(cmbOrigen, YPos, COL1, FIELD_W);
+
+  cmbDestino := TComboBox.Create(pnlForm);
+  ConfigCombo(cmbDestino, YPos, COL2, FIELD_W);
+
+  edtCosto := MakeEditConBorde(YPos, COL3, FIELD_W, False);
+  edtCosto.Text := '0';
+  YPos := YPos + 48;
+
+  // ════ Fila 4: Flete | Tara ════
+  MakeLabel(YPos, COL1, 'Flete pend. (Bs)');
+  MakeLabel(YPos, COL2, 'Tara (kg)');
+  YPos := YPos + 28;
+
+  edtFlete := MakeEditConBorde(YPos, COL1, FIELD_W, False);
+  edtFlete.Text := '0';
+  MakeEditConBorde(YPos, COL2, COL3 + FIELD_W - COL2, True);
+  YPos := YPos + 56;
+
+  with TPanel.Create(pnlForm) do
+  begin
+    Parent := pnlForm;
+    SetBounds(COL1, YPos, COL3 + FIELD_W - COL1, 1);
+    BevelOuter := bvNone;
+    Color := CLR_BORDER;
+  end;
   YPos := YPos + 16;
-  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
-  pnlOuter.SetBounds(20, YPos, 176, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
-  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 174, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
-  edtTipo := TEdit.Create(pnlInner); edtTipo.Parent := pnlInner;
-  edtTipo.Align := alClient; edtTipo.BorderStyle := bsNone; edtTipo.Font.Size := 11;
-  edtTipo.ReadOnly := True; edtTipo.Color := CLR_WHITE; edtTipo.Text := '';
 
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(212, YPos - 16, 100, 14); Lbl.Caption := 'Proveedor'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  cmbProveedor := TComboBox.Create(pnlForm); cmbProveedor.Parent := pnlForm;
-  cmbProveedor.SetBounds(212, YPos, 176, 28); cmbProveedor.Style := csDropDownList; cmbProveedor.Font.Size := 11;
-
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(404, YPos - 16, 100, 14); Lbl.Caption := 'Producto'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  cmbProducto := TComboBox.Create(pnlForm); cmbProducto.Parent := pnlForm;
-  cmbProducto.SetBounds(404, YPos, 168, 28); cmbProducto.Style := csDropDownList; cmbProducto.Font.Size := 11;
-  YPos := YPos + 36;
-
-  // ════ ROW 3: Origen | Destino | Costo ════
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(20, YPos, 100, 14); Lbl.Caption := 'Origen'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 18;
-  cmbOrigen := TComboBox.Create(pnlForm); cmbOrigen.Parent := pnlForm;
-  cmbOrigen.SetBounds(20, YPos, 176, 28); cmbOrigen.Style := csDropDownList; cmbOrigen.Font.Size := 11;
-
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(212, YPos - 18, 100, 14); Lbl.Caption := 'Destino'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  cmbDestino := TComboBox.Create(pnlForm); cmbDestino.Parent := pnlForm;
-  cmbDestino.SetBounds(212, YPos, 176, 28); cmbDestino.Style := csDropDownList; cmbDestino.Font.Size := 11;
-
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(404, YPos - 18, 80, 14); Lbl.Caption := 'Costo (Bs)'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
-  pnlOuter.SetBounds(404, YPos, 168, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
-  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 166, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
-  edtCosto := TEdit.Create(pnlInner); edtCosto.Parent := pnlInner;
-  edtCosto.Align := alClient; edtCosto.BorderStyle := bsNone; edtCosto.Font.Size := 11; edtCosto.Text := '0';
-  YPos := YPos + 34;
-
-  // ════ ROW 4: Flete | Tara ════
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(20, YPos, 120, 14); Lbl.Caption := 'Flete pend. (Bs)'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 18;
-  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
-  pnlOuter.SetBounds(20, YPos, 176, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
-  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 174, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
-  edtFlete := TEdit.Create(pnlInner); edtFlete.Parent := pnlInner;
-  edtFlete.Align := alClient; edtFlete.BorderStyle := bsNone; edtFlete.Font.Size := 11; edtFlete.Text := '0';
-
-  // Tara
-  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(212, YPos - 18, 140, 14); Lbl.Caption := 'Tara (kg)'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
-  pnlOuter.SetBounds(212, YPos, 360, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
-  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 358, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
-  YPos := YPos + 40;
-
-  pnlCancelEdit := CrearBoton(pnlForm, YPos, 0, 140, 36, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
+  pnlCancelEdit := CrearBoton(pnlForm, YPos, COL1, 140, 36, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
   pnlCancelEdit.Visible := False;
-  pnlGuardar := CrearBoton(pnlForm, YPos, 158, 140, 36, 'GUARDAR', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
-  pnlLimpiar := CrearBoton(pnlForm, YPos, 158, 140, 36, 'LIMPIAR', CLR_WHITE, CLR_PRIMARY, 1, @LimpiarClick);
+  pnlGuardar := CrearBoton(pnlForm, YPos, COL3 + FIELD_W - 140, 140, 36, 'GUARDAR', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
+  pnlLimpiar := CrearBoton(pnlForm, YPos, COL3 + FIELD_W - 140, 140, 36, 'LIMPIAR', CLR_WHITE, CLR_PRIMARY, 1, @LimpiarClick);
 
   // ── BOTTOM GRID ──
   pnlCard := TPanel.Create(Self);
