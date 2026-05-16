@@ -98,7 +98,7 @@ var
     Result.Caption := ACaption;
     Result.Font.Size := 11;
     Result.Font.Style := [];
-    Result.Font.Color := CLR_TEXT_HEADING;
+    Result.Font.Color := CLR_TEXT_SLATE;
   end;
 
   function MakeEditConBorde(ATop, ALeft, AWidth: Integer; AReadOnly: Boolean): TEdit;
