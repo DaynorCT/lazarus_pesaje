@@ -5,774 +5,1064 @@ unit PesajeFrame;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  IniFiles, sqldb, DataModule, Utils, LoginForm, Theme;
+  Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  Grids, sqldb, DataModule, Utils, Theme;
 
 type
   { TFramePesaje }
 
   TFramePesaje = class(TFrame)
-    TimerLectura: TTimer;
-    TimerReloj: TTimer;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure TimerRelojTimer(Sender: TObject);
-    procedure TimerLecturaTimer(Sender: TObject);
   private
-    // UI
-    pnlPesaje, pnlForm: TPanel;
-    lblHora, lblFecha: TLabel;
-    lblPesoDisplay, lblUnidad: TLabel;
-    lblEstadoConexion, lblEstabilidad: TLabel;
-    lblResultadoPeso, lblResultadoHora, lblResultadoID: TLabel;
-    btnConectar, btnTara, btnGuardar, btnLimpiar: TButton;
-
+    FTara: Integer;
+    FPesoBruto: Integer;
+    FPesoNeto: Integer;
+    FConectado: Boolean;
+    FEditMode: Boolean;
+    FEditID: Integer;
+    TimerLectura: TTimer;
+    TimerReloj: TTimer;
+    pnlDisplay, pnlCard: TPanel;
+    lblPesoDisplay, lblEstadoConexion, lblResultados: TLabel;
+    lblFormTitle: TLabel;
     cmbVehiculo, cmbChofer, cmbProveedor: TComboBox;
     cmbProducto, cmbOrigen, cmbDestino: TComboBox;
-    edtGuia, edtLote, edtCosto, edtFlete: TEdit;
-    btnVehiculoNuevo, btnChoferNuevo, btnProveedorNuevo: TButton;
-    btnProductoNuevo, btnOrigenNuevo, btnDestinoNuevo: TButton;
-
-    // Datos
-    FConectado: Boolean;
-    FPesoActual: string;
-    FPesoBruto: Double;
-    FTara: Double;
-    FUltimoID: Integer;
-    FPuertoSerial: string;
-    FBaudRate: Integer;
-    FBits: Integer;
-    FParidad: string;
-    FStopBits: Integer;
-
-    procedure CrearUI;
-    procedure CargarConfigSerial;
+    edtCosto, edtFlete: TEdit;
+    Grid: TStringGrid;
+    pnlConectar, pnlTara, pnlGuardar, pnlLimpiar, pnlCancelEdit: TPanel;
+    btnVehNuevo, btnChoNuevo, btnPrvNuevo: TPanel;
+    btnProNuevo, btnOriNuevo, btnDesNuevo: TPanel;
+    procedure RefrescarPesajes(Sender: TObject);
     procedure CargarCombos;
-    procedure btnConectarClick(Sender: TObject);
-    procedure btnTaraClick(Sender: TObject);
-    procedure btnGuardarClick(Sender: TObject);
-    procedure btnLimpiarClick(Sender: TObject);
-    procedure btnQuickCreateClick(Sender: TObject);
+    procedure VehiculoChange(Sender: TObject);
+    procedure TimerLecturaTimer(Sender: TObject);
+    procedure TimerRelojTimer(Sender: TObject);
     procedure ProcesarTrama(const Trama: string);
     function ExtraerPeso(const Trama: string): string;
-    function ParseFloatESP(const S: string): Double;
-    procedure ActualizarPesoDisplay(const Peso: string);
-    function GetIDFromCombo(const cmb: TComboBox; const Tabla: string): Integer;
-    procedure GuardarPesaje;
+    procedure ConectarClick(Sender: TObject);
+    procedure TaraClick(Sender: TObject);
+    procedure GuardarClick(Sender: TObject);
+    procedure QuickGuardarClick(Sender: TObject);
+    procedure QuickCancelarClick(Sender: TObject);
+    procedure LimpiarClick(Sender: TObject);
+    procedure CancelEditClick(Sender: TObject);
+    procedure QuickVehiculoClick(Sender: TObject);
+    procedure QuickChoferClick(Sender: TObject);
+    procedure QuickProveedorClick(Sender: TObject);
+    procedure QuickSimpleClick(Sender: TObject);
+    procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
+    procedure GridMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure CargarPesaje(ID: Integer);
+    procedure FinalizarPesaje(ID: Integer);
+    procedure AnularPesaje(ID: Integer);
+    procedure ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
+    procedure PaintRounded(Sender: TObject);
+    function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer; const ACaption: string;
+      AColor: TColor; AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
+    function BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
   end;
 
 implementation
 
 {$R *.lfm}
 
-// ====================================================================
-// Helpers para construir UI
-// ====================================================================
-
-function CrearLabel(const AParent: TWinControl; const Cap: string;
-  L, T: Integer): TLabel;
+function TFramePesaje.BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
+var
+  i: Integer;
 begin
-  Result := TLabel.Create(AParent);
-  Result.Parent := AParent;
-  Result.Left := L; Result.Top := T;
-  Result.Caption := Cap;
-  Result.Font.Size := 11;
-  Result.Font.Color := $555555;
+  for i := 1 to Cmb.Items.Count - 1 do
+    if PtrInt(Cmb.Items.Objects[i]) = ID then
+      Exit(i);
+  Result := 0;
 end;
-
-function CrearCombo(const AParent: TWinControl; L, T, W: Integer): TComboBox;
-begin
-  Result := TComboBox.Create(AParent);
-  Result.Parent := AParent;
-  Result.Left := L; Result.Top := T;
-  Result.Width := W; Result.Height := 28;
-  Result.Style := csDropDownList;
-  Result.Font.Size := 12;
-  Result.Items.Add('- Seleccione -');
-  Result.ItemIndex := 0;
-end;
-
-function CrearBtnPlus(const AParent: TWinControl; L, T: Integer;
-  Handler: TNotifyEvent; ATag: Integer): TButton;
-begin
-  Result := TButton.Create(AParent);
-  Result.Parent := AParent;
-  Result.Left := L; Result.Top := T;
-  Result.Width := 32; Result.Height := 28;
-  Result.Caption := '+';
-  Result.Font.Style := [fsBold];
-  
-  Result.Tag := ATag;
-  Result.OnClick := Handler;
-end;
-
-// ====================================================================
-// TFramePesaje
-// ====================================================================
 
 constructor TFramePesaje.Create(AOwner: TComponent);
+var
+  Pnl, pnlForm, pnlLeft: TPanel;
+  Lbl, LblSection: TLabel;
+  pnlOuter, pnlInner: TPanel;
+  YPos: Integer;
 begin
   inherited Create(AOwner);
-  FConectado := False;
-  FPesoActual := '0';
-  FPesoBruto := 0;
-  FTara := 0;
-  FUltimoID := 0;
+  FTara := 0; FPesoBruto := 0; FPesoNeto := 0; FConectado := False;
+  FEditMode := False; FEditID := 0;
+  Self.Color := CLR_BG;
+
+  // Header
+  Pnl := TPanel.Create(Self);
+  Pnl.Parent := Self;
+  Pnl.Align := alTop;
+  Pnl.Height := 64;
+  Pnl.BevelOuter := bvNone;
+  Pnl.Color := CLR_BG;
+  Pnl.BorderSpacing.Top := 15;
+
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(24, 18, 200, 28);
+  Lbl.Caption := 'Pesaje';
+  Lbl.Font.Height := -24;
+  Lbl.Font.Style := [fsBold];
+  Lbl.Font.Color := CLR_TEXT_HEADING;
+
+  // ── LEFT PANEL ──
+  pnlLeft := TPanel.Create(Self);
+  pnlLeft.Parent := Self;
+  pnlLeft.SetBounds(24, 80, 380, Self.ClientHeight - 430);
+  pnlLeft.Anchors := [akTop, akLeft, akBottom];
+  pnlLeft.BevelOuter := bvNone;
+  pnlLeft.Color := CLR_BG;
+
+  with TPanel.Create(pnlLeft) do
+  begin
+    Parent := pnlLeft; Align := alTop; Height := 80;
+    BevelOuter := bvNone; Color := CLR_CARD;
+    Lbl := TLabel.Create(Self);
+    Lbl.Parent := TPanel(pnlLeft.Controls[pnlLeft.ControlCount - 1]);
+    Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
+    Lbl.Caption := '--:--:--'; Lbl.Font.Height := -24;
+    Lbl.Font.Style := [fsBold]; Lbl.Font.Color := CLR_TEXT_HEADING;
+    Lbl.Name := 'lblHora'; Lbl.Tag := 1;
+  end;
+
+  pnlDisplay := TPanel.Create(pnlLeft);
+  pnlDisplay.Parent := pnlLeft;
+  pnlDisplay.SetBounds(0, 96, 380, 200);
+  pnlDisplay.BevelOuter := bvNone; pnlDisplay.Color := CLR_PRIMARY;
+  pnlDisplay.Anchors := [akTop, akLeft, akRight];
+  pnlDisplay.OnPaint := @PaintRounded;
+
+  lblPesoDisplay := TLabel.Create(pnlDisplay);
+  lblPesoDisplay.Parent := pnlDisplay; lblPesoDisplay.Align := alClient;
+  lblPesoDisplay.Alignment := taCenter; lblPesoDisplay.Layout := tlCenter;
+  lblPesoDisplay.Caption := '0'; lblPesoDisplay.Font.Height := -48;
+  lblPesoDisplay.Font.Style := [fsBold]; lblPesoDisplay.Font.Color := CLR_WHITE;
+
+  lblEstadoConexion := TLabel.Create(pnlLeft);
+  lblEstadoConexion.Parent := pnlLeft;
+  lblEstadoConexion.SetBounds(10, 310, 360, 24);
+  lblEstadoConexion.Alignment := taCenter;
+  lblEstadoConexion.Caption := 'SIN CONEXION';
+  lblEstadoConexion.Font.Height := -13;
+  lblEstadoConexion.Font.Style := [fsBold];
+  lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
+
+  pnlConectar := CrearBoton(pnlLeft, 345, 40, 140, 36, 'CONECTAR', CLR_PRIMARY, CLR_WHITE, 0, @ConectarClick);
+  pnlTara := CrearBoton(pnlLeft, 345, 200, 140, 36, 'TARA', CLR_PRIMARY, CLR_WHITE, 0, @TaraClick);
+  pnlTara.Enabled := False;
+
+  lblResultados := TLabel.Create(pnlLeft);
+  lblResultados.Parent := pnlLeft;
+  lblResultados.SetBounds(10, 395, 360, 45);
+  lblResultados.Alignment := taCenter;
+  lblResultados.Caption := '';
+  lblResultados.Font.Height := -13;
+  lblResultados.Font.Color := CLR_TEXT_HEADING;
+
+  // ── RIGHT PANEL ──
+  pnlForm := TPanel.Create(Self);
+  pnlForm.Parent := Self;
+  pnlForm.SetBounds(420, 80, 306, Self.ClientHeight - 430);
+  pnlForm.Anchors := [akTop, akRight, akBottom];
+  pnlForm.BevelOuter := bvNone;
+  pnlForm.Color := CLR_BG;
+
+  YPos := 0;
+
+  lblFormTitle := TLabel.Create(pnlForm);
+  lblFormTitle.Parent := pnlForm;
+  lblFormTitle.SetBounds(0, YPos, 300, 20);
+  lblFormTitle.Caption := 'Datos del Pesaje';
+  lblFormTitle.Font.Size := 11;
+  lblFormTitle.Font.Style := [];
+  lblFormTitle.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 28;
+
+  cmbVehiculo := TComboBox.Create(pnlForm);
+  cmbVehiculo.Parent := pnlForm;
+  cmbVehiculo.SetBounds(0, YPos, 234, 32);
+  cmbVehiculo.Style := csDropDownList; cmbVehiculo.Font.Size := 12;
+  cmbVehiculo.OnChange := @VehiculoChange;
+  btnVehNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickVehiculoClick);
+  YPos := YPos + 40;
+
+  cmbChofer := TComboBox.Create(pnlForm);
+  cmbChofer.Parent := pnlForm;
+  cmbChofer.SetBounds(0, YPos, 234, 32);
+  cmbChofer.Style := csDropDownList; cmbChofer.Font.Size := 12;
+  btnChoNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickChoferClick);
+  YPos := YPos + 40;
+
+  cmbProveedor := TComboBox.Create(pnlForm);
+  cmbProveedor.Parent := pnlForm;
+  cmbProveedor.SetBounds(0, YPos, 234, 32);
+  cmbProveedor.Style := csDropDownList; cmbProveedor.Font.Size := 12;
+  btnPrvNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickProveedorClick);
+  YPos := YPos + 40;
+
+  cmbProducto := TComboBox.Create(pnlForm);
+  cmbProducto.Parent := pnlForm;
+  cmbProducto.SetBounds(0, YPos, 234, 32);
+  cmbProducto.Style := csDropDownList; cmbProducto.Font.Size := 12;
+  btnProNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickSimpleClick);
+  btnProNuevo.Tag := 4;
+  YPos := YPos + 40;
+
+  cmbOrigen := TComboBox.Create(pnlForm);
+  cmbOrigen.Parent := pnlForm;
+  cmbOrigen.SetBounds(0, YPos, 234, 32);
+  cmbOrigen.Style := csDropDownList; cmbOrigen.Font.Size := 12;
+  btnOriNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickSimpleClick);
+  btnOriNuevo.Tag := 5;
+  YPos := YPos + 40;
+
+  cmbDestino := TComboBox.Create(pnlForm);
+  cmbDestino.Parent := pnlForm;
+  cmbDestino.SetBounds(0, YPos, 234, 32);
+  cmbDestino.Style := csDropDownList; cmbDestino.Font.Size := 12;
+  btnDesNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickSimpleClick);
+  btnDesNuevo.Tag := 6;
+  YPos := YPos + 48;
+
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(0, YPos, 100, 16); Lbl.Caption := 'Costo (Bs)';
+  Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(158, YPos, 100, 16); Lbl.Caption := 'Flete (Bs)';
+  Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 22;
+
+  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
+  pnlOuter.SetBounds(0, YPos, 148, 36); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
+  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 146, 34); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 6;
+  edtCosto := TEdit.Create(pnlInner); edtCosto.Parent := pnlInner; edtCosto.Align := alClient;
+  edtCosto.BorderStyle := bsNone; edtCosto.Font.Size := 11; edtCosto.Text := '0';
+
+  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
+  pnlOuter.SetBounds(158, YPos, 148, 36); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
+  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 146, 34); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 6;
+  edtFlete := TEdit.Create(pnlInner); edtFlete.Parent := pnlInner; edtFlete.Align := alClient;
+  edtFlete.BorderStyle := bsNone; edtFlete.Font.Size := 11; edtFlete.Text := '0';
+  YPos := YPos + 50;
+
+  pnlCancelEdit := CrearBoton(pnlForm, YPos, 0, 140, 36, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
+  pnlCancelEdit.Visible := False;
+  pnlGuardar := CrearBoton(pnlForm, YPos, 158, 140, 36, 'GUARDAR', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
+  pnlLimpiar := CrearBoton(pnlForm, YPos, 158, 140, 36, 'LIMPIAR', CLR_WHITE, CLR_PRIMARY, 1, @LimpiarClick);
+
+  // ── BOTTOM GRID ──
+  pnlCard := TPanel.Create(Self);
+  pnlCard.Parent := Self;
+  pnlCard.SetBounds(24, Self.ClientHeight - 330, Self.ClientWidth - 48, 310);
+  pnlCard.Anchors := [akLeft, akRight, akBottom];
+  pnlCard.BevelOuter := bvLowered; pnlCard.BevelInner := bvNone;
+  pnlCard.BevelWidth := 1; pnlCard.Color := CLR_CARD;
+
+  Grid := TStringGrid.Create(Self);
+  Grid.Parent := pnlCard;
+  Grid.SetBounds(2, 2, pnlCard.ClientWidth - 4, pnlCard.ClientHeight - 4);
+  Grid.Anchors := [akTop, akLeft, akRight, akBottom];
+  Grid.ColCount := 20; Grid.RowCount := 2; Grid.FixedRows := 1; Grid.FixedCols := 0;
+  Grid.Options := Grid.Options + [goRowSelect];
+  Grid.DefaultRowHeight := 36; Grid.RowHeights[0] := 40;
+  Grid.Color := CLR_CARD; Grid.FixedColor := CLR_CARD;
+  Grid.Font.Height := -12; Grid.Font.Color := CLR_TEXT_HEADING;
+  Grid.TitleFont.Height := -10; Grid.TitleFont.Style := [fsBold]; Grid.TitleFont.Color := CLR_TEXT_SLATE;
+  Grid.GridLineWidth := 0; Grid.Flat := True; Grid.FocusRectVisible := False; Grid.BorderStyle := bsNone;
+
+  Grid.Cells[0,0]:='Chofer'; Grid.Cells[1,0]:='Placa'; Grid.Cells[2,0]:='Licencia';
+  Grid.Cells[3,0]:='Tipo'; Grid.Cells[4,0]:='Proveedor'; Grid.Cells[5,0]:='Producto';
+  Grid.Cells[6,0]:='Origen'; Grid.Cells[7,0]:='Destino'; Grid.Cells[8,0]:='Costo';
+  Grid.Cells[9,0]:='Flete'; Grid.Cells[10,0]:='Fecha'; Grid.Cells[11,0]:='Hora';
+  Grid.Cells[12,0]:='P.Bruto'; Grid.Cells[13,0]:='P.Tara'; Grid.Cells[14,0]:='P.Neto';
+  Grid.Cells[15,0]:='Pesador'; Grid.Cells[16,0]:='Estado'; Grid.Cells[17,0]:='Acciones';
+  Grid.Cells[18,0]:='ID'; Grid.Cells[19,0]:='EstPesaje';
+  // ...
+  Grid.ColWidths[18]:=0; Grid.ColWidths[19]:=0;
+  Grid.OnDrawCell := @GridDrawCell;
+  Grid.OnMouseDown := @GridMouseDown;
 
   TimerLectura := TTimer.Create(Self);
-  TimerLectura.Interval := 300;
+  TimerLectura.Interval := 300; TimerLectura.OnTimer := @TimerLecturaTimer;
   TimerLectura.Enabled := False;
-  TimerLectura.OnTimer := @TimerLecturaTimer;
-
   TimerReloj := TTimer.Create(Self);
-  TimerReloj.Interval := 1000;
-  TimerReloj.Enabled := False;
-  TimerReloj.OnTimer := @TimerRelojTimer;
-
-  CrearUI;
-  CargarConfigSerial;
-
-  if (DM <> nil) and DM.Conexion.Connected then
-    CargarCombos;
-
+  TimerReloj.Interval := 1000; TimerReloj.OnTimer := @TimerRelojTimer;
   TimerReloj.Enabled := True;
+
+  CargarCombos;
+  RefrescarPesajes(nil);
 end;
 
 destructor TFramePesaje.Destroy;
 begin
-  if TimerLectura <> nil then TimerLectura.Enabled := False;
-  if TimerReloj <> nil then TimerReloj.Enabled := False;
-  if (DM <> nil) and DM.PuertoConectado then
-    DM.DesconectarSerial;
+  if FConectado then begin DM.DesconectarSerial; FConectado := False; end;
   inherited Destroy;
 end;
 
-procedure TFramePesaje.TimerRelojTimer(Sender: TObject);
-begin
-  lblHora.Caption := FormatDateTime('hh:nn:ss', Now);
-  lblFecha.Caption := FormatDateTime('dd/mm/yyyy', Now);
-end;
+// ═══════════════════════════════════════════════
+// SERIAL / BASCULA
+// ═══════════════════════════════════════════════
 
 procedure TFramePesaje.TimerLecturaTimer(Sender: TObject);
-var
-  Trama: string;
+var Trama: string;
 begin
-  if not DM.PuertoConectado then Exit;
+  if not FConectado then Exit;
   Trama := DM.LeerPuertoSerial;
-  if Trama <> '' then
-    ProcesarTrama(Trama);
+  if Trama <> '' then ProcesarTrama(Trama);
 end;
 
-procedure TFramePesaje.CrearUI;
-var
-  pnlReloj, pnlDisplay, pnlResultados: TPanel;
-  Lbl: TLabel;
+procedure TFramePesaje.TimerRelojTimer(Sender: TObject);
+var LblHora: TLabel;
 begin
-  Self.Color := CLR_BG;
-
-  pnlPesaje := TPanel.Create(Self);
-  pnlPesaje.Parent := Self;
-  pnlPesaje.Align := alLeft;
-  pnlPesaje.Width := 430;
-  pnlPesaje.BevelOuter := bvNone;
-  pnlPesaje.Color := CLR_BG;
-  pnlPesaje.Caption := '';
-
-  // Reloj
-  pnlReloj := TPanel.Create(Self);
-  pnlReloj.Parent := pnlPesaje;
-  pnlReloj.SetBounds(24, 16, 382, 64);
-  pnlReloj.BevelOuter := bvNone;
-  pnlReloj.Color := $F0F2F5;
-  pnlReloj.Caption := '';
-
-  lblHora := TLabel.Create(Self);
-  lblHora.Parent := pnlReloj;
-  lblHora.SetBounds(0, 0, 380, 38);
-  lblHora.Caption := '00:00:00';
-  lblHora.Font.Height := -32;
-  lblHora.Font.Style := [fsBold];
-  
-  lblHora.Font.Color := $333333;
-
-  lblFecha := TLabel.Create(Self);
-  lblFecha.Parent := pnlReloj;
-  lblFecha.SetBounds(0, 44, 380, 20);
-  lblFecha.Caption := '01/01/2026';
-  lblFecha.Font.Size := 13;
-  lblFecha.Font.Color := $777777;
-
-  // Display peso
-  pnlDisplay := TPanel.Create(Self);
-  pnlDisplay.Parent := pnlPesaje;
-  pnlDisplay.SetBounds(24, 96, 382, 160);
-  pnlDisplay.BevelOuter := bvNone;
-  pnlDisplay.Color := CLR_PRIMARY;
-
-  lblPesoDisplay := TLabel.Create(Self);
-  lblPesoDisplay.Parent := pnlDisplay;
-  lblPesoDisplay.Align := alTop;
-  lblPesoDisplay.Height := 80;
-  lblPesoDisplay.Alignment := taCenter;
-  lblPesoDisplay.Layout := tlCenter;
-  lblPesoDisplay.Caption := '0';
-  lblPesoDisplay.Font.Height := -48;
-  lblPesoDisplay.Font.Style := [fsBold];
-  
-  lblPesoDisplay.Font.Color := CLR_WHITE;
-
-  lblUnidad := TLabel.Create(Self);
-  lblUnidad.Parent := pnlDisplay;
-  lblUnidad.Align := alBottom;
-  lblUnidad.Height := 30;
-  lblUnidad.Alignment := taCenter;
-  lblUnidad.Caption := 'KILOGRAMOS';
-  lblUnidad.Font.Size := 13;
-  lblUnidad.Font.Color := $CCDDFF;
-
-  // Estado conexión
-  lblEstadoConexion := TLabel.Create(Self);
-  lblEstadoConexion.Parent := pnlPesaje;
-  lblEstadoConexion.SetBounds(24, 268, 380, 20);
-  lblEstadoConexion.Caption := 'SIN CONEXION';
-  lblEstadoConexion.Font.Size := 11;
-  lblEstadoConexion.Font.Style := [fsBold];
-  
-  lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
-
-  lblEstabilidad := TLabel.Create(Self);
-  lblEstabilidad.Parent := pnlPesaje;
-  lblEstabilidad.SetBounds(24, 288, 380, 20);
-  lblEstabilidad.Caption := 'Esperando lectura...';
-  lblEstabilidad.Font.Size := 11;
-  lblEstabilidad.Font.Color := $888888;
-
-  // Botones
-  btnConectar := TButton.Create(Self);
-  btnConectar.Parent := pnlPesaje;
-  btnConectar.SetBounds(24, 320, 185, 42);
-  btnConectar.Caption := 'CONECTAR BASCULA';
-  btnConectar.Font.Size := 12; btnConectar.Font.Style := [fsBold];
-  btnConectar.Font.Color := CLR_PRIMARY;
-  
-  btnConectar.OnClick := @btnConectarClick;
-
-  btnTara := TButton.Create(Self);
-  btnTara.Parent := pnlPesaje;
-  btnTara.SetBounds(219, 320, 185, 42);
-  btnTara.Caption := 'CAPTURAR TARA';
-  btnTara.Font.Size := 12; btnTara.Font.Style := [fsBold];
-  btnTara.Font.Color := CLR_PRIMARY;
-  
-  btnTara.Enabled := False;
-  btnTara.OnClick := @btnTaraClick;
-
-  // Resultados
-  pnlResultados := TPanel.Create(Self);
-  pnlResultados.Parent := pnlPesaje;
-  pnlResultados.SetBounds(24, 376, 382, 88);
-  pnlResultados.BevelOuter := bvNone;
-  pnlResultados.Color := CLR_CARD;
-
-  lblResultadoPeso := TLabel.Create(Self);
-  lblResultadoPeso.Parent := pnlResultados;
-  lblResultadoPeso.SetBounds(16, 12, 350, 20);
-  lblResultadoPeso.Caption := 'Bruto: -- kg  |  Tara: -- kg';
-  lblResultadoPeso.Font.Size := 12;
-  lblResultadoPeso.Font.Color := $555555;
-
-  lblResultadoHora := TLabel.Create(Self);
-  lblResultadoHora.Parent := pnlResultados;
-  lblResultadoHora.SetBounds(16, 36, 350, 24);
-  lblResultadoHora.Caption := 'Neto: -- kg';
-  lblResultadoHora.Font.Size := 14;
-  lblResultadoHora.Font.Style := [fsBold];
-  
-  lblResultadoHora.Font.Color := CLR_PRIMARY;
-
-  lblResultadoID := TLabel.Create(Self);
-  lblResultadoID.Parent := pnlResultados;
-  lblResultadoID.SetBounds(290, 56, 80, 20);
-  lblResultadoID.Caption := 'ID: --';
-  lblResultadoID.Font.Size := 11;
-  lblResultadoID.Font.Color := $AAAAAA;
-
-  // ================================================================
-  // Panel formulario (derecha)
-  // ================================================================
-  pnlForm := TPanel.Create(Self);
-  pnlForm.Parent := Self;
-  pnlForm.Align := alClient;
-  pnlForm.BevelOuter := bvNone;
-  pnlForm.Color := CLR_CARD;
-  pnlForm.Caption := '';
-
-  Lbl := TLabel.Create(Self);
-  Lbl.Parent := pnlForm;
-  Lbl.SetBounds(24, 16, 300, 22);
-  Lbl.Caption := 'DATOS DEL PESAJE';
-  Lbl.Font.Size := 14;
-  Lbl.Font.Style := [fsBold];
-  
-  Lbl.Font.Color := $333333;
-
-  // Guía y Lote
-  CrearLabel(pnlForm, 'Guía', 24, 56);
-  edtGuia := TEdit.Create(Self);
-  edtGuia.Parent := pnlForm;
-  edtGuia.SetBounds(24, 76, 150, 28); edtGuia.Font.Size := 12;
-
-  CrearLabel(pnlForm, 'Lote', 190, 56);
-  edtLote := TEdit.Create(Self);
-  edtLote.Parent := pnlForm;
-  edtLote.SetBounds(190, 76, 150, 28); edtLote.Font.Size := 12;
-
-  // Vehículo
-  CrearLabel(pnlForm, 'Vehículo', 24, 112);
-  cmbVehiculo := CrearCombo(pnlForm, 24, 132, 280);
-  btnVehiculoNuevo := CrearBtnPlus(pnlForm, 312, 132, @btnQuickCreateClick, 1);
-
-  // Chofer
-  CrearLabel(pnlForm, 'Chofer', 24, 168);
-  cmbChofer := CrearCombo(pnlForm, 24, 188, 280);
-  btnChoferNuevo := CrearBtnPlus(pnlForm, 312, 188, @btnQuickCreateClick, 2);
-
-  // Proveedor
-  CrearLabel(pnlForm, 'Proveedor', 24, 224);
-  cmbProveedor := CrearCombo(pnlForm, 24, 244, 280);
-  btnProveedorNuevo := CrearBtnPlus(pnlForm, 312, 244, @btnQuickCreateClick, 3);
-
-  // Producto
-  CrearLabel(pnlForm, 'Producto', 24, 280);
-  cmbProducto := CrearCombo(pnlForm, 24, 300, 280);
-  btnProductoNuevo := CrearBtnPlus(pnlForm, 312, 300, @btnQuickCreateClick, 4);
-
-  // Origen
-  CrearLabel(pnlForm, 'Origen', 24, 336);
-  cmbOrigen := CrearCombo(pnlForm, 24, 356, 280);
-  btnOrigenNuevo := CrearBtnPlus(pnlForm, 312, 356, @btnQuickCreateClick, 5);
-
-  // Destino
-  CrearLabel(pnlForm, 'Destino', 24, 392);
-  cmbDestino := CrearCombo(pnlForm, 24, 412, 280);
-  btnDestinoNuevo := CrearBtnPlus(pnlForm, 312, 412, @btnQuickCreateClick, 6);
-
-  // Costo y Flete
-  CrearLabel(pnlForm, 'Costo (Bs)', 24, 452);
-  edtCosto := TEdit.Create(Self);
-  edtCosto.Parent := pnlForm;
-  edtCosto.SetBounds(24, 472, 150, 28); edtCosto.Font.Size := 12; edtCosto.Text := '0';
-
-  CrearLabel(pnlForm, 'Flete pendiente (Bs)', 190, 452);
-  edtFlete := TEdit.Create(Self);
-  edtFlete.Parent := pnlForm;
-  edtFlete.SetBounds(190, 472, 150, 28); edtFlete.Font.Size := 12; edtFlete.Text := '0';
-
-  // Botones
-  btnGuardar := TButton.Create(Self);
-  btnGuardar.Parent := pnlForm;
-  btnGuardar.SetBounds(24, 520, 160, 44);
-  btnGuardar.Caption := 'GUARDAR PESAJE';
-  btnGuardar.Font.Size := 12; btnGuardar.Font.Style := [fsBold];
-  btnGuardar.Font.Color := CLR_PRIMARY;
-  
-  btnGuardar.Enabled := False;
-  btnGuardar.OnClick := @btnGuardarClick;
-
-  btnLimpiar := TButton.Create(Self);
-  btnLimpiar.Parent := pnlForm;
-  btnLimpiar.SetBounds(192, 520, 160, 44);
-  btnLimpiar.Caption := 'LIMPIAR';
-  btnLimpiar.Font.Size := 12; btnLimpiar.Font.Style := [fsBold];
-  btnLimpiar.Font.Color := CLR_PRIMARY;
-  
-  btnLimpiar.OnClick := @btnLimpiarClick;
+  LblHora := TLabel(FindComponent('lblHora'));
+  if LblHora <> nil then LblHora.Caption := FormatDateTime('HH:nn:ss', Now);
 end;
-
-// ====================================================================
-// CONFIGURACION SERIAL
-// ====================================================================
-
-procedure TFramePesaje.CargarConfigSerial;
-var
-  Ini: TIniFile;
-  Path: string;
-begin
-  Path := ExtractFilePath(ParamStr(0)) + 'config.ini';
-  Ini := TIniFile.Create(Path);
-  try
-    FPuertoSerial := Ini.ReadString('serial', 'port', 'COM4');
-    FBaudRate := Ini.ReadInteger('serial', 'baud', 9600);
-    FBits := Ini.ReadInteger('serial', 'bits', 8);
-    FParidad := Ini.ReadString('serial', 'parity', 'N');
-    FStopBits := Ini.ReadInteger('serial', 'stopbits', 1);
-  finally
-    Ini.Free;
-  end;
-end;
-
-// ====================================================================
-// CARGAR COMBOS
-// ====================================================================
-
-procedure TFramePesaje.CargarCombos;
-
-  procedure LlenarCombo(cmb: TComboBox; const SQL, Campo: string);
-  var
-    Q: TSQLQuery;
-  begin
-    if (DM = nil) or (not DM.Conexion.Connected) then Exit;
-    cmb.Items.Clear;
-    cmb.Items.Add('- Seleccione -');
-    Q := DM.AbrirQuery(SQL);
-    while not Q.EOF do
-    begin
-      cmb.Items.Add(Q.FieldByName(Campo).AsString);
-      Q.Next;
-    end;
-    Q.Close;
-    cmb.ItemIndex := 0;
-  end;
-
-begin
-  LlenarCombo(cmbVehiculo,
-    'SELECT id, placa FROM vehiculos WHERE estado=''ACTIVO'' ORDER BY placa', 'placa');
-  LlenarCombo(cmbChofer,
-    'SELECT c.id, p.nombre||'' ''||COALESCE(p.apellido_paterno,'''') AS nom ' +
-    'FROM choferes c INNER JOIN personas p ON p.id=c.persona_id ' +
-    'WHERE c.estado=''ACTIVO'' ORDER BY nom', 'nom');
-  LlenarCombo(cmbProveedor,
-    'SELECT pr.id, COALESCE(pr.nombre_empresa,p.nombre) AS nom FROM proveedores pr ' +
-    'INNER JOIN personas p ON p.id=pr.persona_id WHERE pr.estado=''ACTIVO'' ORDER BY nom', 'nom');
-  LlenarCombo(cmbProducto,
-    'SELECT id, nombre FROM productos WHERE estado=''ACTIVO'' ORDER BY nombre', 'nombre');
-  LlenarCombo(cmbOrigen,
-    'SELECT id, nombre FROM origenes WHERE estado=''ACTIVO'' ORDER BY nombre', 'nombre');
-  LlenarCombo(cmbDestino,
-    'SELECT id, nombre FROM destinos WHERE estado=''ACTIVO'' ORDER BY nombre', 'nombre');
-end;
-
-// ====================================================================
-// QUICK CREATE
-// ====================================================================
-
-procedure TFramePesaje.btnQuickCreateClick(Sender: TObject);
-var
-  NewTag: Integer;
-  F: TForm;
-  Lbl: TLabel;
-  edtNombre: TEdit;
-  Tabla: string;
-  Titulo: string;
-begin
-  NewTag := TButton(Sender).Tag;
-
-  if NewTag in [1,2,3] then begin ShowMessage('Creacion rapida disponible en Fase 2.1'); Exit; end;
-
-  case NewTag of
-    4: begin Tabla := 'productos'; Titulo := 'Nuevo Producto'; end;
-    5: begin Tabla := 'origenes'; Titulo := 'Nuevo Origen'; end;
-    6: begin Tabla := 'destinos'; Titulo := 'Nuevo Destino'; end;
-  else Exit;
-  end;
-
-  F := TForm.Create(nil);
-  try
-    F.Caption := Titulo; F.Width := 400; F.Height := 200;
-    F.Position := poOwnerFormCenter; F.BorderStyle := bsDialog;
-
-    Lbl := TLabel.Create(F); Lbl.Parent := F;
-    Lbl.SetBounds(24, 20, 350, 16); Lbl.Caption := 'Nombre *'; Lbl.Font.Style := [fsBold];
-  
-    edtNombre := TEdit.Create(F); edtNombre.Parent := F;
-    edtNombre.SetBounds(24, 44, 350, 32); edtNombre.Font.Size := 12;
-
-    with TButton.Create(F) do begin Parent := F; SetBounds(100, 100, 90, 32);
-      Caption := 'Guardar'; Font.Style := [fsBold]; ModalResult := mrOK; end;
-    with TButton.Create(F) do begin Parent := F; SetBounds(200, 100, 90, 32);
-      Caption := 'Cancelar'; ModalResult := mrCancel; end;
-
-    if F.ShowModal = mrOK then
-    begin
-      if Trim(edtNombre.Text) = '' then
-      begin ShowMessage('El nombre es obligatorio'); Exit; end;
-      DM.EjecutarSQL('INSERT INTO ' + Tabla + ' (nombre, estado, fecha_creacion, fecha_modificacion) VALUES (' +
-        QuotedStr(Trim(edtNombre.Text)) + ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
-      CargarCombos;
-    end;
-  finally
-    F.Free;
-  end;
-end;
-
-// ====================================================================
-// BOTONES
-// ====================================================================
-
-procedure TFramePesaje.btnConectarClick(Sender: TObject);
-  function ParidadChar: Char;
-  begin
-    if FParidad = 'E' then Result := 'E'
-    else if FParidad = 'O' then Result := 'O'
-    else Result := 'N';
-  end;
-begin
-  if DM.PuertoConectado then
-  begin
-    DM.DesconectarSerial;
-    FConectado := False;
-    TimerLectura.Enabled := False;
-    btnConectar.Caption := 'CONECTAR BASCULA';
-    lblEstadoConexion.Caption := 'SIN CONEXION';
-    lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
-    lblEstabilidad.Caption := 'Esperando lectura...';
-    btnTara.Enabled := False;
-    btnGuardar.Enabled := False;
-    Exit;
-  end;
-
-  if DM.ConectarSerial(FPuertoSerial, FBaudRate, FBits, ParidadChar, FStopBits) then
-  begin
-    FConectado := True;
-    TimerLectura.Enabled := True;
-    btnConectar.Caption := 'DESCONECTAR';
-    lblEstadoConexion.Caption := 'CONECTADO - ' + FPuertoSerial;
-    lblEstadoConexion.Font.Color := CLR_PRIMARY;
-    lblEstabilidad.Caption := 'Esperando datos...';
-    btnTara.Enabled := True;
-  end
-  else
-  begin
-    ShowMessage('Error al conectar al puerto ' + FPuertoSerial);
-    lblEstadoConexion.Caption := 'ERROR DE CONEXION';
-    lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
-  end;
-end;
-
-procedure TFramePesaje.btnTaraClick(Sender: TObject);
-var
-  Peso: Double;
-begin
-  Peso := ParseFloatESP(FPesoActual);
-  if Peso <= 0 then
-  begin
-    ShowMessage('No hay un peso valido para capturar como tara');
-    Exit;
-  end;
-  FTara := Peso;
-  FPesoBruto := 0;
-  lblResultadoPeso.Caption := 'Bruto: -- kg  |  Tara: ' + FormatFloat('0.00', FTara) + ' kg';
-  lblResultadoHora.Caption := 'Neto: PENDIENTE. Capture peso bruto';
-  lblResultadoHora.Font.Color := CLR_DESTRUCTIVE;
-  btnGuardar.Enabled := False;
-end;
-
-procedure TFramePesaje.btnGuardarClick(Sender: TObject);
-begin
-  GuardarPesaje;
-end;
-
-procedure TFramePesaje.btnLimpiarClick(Sender: TObject);
-begin
-  FPesoBruto := 0;
-  FTara := 0;
-  edtGuia.Text := '';
-  edtLote.Text := '';
-  edtCosto.Text := '0';
-  edtFlete.Text := '0';
-  cmbVehiculo.ItemIndex := 0;
-  cmbChofer.ItemIndex := 0;
-  cmbProveedor.ItemIndex := 0;
-  cmbProducto.ItemIndex := 0;
-  cmbOrigen.ItemIndex := 0;
-  cmbDestino.ItemIndex := 0;
-  btnGuardar.Enabled := False;
-  lblResultadoPeso.Caption := 'Bruto: -- kg  |  Tara: -- kg';
-  lblResultadoHora.Caption := 'Neto: -- kg';
-  lblResultadoHora.Font.Color := CLR_PRIMARY;
-  lblResultadoID.Caption := 'ID: --';
-end;
-
-// ====================================================================
-// PARSEO
-// ====================================================================
 
 procedure TFramePesaje.ProcesarTrama(const Trama: string);
-var
-  PesoStr: string;
+var PesoStr: string; PesoVal: Integer;
 begin
   PesoStr := ExtraerPeso(Trama);
-  if PesoStr <> '' then
+  if PesoStr = '' then Exit;
+  PesoVal := StrToIntDef(PesoStr, 0);
+  lblPesoDisplay.Caption := IntToStr(PesoVal);
+  if FTara > 0 then
   begin
-    FPesoActual := PesoStr;
-    ActualizarPesoDisplay(PesoStr);
+    FPesoBruto := PesoVal; FPesoNeto := FPesoBruto - FTara;
+    lblResultados.Caption := 'Bruto: ' + IntToStr(FPesoBruto) + ' kg  |  ' +
+      'Tara: ' + IntToStr(FTara) + ' kg  |  Neto: ' + IntToStr(FPesoNeto) + ' kg';
   end;
 end;
 
 function TFramePesaje.ExtraerPeso(const Trama: string): string;
-var
-  i: Integer;
-  InNum: Boolean;
-  Buf: string;
+var i: Integer; c: Char; EnPeso: Boolean;
 begin
-  Result := '';
-  Buf := '';
-  InNum := False;
-  for i := 1 to Length(Trama) do
+  Result := ''; EnPeso := False;
+  for i := 1 to Length(Trama) do begin
+    c := Trama[i];
+    if (c >= '0') and (c <= '9') then begin EnPeso := True; Result := Result + c; end
+    else if EnPeso and (c = '.') then Result := Result + c
+    else if EnPeso then Break;
+  end;
+  if Length(Result) < 2 then Result := '';
+end;
+
+// ═══════════════════════════════════════════════
+// COMBO LOADING
+// ═══════════════════════════════════════════════
+
+procedure TFramePesaje.CargarCombos;
+var Q: TSQLQuery;
+  procedure LlenarCombo(Cmb: TComboBox; const SQL, CampoValor, CampoTexto: string);
   begin
-    if (Trama[i] >= '0') and (Trama[i] <= '9') then
-    begin
-      if not InNum then
-      begin
-        InNum := True;
-        Buf := '';
+    Cmb.Items.Clear; Cmb.Items.Add('- Seleccione -'); Cmb.ItemIndex := 0;
+    Q := DM.AbrirQuery(SQL);
+    try
+      while not Q.EOF do begin
+        Cmb.Items.AddObject(Q.FieldByName(CampoTexto).AsString,
+          TObject(PtrInt(Q.FieldByName(CampoValor).AsInteger)));
+        Q.Next;
       end;
-      Buf := Buf + Trama[i];
-    end
-    else if (Trama[i] = '.') and InNum then
-      Buf := Buf + '.'
-    else if InNum then
-      Break;
+    finally Q.Close; end;
   end;
-  if (Buf <> '') and (Length(Buf) >= 2) then
-    Result := Buf;
+begin
+  if (DM = nil) or (not DM.Conexion.Connected) then Exit;
+  LlenarCombo(cmbVehiculo, 'SELECT id, placa FROM vehiculos WHERE estado=''ACTIVO'' ORDER BY placa', 'id', 'placa');
+  LlenarCombo(cmbChofer, 'SELECT c.id, p.nombre||'' ''||p.apellido_paterno AS nombre ' +
+    'FROM choferes c INNER JOIN personas p ON p.id=c.persona_id WHERE c.estado=''ACTIVO'' AND p.estado=''ACTIVO'' ORDER BY p.nombre', 'id', 'nombre');
+  LlenarCombo(cmbProveedor, 'SELECT pr.id, COALESCE(pr.nombre_empresa, p.nombre) AS nombre ' +
+    'FROM proveedores pr INNER JOIN personas p ON p.id=pr.persona_id WHERE pr.estado=''ACTIVO'' AND p.estado=''ACTIVO'' ORDER BY nombre', 'id', 'nombre');
+  LlenarCombo(cmbProducto, 'SELECT id, nombre FROM productos WHERE estado=''ACTIVO'' ORDER BY nombre', 'id', 'nombre');
+  LlenarCombo(cmbOrigen, 'SELECT id, nombre FROM origenes WHERE estado=''ACTIVO'' ORDER BY nombre', 'id', 'nombre');
+  LlenarCombo(cmbDestino, 'SELECT id, nombre FROM destinos WHERE estado=''ACTIVO'' ORDER BY nombre', 'id', 'nombre');
 end;
 
-function TFramePesaje.ParseFloatESP(const S: string): Double;
-var
-  FS: TFormatSettings;
+procedure TFramePesaje.VehiculoChange(Sender: TObject);
+var Q: TSQLQuery; Vid: Integer;
 begin
-  FS := DefaultFormatSettings;
-  FS.DecimalSeparator := '.';
-  Result := StrToFloatDef(S, 0, FS);
+  if cmbVehiculo.ItemIndex < 1 then Exit;
+  Vid := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
+  Q := DM.AbrirQuery('SELECT tara FROM vehiculos WHERE id=' + IntToStr(Vid));
+  try
+    if not Q.EOF then
+    begin
+      FTara := Q.Fields[0].AsInteger;
+      lblResultados.Caption := 'Tara del vehiculo: ' + IntToStr(FTara) + ' kg';
+    end;
+  finally Q.Close; end;
 end;
 
-procedure TFramePesaje.ActualizarPesoDisplay(const Peso: string);
-var
-  PesoVal, PesoNeto: Double;
+// ═══════════════════════════════════════════════
+// PESAJES GRID
+// ═══════════════════════════════════════════════
+
+procedure TFramePesaje.RefrescarPesajes(Sender: TObject);
+var Q: TSQLQuery; Row, ID: Integer; FechaStr: string;
 begin
-  lblPesoDisplay.Caption := Peso;
-  lblEstabilidad.Caption := 'Peso estable';
-  lblEstabilidad.Font.Color := CLR_PRIMARY;
-
-  PesoVal := ParseFloatESP(Peso);
-  if (FTara > 0) and (PesoVal > 0) then
-  begin
-    FPesoBruto := PesoVal;
-    PesoNeto := FPesoBruto - FTara;
-    lblResultadoPeso.Caption := 'Bruto: ' + FormatFloat('0.00', FPesoBruto) +
-      ' kg  |  Tara: ' + FormatFloat('0.00', FTara) + ' kg';
-    lblResultadoHora.Caption := 'Neto: ' + FormatFloat('0.00', PesoNeto) + ' kg';
-    if PesoNeto >= 0 then
-      lblResultadoHora.Font.Color := $2D6A4F
-    else
-      lblResultadoHora.Font.Color := CLR_DESTRUCTIVE;
-    btnGuardar.Enabled := True;
+  if (DM = nil) or (not DM.Conexion.Connected) then Exit;
+  Q := DM.AbrirQuery(
+    'SELECT p.id, ' +
+    'COALESCE(pe.nombre||'' ''||pe.apellido_paterno,'''') as chofer, v.placa, ' +
+    'COALESCE(c.licencia,'''') as licencia, COALESCE(v.tipo_vehiculo,'''') as tipo, ' +
+    'COALESCE(pp.nombre||'' ''||pp.apellido_paterno,'''') as proveedor, ' +
+    'COALESCE(pr.nombre,'''') as producto, COALESCE(o.nombre,'''') as origen, ' +
+    'COALESCE(d.nombre,'''') as destino, p.costo_bs, p.flete_bs_pendiente, ' +
+    'p.fecha_creacion, p.peso_bruto, p.tara, p.peso_neto, ' +
+    'COALESCE(ps.nombre,'''') as pesador, p.estado, p.estado_balanza ' +
+    'FROM pesajes p ' +
+    'LEFT JOIN vehiculos v ON v.id=p.vehiculo_id ' +
+    'LEFT JOIN choferes c ON c.id=p.chofer_id LEFT JOIN personas pe ON pe.id=c.persona_id ' +
+    'LEFT JOIN proveedores ppv ON ppv.id=p.proveedor_id LEFT JOIN personas pp ON pp.id=ppv.persona_id ' +
+    'LEFT JOIN productos pr ON pr.id=p.producto_id ' +
+    'LEFT JOIN origenes o ON o.id=p.id_origen ' +
+    'LEFT JOIN destinos d ON d.id=p.id_destino ' +
+    'LEFT JOIN personas ps ON ps.id=p.pesador_id ' +
+    'WHERE p.estado IN (''ACTIVO'',''INACTIVO'') ORDER BY p.id DESC LIMIT 50');
+  Grid.RowCount := Q.RecordCount + 1; Row := 1;
+  while not Q.EOF do begin
+    ID := Q.Fields[0].AsInteger;
+    Grid.Objects[0, Row] := TObject(PtrInt(ID));
+    FechaStr := Q.Fields[10].AsString;
+    if Length(FechaStr) >= 16 then
+    begin
+      Grid.Cells[10,Row] := Copy(FechaStr,9,2)+'/'+Copy(FechaStr,6,2)+'/'+Copy(FechaStr,1,4);
+      Grid.Cells[11,Row] := Copy(FechaStr,12,5);
+    end else begin
+      Grid.Cells[10,Row] := Copy(FechaStr,1,10);
+      Grid.Cells[11,Row] := '';
+    end;
+    Grid.Cells[0,Row]:=UpperCase(Q.Fields[1].AsString);
+    Grid.Cells[1,Row]:=UpperCase(Q.Fields[2].AsString);
+    Grid.Cells[2,Row]:=UpperCase(Q.Fields[3].AsString);
+    Grid.Cells[3,Row]:=UpperCase(Q.Fields[4].AsString);
+    Grid.Cells[4,Row]:=UpperCase(Q.Fields[5].AsString);
+    Grid.Cells[5,Row]:=UpperCase(Q.Fields[6].AsString);
+    Grid.Cells[6,Row]:=UpperCase(Q.Fields[7].AsString);
+    Grid.Cells[7,Row]:=UpperCase(Q.Fields[8].AsString);
+    Grid.Cells[8,Row]:=Q.Fields[9].AsString;
+    Grid.Cells[9,Row]:=Q.Fields[10].AsString;
+    Grid.Cells[12,Row]:=Q.Fields[11].AsString;
+    Grid.Cells[13,Row]:=Q.Fields[12].AsString;
+    Grid.Cells[14,Row]:=Q.Fields[13].AsString;
+    Grid.Cells[15,Row]:=UpperCase(Q.Fields[14].AsString);
+    Grid.Cells[16,Row]:=UpperCase(Q.Fields[15].AsString);
+    Grid.Cells[17,Row]:='';
+    Grid.Cells[18,Row]:=IntToStr(ID);
+    Grid.Cells[19,Row]:=UpperCase(Q.Fields[16].AsString);
+    Q.Next; Inc(Row);
   end;
-end;
-
-// ====================================================================
-// GUARDAR EN BD
-// ====================================================================
-
-function TFramePesaje.GetIDFromCombo(const cmb: TComboBox; const Tabla: string): Integer;
-var
-  SQL, Nombre: string;
-  Q: TSQLQuery;
-begin
-  Result := 0;
-  if cmb.ItemIndex <= 0 then Exit;
-  Nombre := StringReplace(cmb.Text, '''', '''''', [rfReplaceAll]);
-
-  case Tabla of
-    'vehiculos':
-      SQL := 'SELECT id FROM vehiculos WHERE placa=''' + Nombre + ''' AND estado=''ACTIVO'' LIMIT 1';
-    'choferes':
-      SQL := 'SELECT c.id FROM choferes c INNER JOIN personas p ON p.id=c.persona_id ' +
-        'WHERE p.nombre||'' ''||p.apellido_paterno=''' + Nombre + ''' AND c.estado=''ACTIVO'' LIMIT 1';
-    'proveedores':
-      SQL := 'SELECT pr.id FROM proveedores pr INNER JOIN personas p ON p.id=pr.persona_id ' +
-        'WHERE (pr.nombre_empresa=''' + Nombre + ''' OR p.nombre=''' + Nombre + ''') AND pr.estado=''ACTIVO'' LIMIT 1';
-  else
-    SQL := 'SELECT id FROM ' + Tabla + ' WHERE nombre=''' + Nombre + ''' AND estado=''ACTIVO'' LIMIT 1';
-  end;
-
-  Q := DM.AbrirQuery(SQL);
-  if not Q.EOF then
-    Result := Q.FieldByName('id').AsInteger;
   Q.Close;
 end;
 
-procedure TFramePesaje.GuardarPesaje;
-var
-  SQL: string;
-  VehiculoID, ChoferID, ProveedorID, ProductoID: Integer;
-  OrigenID, DestinoID: Integer;
-  PesoNeto: Double;
-
-  function Nvl(ID: Integer): string;
-  begin
-    if ID > 0 then Result := IntToStr(ID) else Result := 'NULL';
-  end;
-
+procedure TFramePesaje.GridDrawCell(Sender: TObject; aCol, aRow: Integer;
+  aRect: TRect; aState: TGridDrawState);
+var Ts: TTextStyle; IsSelected: Boolean;
 begin
-  if cmbVehiculo.ItemIndex <= 0 then
-  begin
-    ShowMessage('Seleccione un vehiculo');
+  if aRow = 0 then begin
+    Grid.Canvas.Brush.Color := CLR_CARD; Grid.Canvas.FillRect(aRect);
+    Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+    Ts := Grid.Canvas.TextStyle; Ts.Alignment := taCenter; Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
     Exit;
   end;
-  if FPesoBruto <= 0 then
-  begin
-    ShowMessage('Capture el peso bruto antes de guardar');
+  IsSelected := gdSelected in aState;
+
+  // Columna Estado: badge
+  if aCol = 16 then begin
+    if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+    if Grid.Cells[16, aRow] = 'ACTIVO' then
+    begin Grid.Canvas.Brush.Color := CLR_SUCCESS_BG; Grid.Canvas.Font.Color := CLR_TEAL; end
+    else begin Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG; Grid.Canvas.Font.Color := CLR_DESTRUCTIVE; end;
+    Grid.Canvas.Pen.Style := psClear;
+    Grid.Canvas.RoundRect(aRect.Left + 2, aRect.Top + 6, aRect.Left + (aRect.Right - aRect.Left) - 2, aRect.Top + 30, 12, 12);
+    Grid.Canvas.Font.Height := -11; Grid.Canvas.Font.Style := [fsBold];
+    Ts := Grid.Canvas.TextStyle; Ts.Alignment := taCenter; Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[16, aRow], Ts);
     Exit;
   end;
 
-  PesoNeto := FPesoBruto - FTara;
+  // Columna Acciones
+  if aCol = 17 then begin
+    if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+    Grid.Canvas.Font.Height := -11; Grid.Canvas.Font.Style := [fsBold];
+    Ts := Grid.Canvas.TextStyle; Ts.Layout := tlCenter;
 
-  VehiculoID := GetIDFromCombo(cmbVehiculo, 'vehiculos');
-  ChoferID := GetIDFromCombo(cmbChofer, 'choferes');
-  ProveedorID := GetIDFromCombo(cmbProveedor, 'proveedores');
-  ProductoID := GetIDFromCombo(cmbProducto, 'productos');
-  OrigenID := GetIDFromCombo(cmbOrigen, 'origenes');
-  DestinoID := GetIDFromCombo(cmbDestino, 'destinos');
-
-  if VehiculoID = 0 then
-  begin
-    ShowMessage('Vehiculo no encontrado en la base de datos');
+    if Grid.Cells[16, aRow] = 'ACTIVO' then
+    begin
+      if Grid.Cells[19, aRow] = 'EN_PROCESO' then
+      begin
+        // Toggle ●/○
+        Grid.Canvas.Font.Color := CLR_SUCCESS;
+        Ts.Alignment := taCenter;
+        Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
+          aRect.Left + 20, aRect.Top + 2, '● ──', Ts);
+        // Edit
+        Grid.Canvas.Font.Color := CLR_PRIMARY;
+        Grid.Canvas.TextRect(Rect(aRect.Left + 55, aRect.Top, aRect.Left + 110, aRect.Bottom),
+          aRect.Left + 55, aRect.Top + 2, '✏️', Ts);
+        // Finalizar
+        Grid.Canvas.Font.Color := CLR_INFO;
+        Grid.Canvas.TextRect(Rect(aRect.Left + 110, aRect.Top, aRect.Left + 160, aRect.Bottom),
+          aRect.Left + 110, aRect.Top + 2, '✅', Ts);
+      end
+      else // FINALIZADO
+      begin
+        // Toggle ●/○
+        Grid.Canvas.Font.Color := CLR_SUCCESS;
+        Ts.Alignment := taCenter;
+        Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
+          aRect.Left + 20, aRect.Top + 2, '● ──', Ts);
+        // Boleta
+        Grid.Canvas.Font.Color := CLR_PRIMARY;
+        Grid.Canvas.TextRect(Rect(aRect.Left + 55, aRect.Top, aRect.Left + 110, aRect.Bottom),
+          aRect.Left + 55, aRect.Top + 2, '📄', Ts);
+        // Anular
+        Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
+        Grid.Canvas.TextRect(Rect(aRect.Left + 110, aRect.Top, aRect.Left + 160, aRect.Bottom),
+          aRect.Left + 110, aRect.Top + 2, '✕', Ts);
+      end;
+    end
+    else // INACTIVO
+    begin
+      Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
+      Ts.Alignment := taCenter;
+      Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
+        aRect.Left + 20, aRect.Top + 2, '○ ──', Ts);
+    end;
     Exit;
   end;
 
+  if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+  else Grid.Canvas.Brush.Color := CLR_CARD;
+  Grid.Canvas.FillRect(aRect);
+  Ts := Grid.Canvas.TextStyle; Ts.Alignment := taCenter; Ts.Layout := tlCenter;
+  Grid.Canvas.Font.Height := -12; Grid.Canvas.Font.Color := CLR_TEXT_HEADING; Grid.Canvas.Font.Style := [];
+  Grid.Canvas.TextRect(aRect, aRect.Left + 6, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
+  if aCol = 0 then begin
+    Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+  end;
+end;
+
+procedure TFramePesaje.GridMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var Col, Row: Integer; ID, TotalH, I: Integer; CellW: Integer;
+begin
+  if Button <> mbLeft then Exit;
+  Grid.MouseToCell(X, Y, Col, Row);
+  if (Row < 1) or (Row >= Grid.RowCount) then Exit;
+  TotalH := 0;
+  for I := 0 to Grid.RowCount - 1 do TotalH := TotalH + Grid.RowHeights[I];
+  if Y > TotalH then Exit;
+  if Col <> 17 then Exit;
+  ID := PtrInt(Grid.Objects[0, Row]);
+  CellW := Grid.CellRect(Col, Row).Right - Grid.CellRect(Col, Row).Left;
+
+  if Grid.Cells[16, Row] = 'ACTIVO' then
+  begin
+    if Grid.Cells[19, Row] = 'EN_PROCESO' then
+    begin
+      if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
+        ToggleEstadoPesaje(ID, Grid.Cells[16, Row])
+      else if X < Grid.CellRect(Col, Row).Left + 2 * CellW div 3 then
+        CargarPesaje(ID)
+      else
+        FinalizarPesaje(ID);
+    end
+    else // FINALIZADO
+    begin
+      if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
+        ToggleEstadoPesaje(ID, Grid.Cells[16, Row])
+      else if X < Grid.CellRect(Col, Row).Left + 2 * CellW div 3 then
+        ShowMessage('Boleta PDF - Fase 3')
+      else
+        AnularPesaje(ID);
+    end;
+  end
+  else // INACTIVO
+  begin
+    if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
+      ToggleEstadoPesaje(ID, Grid.Cells[16, Row]);
+  end;
+end;
+
+// ═══════════════════════════════════════════════
+// LOAD PESAJE FOR EDIT
+// ═══════════════════════════════════════════════
+
+procedure TFramePesaje.CargarPesaje(ID: Integer);
+var Q: TSQLQuery;
+begin
+  if ID = 0 then Exit;
+  Q := DM.AbrirQuery(
+    'SELECT vehiculo_id, chofer_id, proveedor_id, producto_id, id_origen, id_destino, ' +
+    'peso_bruto, tara, costo_bs, flete_bs_pendiente FROM pesajes WHERE id=' + IntToStr(ID));
+  try
+    if Q.EOF then Exit;
+    FEditMode := True; FEditID := ID;
+    cmbVehiculo.ItemIndex := BuscarComboIndex(cmbVehiculo, Q.Fields[0].AsInteger);
+    cmbChofer.ItemIndex := BuscarComboIndex(cmbChofer, Q.Fields[1].AsInteger);
+    cmbProveedor.ItemIndex := BuscarComboIndex(cmbProveedor, Q.Fields[2].AsInteger);
+    cmbProducto.ItemIndex := BuscarComboIndex(cmbProducto, Q.Fields[3].AsInteger);
+    cmbOrigen.ItemIndex := BuscarComboIndex(cmbOrigen, Q.Fields[4].AsInteger);
+    cmbDestino.ItemIndex := BuscarComboIndex(cmbDestino, Q.Fields[5].AsInteger);
+    FPesoBruto := Q.Fields[6].AsInteger; FTara := Q.Fields[7].AsInteger;
+    FPesoNeto := FPesoBruto - FTara;
+    lblPesoDisplay.Caption := IntToStr(FPesoBruto);
+    lblResultados.Caption := 'Bruto: ' + IntToStr(FPesoBruto) + ' kg  |  ' +
+      'Tara: ' + IntToStr(FTara) + ' kg  |  Neto: ' + IntToStr(FPesoNeto) + ' kg';
+    edtCosto.Text := Q.Fields[8].AsString;
+    edtFlete.Text := Q.Fields[9].AsString;
+    lblFormTitle.Caption := 'Editar Pesaje #' + IntToStr(ID);
+    TLabel(pnlGuardar.Controls[0]).Caption := 'ACTUALIZAR';
+    pnlCancelEdit.Visible := True;
+    pnlLimpiar.Visible := False;
+  finally Q.Close; end;
+end;
+
+// ═══════════════════════════════════════════════
+// PESAJE ACTIONS
+// ═══════════════════════════════════════════════
+
+procedure TFramePesaje.FinalizarPesaje(ID: Integer);
+begin
+  DM.EjecutarSQL('UPDATE pesajes SET estado_balanza=''FINALIZADO'', fecha_modificacion=''' +
+    FechaHoraActual + ''' WHERE id=' + IntToStr(ID) + ' AND estado_balanza=''EN_PROCESO''');
+  RefrescarPesajes(nil);
+end;
+
+procedure TFramePesaje.AnularPesaje(ID: Integer);
+begin
+  if MessageDlg('Anular pesaje', 'Se cambiara el estado a INACTIVO. Continuar?',
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
+  DM.EjecutarSQL('UPDATE pesajes SET estado=''INACTIVO'', fecha_modificacion=''' +
+    FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
+  RefrescarPesajes(nil);
+end;
+
+procedure TFramePesaje.ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
+var NuevoEstado: string;
+begin
+  if EstadoActual = 'ACTIVO' then NuevoEstado := 'INACTIVO' else NuevoEstado := 'ACTIVO';
+  DM.EjecutarSQL('UPDATE pesajes SET estado=''' + NuevoEstado +
+    ''', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
+  RefrescarPesajes(nil);
+end;
+
+// ═══════════════════════════════════════════════
+// BUTTON EVENTS
+// ═══════════════════════════════════════════════
+
+procedure TFramePesaje.ConectarClick(Sender: TObject);
+begin
+  if FConectado then begin
+    DM.DesconectarSerial; TimerLectura.Enabled := False; FConectado := False;
+    lblEstadoConexion.Caption := 'SIN CONEXION'; lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
+    TLabel(pnlConectar.Controls[0]).Caption := 'CONECTAR'; pnlTara.Enabled := False;
+  end else begin
+    if DM.ConectarSerial('COM4', 9600, 8, 'N', 1) then begin
+      TimerLectura.Enabled := True; FConectado := True;
+      lblEstadoConexion.Caption := 'CONECTADO - COM4'; lblEstadoConexion.Font.Color := CLR_SUCCESS;
+      TLabel(pnlConectar.Controls[0]).Caption := 'DESCONECTAR'; pnlTara.Enabled := True;
+    end else ShowMessage('No se pudo conectar al puerto COM4');
+  end;
+end;
+
+procedure TFramePesaje.TaraClick(Sender: TObject);
+var PesoStr: string;
+begin
+  PesoStr := lblPesoDisplay.Caption; FTara := StrToIntDef(PesoStr, 0);
+  FPesoBruto := 0; FPesoNeto := 0;
+  lblResultados.Caption := 'TARA capturada: ' + IntToStr(FTara) + ' kg  |  Espere el peso bruto...';
+end;
+
+procedure TFramePesaje.GuardarClick(Sender: TObject);
+var VehiculoID, ChoferID, ProveedorID, ProductoID, OrigenID, DestinoID: Integer;
+  Costo, Flete: Integer;
+begin
+  if cmbVehiculo.ItemIndex < 1 then begin ShowMessage('Seleccione un vehiculo'); Exit; end;
+  if (FPesoBruto <= 0) or (FTara <= 0) then begin ShowMessage('Capture tara y peso bruto primero'); Exit; end;
+
+  VehiculoID := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
+  ChoferID:=0; ProveedorID:=0; ProductoID:=0; OrigenID:=0; DestinoID:=0;
+  if cmbChofer.ItemIndex > 0 then ChoferID := PtrInt(cmbChofer.Items.Objects[cmbChofer.ItemIndex]);
+  if cmbProveedor.ItemIndex > 0 then ProveedorID := PtrInt(cmbProveedor.Items.Objects[cmbProveedor.ItemIndex]);
+  if cmbProducto.ItemIndex > 0 then ProductoID := PtrInt(cmbProducto.Items.Objects[cmbProducto.ItemIndex]);
+  if cmbOrigen.ItemIndex > 0 then OrigenID := PtrInt(cmbOrigen.Items.Objects[cmbOrigen.ItemIndex]);
+  if cmbDestino.ItemIndex > 0 then DestinoID := PtrInt(cmbDestino.Items.Objects[cmbDestino.ItemIndex]);
+  Costo := StrToIntDef(edtCosto.Text, 0); Flete := StrToIntDef(edtFlete.Text, 0);
+
+  if not FEditMode then
+  begin
+    if MessageDlg('Guardar pesaje', Format('Bruto: %d kg | Tara: %d kg | Neto: %d kg. Confirmar?',
+      [FPesoBruto, FTara, FPesoNeto]), mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
+  end;
+
+  if DM.Transaccion.Active then DM.Transaccion.Rollback;
   DM.Transaccion.StartTransaction;
   try
-    SQL := 'INSERT INTO pesajes (guia, lote, vehiculo_id, chofer_id, proveedor_id, ' +
-      'producto_id, id_origen, id_destino, peso_bruto, tara, peso_neto, ' +
-      'costo_bs, flete_bs_pendiente, pesador_id, estado, estado_balanza, ' +
-      'fecha_creacion, fecha_modificacion) VALUES (';
-
-    SQL := SQL + QuotedStr(edtGuia.Text) + ', ' + QuotedStr(edtLote.Text) + ', ';
-    SQL := SQL + IntToStr(VehiculoID) + ', ' + Nvl(ChoferID) + ', ';
-    SQL := SQL + Nvl(ProveedorID) + ', ' + Nvl(ProductoID) + ', ';
-    SQL := SQL + Nvl(OrigenID) + ', ' + Nvl(DestinoID) + ', ';
-    SQL := SQL + IntToStr(Round(FPesoBruto)) + ', ' + IntToStr(Round(FTara)) + ', ';
-    SQL := SQL + IntToStr(Round(PesoNeto)) + ', ';
-    SQL := SQL + edtCosto.Text + ', ' + edtFlete.Text + ', ';
-    SQL := SQL + IntToStr(UsuarioActual.ID) + ', ';
-    SQL := SQL + '''ACTIVO'', ''FINALIZADO'', ';
-    SQL := SQL + '''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')';
-
-    DM.EjecutarSQL(SQL);
-    FUltimoID := DM.ObtenerUltimoID;
-    DM.Transaccion.Commit;
-
-    lblResultadoID.Caption := 'ID: ' + IntToStr(FUltimoID);
-    ShowMessage('Pesaje Nro ' + IntToStr(FUltimoID) + ' guardado correctamente');
-    btnLimpiarClick(nil);
-  except
-    on E: Exception do
+    if FEditMode then
     begin
-      DM.Transaccion.Rollback;
-      ShowMessage('Error al guardar pesaje: ' + E.Message);
+      DM.EjecutarSQL('UPDATE pesajes SET vehiculo_id=' + IntToStr(VehiculoID) +
+        ', chofer_id=' + IfThen(ChoferID > 0, IntToStr(ChoferID), 'NULL') +
+        ', proveedor_id=' + IfThen(ProveedorID > 0, IntToStr(ProveedorID), 'NULL') +
+        ', producto_id=' + IfThen(ProductoID > 0, IntToStr(ProductoID), 'NULL') +
+        ', id_origen=' + IfThen(OrigenID > 0, IntToStr(OrigenID), 'NULL') +
+        ', id_destino=' + IfThen(DestinoID > 0, IntToStr(DestinoID), 'NULL') +
+        ', peso_bruto=' + IntToStr(FPesoBruto) + ', tara=' + IntToStr(FTara) +
+        ', peso_neto=' + IntToStr(FPesoNeto) +
+        ', costo_bs=' + IntToStr(Costo) + ', flete_bs_pendiente=' + IntToStr(Flete) +
+        ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(FEditID));
+    end
+    else
+    begin
+      DM.EjecutarSQL('INSERT INTO pesajes (vehiculo_id, chofer_id, proveedor_id, producto_id, ' +
+        'id_origen, id_destino, peso_bruto, tara, peso_neto, costo_bs, flete_bs_pendiente, ' +
+        'estado, estado_balanza, fecha_creacion, fecha_modificacion) VALUES (' +
+        IntToStr(VehiculoID) + ', ' +
+        IfThen(ChoferID > 0, IntToStr(ChoferID), 'NULL') + ', ' +
+        IfThen(ProveedorID > 0, IntToStr(ProveedorID), 'NULL') + ', ' +
+        IfThen(ProductoID > 0, IntToStr(ProductoID), 'NULL') + ', ' +
+        IfThen(OrigenID > 0, IntToStr(OrigenID), 'NULL') + ', ' +
+        IfThen(DestinoID > 0, IntToStr(DestinoID), 'NULL') + ', ' +
+        IntToStr(FPesoBruto) + ', ' + IntToStr(FTara) + ', ' + IntToStr(FPesoNeto) + ', ' +
+        IntToStr(Costo) + ', ' + IntToStr(Flete) + ', ''ACTIVO'', ''EN_PROCESO'', ''' +
+        FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
     end;
+    DM.Transaccion.Commit;
+    RefrescarPesajes(nil);
+    ShowMessage(IfThen(FEditMode, 'Pesaje actualizado', 'Pesaje guardado correctamente'));
+    CancelEditClick(nil);
+  except
+    DM.Transaccion.Rollback;
+    ShowMessage('Error al guardar pesaje');
+  end;
+end;
+
+procedure TFramePesaje.CancelEditClick(Sender: TObject);
+begin
+  FEditMode := False; FEditID := 0;
+  LimpiarClick(nil);
+  lblFormTitle.Caption := 'Datos del Pesaje';
+  TLabel(pnlGuardar.Controls[0]).Caption := 'GUARDAR';
+  pnlCancelEdit.Visible := False;
+  pnlLimpiar.Visible := True;
+end;
+
+procedure TFramePesaje.LimpiarClick(Sender: TObject);
+begin
+  FTara := 0; FPesoBruto := 0; FPesoNeto := 0;
+  lblPesoDisplay.Caption := '0'; lblResultados.Caption := '';
+  cmbVehiculo.ItemIndex := 0; cmbChofer.ItemIndex := 0; cmbProveedor.ItemIndex := 0;
+  cmbProducto.ItemIndex := 0; cmbOrigen.ItemIndex := 0; cmbDestino.ItemIndex := 0;
+  edtCosto.Text := '0'; edtFlete.Text := '0';
+end;
+
+// ═══════════════════════════════════════════════
+// QUICK CREATE DIALOGS
+// ═══════════════════════════════════════════════
+
+procedure TFramePesaje.QuickVehiculoClick(Sender: TObject);
+var F: TForm; ePlaca, eTipo, eTara: TEdit; Lbl: TLabel; YPos: Integer;
+begin
+  F := TForm.Create(nil);
+  try
+    F.Caption := ''; F.Width := 380; F.Position := poOwnerFormCenter;
+    F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
+    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(24,14,400,24); Caption:='Nuevo vehiculo'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    end; YPos:=80;
+
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Placa *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        ePlaca:=TEdit.Create(F); ePlaca.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        ePlaca.Align:=alClient; ePlaca.BorderStyle:=bsNone; ePlaca.Font.Size:=11; ePlaca.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Tipo'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eTipo:=TEdit.Create(F); eTipo.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eTipo.Align:=alClient; eTipo.BorderStyle:=bsNone; eTipo.Font.Size:=11; eTipo.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Tara (kg)'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eTara:=TEdit.Create(F); eTara.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eTara.Align:=alClient; eTara.BorderStyle:=bsNone; eTara.Font.Size:=11; eTara.Text:='0'; end; end;
+    YPos:=YPos+60;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(58,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(196,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
+    F.Height:=YPos+60;
+
+    if F.ShowModal = mrOK then begin
+      if Trim(ePlaca.Text) = '' then begin ShowMessage('Placa obligatoria'); Exit; end;
+      DM.EjecutarSQL('INSERT INTO vehiculos (placa, tipo_vehiculo, tara, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+        QuotedStr(Trim(ePlaca.Text)) + ', ' + QuotedStr(Trim(eTipo.Text)) + ', ' + Trim(eTara.Text) +
+        ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+      CargarCombos;
+    end;
+  finally F.Free; end;
+end;
+
+procedure TFramePesaje.QuickChoferClick(Sender: TObject);
+var F: TForm; eNom, eCI, eLic, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+begin
+  F := TForm.Create(nil);
+  try
+    F.Caption := ''; F.Width := 380; F.Position := poOwnerFormCenter;
+    F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
+    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(24,14,400,24); Caption:='Nuevo chofer'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    end; YPos:=80;
+
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eNom:=TEdit.Create(F); eNom.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=11; eNom.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='CI'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eCI:=TEdit.Create(F); eCI.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eCI.Align:=alClient; eCI.BorderStyle:=bsNone; eCI.Font.Size:=11; eCI.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Licencia'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eLic:=TEdit.Create(F); eLic.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eLic.Align:=alClient; eLic.BorderStyle:=bsNone; eLic.Font.Size:=11; eLic.CharCase:=ecNormal; end; end;
+    YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eTel:=TEdit.Create(F); eTel.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eTel.Align:=alClient; eTel.BorderStyle:=bsNone; eTel.Font.Size:=11; eTel.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+60;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(58,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(196,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
+    F.Height:=YPos+60;
+
+    if F.ShowModal = mrOK then begin
+      if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
+      if DM.Transaccion.Active then DM.Transaccion.Rollback;
+      DM.Transaccion.StartTransaction;
+      try
+        DM.EjecutarSQL('INSERT INTO personas (nombre, ci, telefono, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+          QuotedStr(Trim(eNom.Text)) + ', ' + QuotedStr(Trim(eCI.Text)) + ', ' + QuotedStr(Trim(eTel.Text)) +
+          ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+        DM.EjecutarSQL('INSERT INTO choferes (persona_id, licencia, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+          IntToStr(DM.ObtenerUltimoID) + ', ' + QuotedStr(Trim(eLic.Text)) +
+          ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+        DM.Transaccion.Commit; CargarCombos;
+      except DM.Transaccion.Rollback; ShowMessage('Error al crear chofer'); end;
+    end;
+  finally F.Free; end;
+end;
+
+procedure TFramePesaje.QuickProveedorClick(Sender: TObject);
+var F: TForm; eNom, eEmp, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+begin
+  F := TForm.Create(nil);
+  try
+    F.Caption := ''; F.Width := 380; F.Position := poOwnerFormCenter;
+    F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
+    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(24,14,400,24); Caption:='Nuevo proveedor'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    end; YPos:=80;
+
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eNom:=TEdit.Create(F); eNom.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=11; eNom.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Empresa'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eEmp:=TEdit.Create(F); eEmp.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eEmp.Align:=alClient; eEmp.BorderStyle:=bsNone; eEmp.Font.Size:=11; eEmp.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eTel:=TEdit.Create(F); eTel.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eTel.Align:=alClient; eTel.BorderStyle:=bsNone; eTel.Font.Size:=11; eTel.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+60;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(58,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(196,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
+    F.Height:=YPos+60;
+
+    if F.ShowModal = mrOK then begin
+      if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
+      if DM.Transaccion.Active then DM.Transaccion.Rollback;
+      DM.Transaccion.StartTransaction;
+      try
+        DM.EjecutarSQL('INSERT INTO personas (nombre, telefono, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+          QuotedStr(Trim(eNom.Text)) + ', ' + QuotedStr(Trim(eTel.Text)) +
+          ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+        DM.EjecutarSQL('INSERT INTO proveedores (persona_id, nombre_empresa, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+          IntToStr(DM.ObtenerUltimoID) + ', ' + QuotedStr(Trim(eEmp.Text)) +
+          ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+        DM.Transaccion.Commit; CargarCombos;
+      except DM.Transaccion.Rollback; ShowMessage('Error al crear proveedor'); end;
+    end;
+  finally F.Free; end;
+end;
+
+procedure TFramePesaje.QuickSimpleClick(Sender: TObject);
+var F: TForm; eNom: TEdit; TagVal: Integer; Tabla: string; Lbl: TLabel; YPos: Integer;
+begin
+  TagVal := TPanel(Sender).Tag;
+  case TagVal of 4: Tabla:='productos'; 5: Tabla:='origenes'; 6: Tabla:='destinos'; else Exit; end;
+  F := TForm.Create(nil);
+  try
+    F.Caption := ''; F.Width := 360; F.Position := poOwnerFormCenter;
+    F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
+    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(24,14,400,24); Caption:='Nuevo registro'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    end; YPos:=80;
+
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,310,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        SetBounds(1,1,308,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
+        eNom:=TEdit.Create(F); eNom.Parent:=TPanel(F.Controls[F.ControlCount-1]);
+        eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=11; eNom.CharCase:=ecUpperCase; end; end;
+    YPos:=YPos+60;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(48,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(186,YPos,130,36);
+      BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
+    F.Height:=YPos+60;
+
+    if F.ShowModal = mrOK then begin
+      if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
+      DM.EjecutarSQL('INSERT INTO ' + Tabla + ' (nombre, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+        QuotedStr(Trim(eNom.Text)) + ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+      CargarCombos;
+    end;
+  finally F.Free; end;
+end;
+
+// ═══════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════
+
+function TFramePesaje.CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer;
+  const ACaption: string; AColor: TColor; AFontColor: TColor; ATag: Integer;
+  AClick: TNotifyEvent): TPanel;
+var Lbl: TLabel;
+begin
+  Result := TPanel.Create(AParent);
+  Result.Parent := AParent; Result.SetBounds(ALeft, ATop, AW, AH);
+  Result.BevelOuter := bvNone; Result.Color := AColor; Result.Tag := ATag;
+  Result.Cursor := crHandPoint; Result.OnClick := AClick;
+  Result.OnPaint := @PaintRounded;
+  Result.ParentBackground := False; Result.ParentColor := False;
+  Lbl := TLabel.Create(Result); Lbl.Parent := Result;
+  Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
+  Lbl.Caption := ACaption; Lbl.Font.Size := 12; Lbl.Font.Style := [];
+  Lbl.Font.Color := AFontColor; Lbl.OnClick := AClick;
+end;
+
+procedure TFramePesaje.QuickCancelarClick(Sender: TObject);
+var Frm: TCustomForm;
+begin
+  if Sender is TPanel then begin
+    Frm := GetParentForm(TPanel(Sender));
+    if Frm <> nil then Frm.ModalResult := mrCancel;
+  end;
+end;
+
+procedure TFramePesaje.QuickGuardarClick(Sender: TObject);
+var Frm: TCustomForm;
+begin
+  if Sender is TPanel then begin
+    Frm := GetParentForm(TPanel(Sender));
+    if Frm <> nil then Frm.ModalResult := mrOK;
+  end;
+end;
+
+procedure TFramePesaje.PaintRounded(Sender: TObject);
+var Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_BG; Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  if Pnl.Tag = 1 then begin
+    Pnl.Canvas.Pen.Color := CLR_INFO; Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end else begin
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
   end;
 end;
 
