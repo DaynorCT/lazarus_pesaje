@@ -28,7 +28,7 @@ type
     lblFormTitle: TLabel;
     cmbVehiculo, cmbChofer, cmbProveedor: TComboBox;
     cmbProducto, cmbOrigen, cmbDestino: TComboBox;
-    edtCosto, edtFlete: TEdit;
+    edtCosto, edtFlete, edtLicencia, edtTipo: TEdit;
     Grid: TStringGrid;
     pnlConectar, pnlTara, pnlGuardar, pnlLimpiar, pnlCancelEdit: TPanel;
     btnVehNuevo, btnChoNuevo, btnPrvNuevo: TPanel;
@@ -36,6 +36,7 @@ type
     procedure RefrescarPesajes(Sender: TObject);
     procedure CargarCombos;
     procedure VehiculoChange(Sender: TObject);
+    procedure ChoferChange(Sender: TObject);
     procedure TimerLecturaTimer(Sender: TObject);
     procedure TimerRelojTimer(Sender: TObject);
     procedure ProcesarTrama(const Trama: string);
@@ -109,7 +110,7 @@ begin
   // ── LEFT PANEL ──
   pnlLeft := TPanel.Create(Self);
   pnlLeft.Parent := Self;
-  pnlLeft.SetBounds(24, 80, 380, Self.ClientHeight - 430);
+  pnlLeft.SetBounds(24, 80, 260, Self.ClientHeight - 330);
   pnlLeft.Anchors := [akTop, akLeft, akBottom];
   pnlLeft.BevelOuter := bvNone;
   pnlLeft.Color := CLR_BG;
@@ -163,90 +164,121 @@ begin
   // ── RIGHT PANEL ──
   pnlForm := TPanel.Create(Self);
   pnlForm.Parent := Self;
-  pnlForm.SetBounds(420, 80, 306, Self.ClientHeight - 430);
+  pnlForm.SetBounds(0, 60, 775, Self.ClientHeight - 400);
   pnlForm.Anchors := [akTop, akRight, akBottom];
-  pnlForm.BevelOuter := bvNone;
-  pnlForm.Color := CLR_BG;
+  pnlForm.BevelOuter := bvLowered;
+  pnlForm.BevelInner := bvNone;
+  pnlForm.BevelWidth := 1;
+  pnlForm.Color := CLR_CARD;
 
   YPos := 0;
 
   lblFormTitle := TLabel.Create(pnlForm);
   lblFormTitle.Parent := pnlForm;
-  lblFormTitle.SetBounds(0, YPos, 300, 20);
+  lblFormTitle.SetBounds(20, YPos, 300, 20);
   lblFormTitle.Caption := 'Datos del Pesaje';
   lblFormTitle.Font.Size := 11;
   lblFormTitle.Font.Style := [];
   lblFormTitle.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 28;
+  YPos := YPos + 26;
 
-  cmbVehiculo := TComboBox.Create(pnlForm);
-  cmbVehiculo.Parent := pnlForm;
-  cmbVehiculo.SetBounds(0, YPos, 234, 32);
-  cmbVehiculo.Style := csDropDownList; cmbVehiculo.Font.Size := 12;
+  // ════ ROW 1: Chofer | Placa * | Licencia ════
+  // Col 1: Chofer
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(20, YPos, 100, 14); Lbl.Caption := 'Chofer'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 18;
+  cmbChofer := TComboBox.Create(pnlForm); cmbChofer.Parent := pnlForm;
+  cmbChofer.SetBounds(20, YPos, 152, 28); cmbChofer.Style := csDropDownList; cmbChofer.Font.Size := 11;
+  cmbChofer.OnChange := @ChoferChange;
+  btnChoNuevo := CrearBoton(pnlForm, YPos, 174, 24, 28, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickChoferClick);
+
+  // Col 2: Placa *
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(212, YPos - 18, 80, 14); Lbl.Caption := 'Placa'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(246, YPos - 18, 20, 14); Lbl.Caption := '*'; Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_DESTRUCTIVE; Lbl.Font.Style := [fsBold];
+  cmbVehiculo := TComboBox.Create(pnlForm); cmbVehiculo.Parent := pnlForm;
+  cmbVehiculo.SetBounds(212, YPos, 152, 28); cmbVehiculo.Style := csDropDownList; cmbVehiculo.Font.Size := 11;
   cmbVehiculo.OnChange := @VehiculoChange;
-  btnVehNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickVehiculoClick);
-  YPos := YPos + 40;
+  btnVehNuevo := CrearBoton(pnlForm, YPos, 366, 24, 28, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickVehiculoClick);
 
-  cmbChofer := TComboBox.Create(pnlForm);
-  cmbChofer.Parent := pnlForm;
-  cmbChofer.SetBounds(0, YPos, 234, 32);
-  cmbChofer.Style := csDropDownList; cmbChofer.Font.Size := 12;
-  btnChoNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickChoferClick);
-  YPos := YPos + 40;
+  // Col 3: Licencia
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(404, YPos - 18, 100, 14); Lbl.Caption := 'Licencia'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
+  pnlOuter.SetBounds(404, YPos, 168, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
+  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 166, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
+  edtLicencia := TEdit.Create(pnlInner); edtLicencia.Parent := pnlInner;
+  edtLicencia.Align := alClient; edtLicencia.BorderStyle := bsNone; edtLicencia.Font.Size := 11;
+  edtLicencia.ReadOnly := True; edtLicencia.Color := CLR_WHITE; edtLicencia.Text := '';
+  YPos := YPos + 34;
 
-  cmbProveedor := TComboBox.Create(pnlForm);
-  cmbProveedor.Parent := pnlForm;
-  cmbProveedor.SetBounds(0, YPos, 234, 32);
-  cmbProveedor.Style := csDropDownList; cmbProveedor.Font.Size := 12;
-  btnPrvNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickProveedorClick);
-  YPos := YPos + 40;
-
-  cmbProducto := TComboBox.Create(pnlForm);
-  cmbProducto.Parent := pnlForm;
-  cmbProducto.SetBounds(0, YPos, 234, 32);
-  cmbProducto.Style := csDropDownList; cmbProducto.Font.Size := 12;
-  btnProNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickSimpleClick);
-  btnProNuevo.Tag := 4;
-  YPos := YPos + 40;
-
-  cmbOrigen := TComboBox.Create(pnlForm);
-  cmbOrigen.Parent := pnlForm;
-  cmbOrigen.SetBounds(0, YPos, 234, 32);
-  cmbOrigen.Style := csDropDownList; cmbOrigen.Font.Size := 12;
-  btnOriNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickSimpleClick);
-  btnOriNuevo.Tag := 5;
-  YPos := YPos + 40;
-
-  cmbDestino := TComboBox.Create(pnlForm);
-  cmbDestino.Parent := pnlForm;
-  cmbDestino.SetBounds(0, YPos, 234, 32);
-  cmbDestino.Style := csDropDownList; cmbDestino.Font.Size := 12;
-  btnDesNuevo := CrearBoton(pnlForm, YPos, 240, 60, 32, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickSimpleClick);
-  btnDesNuevo.Tag := 6;
-  YPos := YPos + 48;
+  // ════ ROW 2: Tipo | Proveedor | Producto ════
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(20, YPos, 100, 14); Lbl.Caption := 'Tipo vehiculo'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 16;
+  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
+  pnlOuter.SetBounds(20, YPos, 176, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
+  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 174, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
+  edtTipo := TEdit.Create(pnlInner); edtTipo.Parent := pnlInner;
+  edtTipo.Align := alClient; edtTipo.BorderStyle := bsNone; edtTipo.Font.Size := 11;
+  edtTipo.ReadOnly := True; edtTipo.Color := CLR_WHITE; edtTipo.Text := '';
 
   Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(0, YPos, 100, 16); Lbl.Caption := 'Costo (Bs)';
-  Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  Lbl.SetBounds(212, YPos - 16, 100, 14); Lbl.Caption := 'Proveedor'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  cmbProveedor := TComboBox.Create(pnlForm); cmbProveedor.Parent := pnlForm;
+  cmbProveedor.SetBounds(212, YPos, 176, 28); cmbProveedor.Style := csDropDownList; cmbProveedor.Font.Size := 11;
+
   Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
-  Lbl.SetBounds(158, YPos, 100, 16); Lbl.Caption := 'Flete (Bs)';
-  Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 22;
+  Lbl.SetBounds(404, YPos - 16, 100, 14); Lbl.Caption := 'Producto'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  cmbProducto := TComboBox.Create(pnlForm); cmbProducto.Parent := pnlForm;
+  cmbProducto.SetBounds(404, YPos, 168, 28); cmbProducto.Style := csDropDownList; cmbProducto.Font.Size := 11;
+  YPos := YPos + 36;
 
-  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
-  pnlOuter.SetBounds(0, YPos, 148, 36); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
-  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 146, 34); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 6;
-  edtCosto := TEdit.Create(pnlInner); edtCosto.Parent := pnlInner; edtCosto.Align := alClient;
-  edtCosto.BorderStyle := bsNone; edtCosto.Font.Size := 11; edtCosto.Text := '0';
+  // ════ ROW 3: Origen | Destino | Costo ════
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(20, YPos, 100, 14); Lbl.Caption := 'Origen'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 18;
+  cmbOrigen := TComboBox.Create(pnlForm); cmbOrigen.Parent := pnlForm;
+  cmbOrigen.SetBounds(20, YPos, 176, 28); cmbOrigen.Style := csDropDownList; cmbOrigen.Font.Size := 11;
 
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(212, YPos - 18, 100, 14); Lbl.Caption := 'Destino'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  cmbDestino := TComboBox.Create(pnlForm); cmbDestino.Parent := pnlForm;
+  cmbDestino.SetBounds(212, YPos, 176, 28); cmbDestino.Style := csDropDownList; cmbDestino.Font.Size := 11;
+
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(404, YPos - 18, 80, 14); Lbl.Caption := 'Costo (Bs)'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
   pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
-  pnlOuter.SetBounds(158, YPos, 148, 36); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
+  pnlOuter.SetBounds(404, YPos, 168, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
   pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 146, 34); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 6;
-  edtFlete := TEdit.Create(pnlInner); edtFlete.Parent := pnlInner; edtFlete.Align := alClient;
-  edtFlete.BorderStyle := bsNone; edtFlete.Font.Size := 11; edtFlete.Text := '0';
-  YPos := YPos + 50;
+  pnlInner.SetBounds(1, 1, 166, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
+  edtCosto := TEdit.Create(pnlInner); edtCosto.Parent := pnlInner;
+  edtCosto.Align := alClient; edtCosto.BorderStyle := bsNone; edtCosto.Font.Size := 11; edtCosto.Text := '0';
+  YPos := YPos + 34;
+
+  // ════ ROW 4: Flete | Tara ════
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(20, YPos, 120, 14); Lbl.Caption := 'Flete pend. (Bs)'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 18;
+  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
+  pnlOuter.SetBounds(20, YPos, 176, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
+  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 174, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
+  edtFlete := TEdit.Create(pnlInner); edtFlete.Parent := pnlInner;
+  edtFlete.Align := alClient; edtFlete.BorderStyle := bsNone; edtFlete.Font.Size := 11; edtFlete.Text := '0';
+
+  // Tara
+  Lbl := TLabel.Create(pnlForm); Lbl.Parent := pnlForm;
+  Lbl.SetBounds(212, YPos - 18, 140, 14); Lbl.Caption := 'Tara (kg)'; Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING;
+  pnlOuter := TPanel.Create(pnlForm); pnlOuter.Parent := pnlForm;
+  pnlOuter.SetBounds(212, YPos, 360, 26); pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
+  pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 358, 24); pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 3;
+  YPos := YPos + 40;
 
   pnlCancelEdit := CrearBoton(pnlForm, YPos, 0, 140, 36, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
   pnlCancelEdit.Visible := False;
@@ -384,13 +416,25 @@ var Q: TSQLQuery; Vid: Integer;
 begin
   if cmbVehiculo.ItemIndex < 1 then Exit;
   Vid := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
-  Q := DM.AbrirQuery('SELECT tara FROM vehiculos WHERE id=' + IntToStr(Vid));
+  Q := DM.AbrirQuery('SELECT tara, tipo_vehiculo FROM vehiculos WHERE id=' + IntToStr(Vid));
   try
     if not Q.EOF then
     begin
       FTara := Q.Fields[0].AsInteger;
+      edtTipo.Text := UpperCase(Q.Fields[1].AsString);
       lblResultados.Caption := 'Tara del vehiculo: ' + IntToStr(FTara) + ' kg';
     end;
+  finally Q.Close; end;
+end;
+
+procedure TFramePesaje.ChoferChange(Sender: TObject);
+var Q: TSQLQuery; Cid: Integer;
+begin
+  if cmbChofer.ItemIndex < 1 then begin edtLicencia.Text := ''; Exit; end;
+  Cid := PtrInt(cmbChofer.Items.Objects[cmbChofer.ItemIndex]);
+  Q := DM.AbrirQuery('SELECT licencia FROM choferes WHERE id=' + IntToStr(Cid));
+  try
+    if not Q.EOF then edtLicencia.Text := UpperCase(Q.Fields[0].AsString);
   finally Q.Close; end;
 end;
 
@@ -763,6 +807,7 @@ begin
   cmbVehiculo.ItemIndex := 0; cmbChofer.ItemIndex := 0; cmbProveedor.ItemIndex := 0;
   cmbProducto.ItemIndex := 0; cmbOrigen.ItemIndex := 0; cmbDestino.ItemIndex := 0;
   edtCosto.Text := '0'; edtFlete.Text := '0';
+  edtLicencia.Text := ''; edtTipo.Text := '';
 end;
 
 // ═══════════════════════════════════════════════
