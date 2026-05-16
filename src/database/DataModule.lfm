@@ -1,17 +1,23 @@
 object DM: TDM
   OldCreateOrder = False
   Height = 240
+  HorizontalOffset = 231
+  VerticalOffset = 63
   Width = 380
   object Conexion: TSQLite3Connection
     Connected = False
     LoginPrompt = False
     DatabaseName = 'pesaje.db'
+    KeepConnection = False
+    AlwaysUseBigint = False
+    AlwaysUseMemo = False
   end
   object Transaccion: TSQLTransaction
     Active = False
     Database = Conexion
   end
   object Query: TSQLQuery
+    FieldDefs = <>
     Database = Conexion
     Transaction = Transaccion
   end

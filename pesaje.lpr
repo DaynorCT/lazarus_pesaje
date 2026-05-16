@@ -28,13 +28,6 @@ begin
   Application.Title := 'Sistema de Pesaje';
   Application.Initialize;
 
-  DirectorioApp := ExtractFilePath(ParamStr(0));
-  if Pos('.app/Contents/MacOS', DirectorioApp) > 0 then
-  begin
-    DirectorioApp := ExtractFilePath(ExpandFileName(
-      ExcludeTrailingPathDelimiter(DirectorioApp) + '/../../..'));
-  end;
-
   DM := TDM.Create(nil);
   DM.InicializarBaseDatos;
 

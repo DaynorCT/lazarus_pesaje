@@ -46,7 +46,6 @@ type
 
 var
   DM: TDM;
-  DirectorioApp: string = '';
 
 implementation
 
@@ -54,7 +53,11 @@ implementation
 
 function TDM.DBPath: string;
 begin
-  Result := DirectorioApp + 'pesaje.db';
+  {$IFDEF DARWIN}
+  Result := '/Users/jaru/dev/lazarus-pesaje/pesaje.db';
+  {$ELSE}
+  Result := ExtractFilePath(ParamStr(0)) + 'pesaje.db';
+  {$ENDIF}
 end;
 
 procedure TDM.DataModuleCreate(Sender: TObject);
