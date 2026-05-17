@@ -250,47 +250,113 @@ begin
   Lbl.Font.Color := CLR_TEXT_SLATE;
   Lbl.Alignment := taCenter;
 
-  pnlCapturarPeso := CrearBoton(pnlRegistro, YPos, 120, 100, 40, 'Capturar peso', CLR_PRIMARY, CLR_WHITE, 0, @CapturarPesoClick);
-  pnlCapturarPeso.Enabled := False;
-
-  pnlCapturarTara := CrearBoton(pnlRegistro, YPos, 228, 100, 40, 'Capturar tara', CLR_WHITE, CLR_PRIMARY, 1, @TaraClick);
-  pnlCapturarTara.Enabled := False;
-  YPos := YPos + 64;
+  // ─────────────────────────────
+  // BOTON CAPTURAR PESO
+  // ─────────────────────────────
+  pnlCapturarPeso := TPanel.Create(pnlRegistro);
+  pnlCapturarPeso.Parent := pnlRegistro;
+  pnlCapturarPeso.SetBounds(
+    130,
+    YPos,
+    150,
+    36
+  );
+  pnlCapturarPeso.BevelOuter := bvNone;
+  pnlCapturarPeso.Color := CLR_PRIMARY;
+  pnlCapturarPeso.ParentBackground := False;
+  pnlCapturarPeso.ParentColor := False;
+  pnlCapturarPeso.Cursor := crHandPoint;
+  pnlCapturarPeso.OnPaint := @PaintRounded;
+  pnlCapturarPeso.OnClick := @CapturarPesoClick;
+  //pnlCapturarPeso.Enabled := False;
+  
+  // TEXTO BOTON PESO
+  Lbl := TLabel.Create(pnlCapturarPeso);
+  Lbl.Parent := pnlCapturarPeso;
+  Lbl.Align := alClient;
+  Lbl.Alignment := taCenter;
+  Lbl.Layout := tlCenter;
+  Lbl.Caption := 'Capturar peso';
+  Lbl.Font.Size := 12;
+  Lbl.Font.Style := [];
+  Lbl.Font.Color := CLR_WHITE;
+  Lbl.Transparent := True;
+  Lbl.ParentColor := False;
+  Lbl.Cursor := crHandPoint;
+  Lbl.OnClick := @CapturarPesoClick;
+  
+  // ─────────────────────────────
+  // BOTON CAPTURAR TARA
+  // ─────────────────────────────
+  pnlCapturarTara := TPanel.Create(pnlRegistro);
+  pnlCapturarTara.Parent := pnlRegistro;
+  pnlCapturarTara.SetBounds(
+    295,
+    YPos,
+    150,
+    36
+  );
+  pnlCapturarTara.BevelOuter := bvNone;
+  pnlCapturarTara.Color := CLR_INFO;
+  pnlCapturarTara.ParentBackground := False;
+  pnlCapturarTara.ParentColor := False;
+  pnlCapturarTara.Cursor := crHandPoint;
+  pnlCapturarTara.OnPaint := @PaintRounded;
+  pnlCapturarTara.OnClick := @TaraClick;
+  //pnlCapturarTara.Enabled := False;
+  
+  // TEXTO BOTON TARA
+  Lbl := TLabel.Create(pnlCapturarTara);
+  Lbl.Parent := pnlCapturarTara;
+  Lbl.Align := alClient;
+  Lbl.Alignment := taCenter;
+  Lbl.Layout := tlCenter;
+  Lbl.Caption := 'Capturar tara';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_WHITE;
+  Lbl.Transparent := True;
+  Lbl.Cursor := crHandPoint;
+  Lbl.OnClick := @TaraClick;
+  YPos := YPos + 90;
 
   // Peso Bruto | Peso tara | Peso Neto
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(24, YPos, 100, 16);
+  Lbl.SetBounds(60, YPos, 140, 16);
   Lbl.Caption := 'Peso Bruto';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
-
+  
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(132, YPos, 100, 16);
+  Lbl.SetBounds(240, YPos, 140, 16);
   Lbl.Caption := 'Peso tara';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
-
+  
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(240, YPos, 100, 16);
+  Lbl.SetBounds(416, YPos, 140, 16);
   Lbl.Caption := 'Peso Neto';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
+  
   YPos := YPos + 24;
-
+  
+  // ───── Peso Bruto ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(24, YPos, 100, 40);
+  po.SetBounds(24, YPos, 150, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
+  
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 98, 38);
+  pi.SetBounds(1, 1, 148, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
+  
   lblValBruto := TLabel.Create(pi);
   lblValBruto.Parent := pi;
   lblValBruto.Align := alClient;
@@ -300,18 +366,21 @@ begin
   lblValBruto.Font.Size := 12;
   lblValBruto.Font.Style := [fsBold];
   lblValBruto.Font.Color := CLR_TEXT_HEADING;
-
+  
+  // ───── Peso Tara ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(132, YPos, 100, 40);
+  po.SetBounds(200, YPos, 150, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
+  
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 98, 38);
+  pi.SetBounds(1, 1, 148, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
+  
   lblValTara := TLabel.Create(pi);
   lblValTara.Parent := pi;
   lblValTara.Align := alClient;
@@ -321,18 +390,21 @@ begin
   lblValTara.Font.Size := 12;
   lblValTara.Font.Style := [fsBold];
   lblValTara.Font.Color := CLR_TEXT_HEADING;
-
+  
+  // ───── Peso Neto ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(240, YPos, 116, 40);
+  po.SetBounds(376, YPos, 150, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
+  
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 114, 38);
+  pi.SetBounds(1, 1, 148, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
+  
   lblValNeto := TLabel.Create(pi);
   lblValNeto.Parent := pi;
   lblValNeto.Align := alClient;
