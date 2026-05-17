@@ -208,19 +208,26 @@ begin
   pnlDisplay := TPanel.Create(pnlRegistro);
   pnlDisplay.Parent := pnlRegistro;
   pnlDisplay.SetBounds(24, YPos, InnerW, 160);
+  
   pnlDisplay.BevelOuter := bvNone;
-  pnlDisplay.Color := CLR_PRIMARY;
-  pnlDisplay.OnPaint := @PaintRounded;
-
-  lblPesoDisplay := TLabel.Create(pnlDisplay);
-  lblPesoDisplay.Parent := pnlDisplay;
+  pnlDisplay.Color := CLR_PRIMARY; // borde azul
+  
+  // panel interno blanco
+  pi := TPanel.Create(pnlDisplay);
+  pi.Parent := pnlDisplay;
+  pi.SetBounds(2, 2, InnerW - 4, 156);
+  pi.BevelOuter := bvNone;
+  pi.Color := CLR_WHITE;
+  
+  lblPesoDisplay := TLabel.Create(pi);
+  lblPesoDisplay.Parent := pi;
   lblPesoDisplay.Align := alClient;
   lblPesoDisplay.Alignment := taCenter;
   lblPesoDisplay.Layout := tlCenter;
   lblPesoDisplay.Caption := '0 kg';
   lblPesoDisplay.Font.Height := -36;
   lblPesoDisplay.Font.Style := [fsBold];
-  lblPesoDisplay.Font.Color := CLR_WHITE;
+  lblPesoDisplay.Font.Color := CLR_TEXT_HEADING;
   YPos := YPos + 176;
 
   with TPanel.Create(pnlRegistro) do
