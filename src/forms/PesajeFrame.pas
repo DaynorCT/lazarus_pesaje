@@ -85,8 +85,8 @@ end;
 constructor TFramePesaje.Create(AOwner: TComponent);
 const
   COL1 = 24;
-  COL2 = 300;
-  COL3 = 570;
+  COL2 = 310;
+  COL3 = 600;
   FIELD_W = 180;
   COMBO_W = 148;
 var
