@@ -168,12 +168,17 @@ begin
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  // ── CARD: Registro de peso ──
-  CardW := 380;
+  // ── CARD: Registro de peso left ──
+  CardW := 550;
   InnerW := CardW - 48;
   pnlRegistroCard := TPanel.Create(Self);
   pnlRegistroCard.Parent := Self;
-  pnlRegistroCard.SetBounds(24, 80, CardW, Self.ClientHeight - 330);
+  pnlRegistroCard.SetBounds(
+    24, 
+    80, 
+    CardW, 
+    Self.ClientHeight - 330
+    );
   pnlRegistroCard.Anchors := [akTop, akLeft, akBottom];
   pnlRegistroCard.BevelOuter := bvLowered;
   pnlRegistroCard.BevelInner := bvNone;
@@ -341,7 +346,12 @@ begin
   // ── RIGHT PANEL ──
   pnlForm := TPanel.Create(Self);
   pnlForm.Parent := Self;
-  pnlForm.SetBounds(420, 80, Self.ClientWidth - 444, Self.ClientHeight - 330);
+  pnlForm.SetBounds(
+    CardW + 60, 
+    80, 
+    Self.ClientWidth - 635, 
+    Self.ClientHeight - 330
+    );
   pnlForm.Anchors := [akTop, akLeft, akRight, akBottom];
   pnlForm.BevelOuter := bvLowered;
   pnlForm.BevelInner := bvNone;
@@ -456,7 +466,7 @@ begin
   // ── BOTTOM GRID ──
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.SetBounds(24, Self.ClientHeight - 260, Self.ClientWidth - 48, 310);
+  pnlCard.SetBounds(24, Self.ClientHeight - 200, Self.ClientWidth - 48, 310);
   pnlCard.Anchors := [akLeft, akRight, akBottom];
   pnlCard.BevelOuter := bvLowered; pnlCard.BevelInner := bvNone;
   pnlCard.BevelWidth := 1; pnlCard.Color := CLR_CARD;
