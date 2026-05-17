@@ -22,15 +22,16 @@ type
     FEditMode: Boolean;
     FEditID: Integer;
     TimerLectura: TTimer;
-    TimerReloj: TTimer;
-    pnlDisplay, pnlCard: TPanel;
-    lblPesoDisplay, lblEstadoConexion, lblResultados: TLabel;
+    pnlRegistroCard, pnlDisplay, pnlCard: TPanel;
+    lblPesoDisplay, lblRegistroTitle: TLabel;
+    lblValBruto, lblValTara, lblValNeto: TLabel;
     lblFormTitle: TLabel;
     cmbVehiculo, cmbChofer, cmbProveedor: TComboBox;
     cmbProducto, cmbOrigen, cmbDestino: TComboBox;
     edtCosto, edtFlete, edtLicencia, edtTipo: TEdit;
     Grid: TStringGrid;
-    pnlConectar, pnlTara, pnlGuardar, pnlLimpiar, pnlCancelEdit: TPanel;
+    pnlSwitchConectar, pnlCapturarPeso, pnlCapturarTara: TPanel;
+    pnlGuardar, pnlLimpiar, pnlCancelEdit: TPanel;
     btnVehNuevo, btnChoNuevo, btnPrvNuevo: TPanel;
     btnProNuevo, btnOriNuevo, btnDesNuevo: TPanel;
     procedure RefrescarPesajes(Sender: TObject);
@@ -38,8 +39,11 @@ type
     procedure VehiculoChange(Sender: TObject);
     procedure ChoferChange(Sender: TObject);
     procedure TimerLecturaTimer(Sender: TObject);
-    procedure TimerRelojTimer(Sender: TObject);
     procedure ProcesarTrama(const Trama: string);
+    procedure ActualizarResumenPesos;
+    procedure SwitchConectarPaint(Sender: TObject);
+    procedure SwitchConectarClick(Sender: TObject);
+    procedure CapturarPesoClick(Sender: TObject);
     function ExtraerPeso(const Trama: string): string;
     procedure ConectarClick(Sender: TObject);
     procedure TaraClick(Sender: TObject);
@@ -86,9 +90,10 @@ const
   FIELD_W = 180;
   COMBO_W = 148;
 var
-  Pnl, pnlForm, pnlLeft: TPanel;
+  Pnl, pnlForm, pnlRegistro: TPanel;
   Lbl: TLabel;
-  YPos: Integer;
+  YPos, CardW, InnerW: Integer;
+  po, pi: TPanel;
 
   function MakeLabel(ATop, ALeft: Integer; const ACaption: string): TLabel;
   begin
@@ -163,65 +168,181 @@ begin
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  // ── LEFT PANEL ──
-  pnlLeft := TPanel.Create(Self);
-  pnlLeft.Parent := Self;
-  pnlLeft.SetBounds(24, 80, 380, Self.ClientHeight - 400);
-  pnlLeft.Anchors := [akTop, akLeft, akBottom];
-  pnlLeft.BevelOuter := bvNone;
-  pnlLeft.Color := CLR_BG;
+  // ── CARD: Registro de peso ──
+  CardW := 380;
+  InnerW := CardW - 48;
+  pnlRegistroCard := TPanel.Create(Self);
+  pnlRegistroCard.Parent := Self;
+  pnlRegistroCard.SetBounds(24, 80, CardW, Self.ClientHeight - 330);
+  pnlRegistroCard.Anchors := [akTop, akLeft, akBottom];
+  pnlRegistroCard.BevelOuter := bvLowered;
+  pnlRegistroCard.BevelInner := bvNone;
+  pnlRegistroCard.BevelWidth := 1;
+  pnlRegistroCard.Color := CLR_CARD;
 
-  with TPanel.Create(pnlLeft) do
+  pnlRegistro := pnlRegistroCard;
+  YPos := 20;
+
+  lblRegistroTitle := TLabel.Create(pnlRegistro);
+  lblRegistroTitle.Parent := pnlRegistro;
+  lblRegistroTitle.SetBounds(24, YPos, InnerW, 20);
+  lblRegistroTitle.Caption := 'Registro de peso';
+  lblRegistroTitle.Font.Size := 13;
+  lblRegistroTitle.Font.Color := CLR_TEXT_HEADING;
+  YPos := YPos + 38;
+
+  with TPanel.Create(pnlRegistro) do
   begin
-    Parent := pnlLeft; Align := alTop; Height := 80;
-    BevelOuter := bvNone; Color := CLR_CARD;
-    Lbl := TLabel.Create(Self);
-    Lbl.Parent := TPanel(pnlLeft.Controls[pnlLeft.ControlCount - 1]);
-    Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
-    Lbl.Caption := '--:--:--'; Lbl.Font.Height := -24;
-    Lbl.Font.Style := [fsBold]; Lbl.Font.Color := CLR_TEXT_HEADING;
-    Lbl.Name := 'lblHora'; Lbl.Tag := 1;
+    Parent := pnlRegistro;
+    SetBounds(24, YPos, InnerW, 1);
+    BevelOuter := bvNone;
+    Color := CLR_BORDER;
   end;
+  YPos := YPos + 20;
 
-  pnlDisplay := TPanel.Create(pnlLeft);
-  pnlDisplay.Parent := pnlLeft;
-  pnlDisplay.SetBounds(0, 96, 380, 200);
-  pnlDisplay.BevelOuter := bvNone; pnlDisplay.Color := CLR_PRIMARY;
-  pnlDisplay.Anchors := [akTop, akLeft, akRight];
+  pnlDisplay := TPanel.Create(pnlRegistro);
+  pnlDisplay.Parent := pnlRegistro;
+  pnlDisplay.SetBounds(24, YPos, InnerW, 160);
+  pnlDisplay.BevelOuter := bvNone;
+  pnlDisplay.Color := CLR_PRIMARY;
   pnlDisplay.OnPaint := @PaintRounded;
 
   lblPesoDisplay := TLabel.Create(pnlDisplay);
-  lblPesoDisplay.Parent := pnlDisplay; lblPesoDisplay.Align := alClient;
-  lblPesoDisplay.Alignment := taCenter; lblPesoDisplay.Layout := tlCenter;
-  lblPesoDisplay.Caption := '0'; lblPesoDisplay.Font.Height := -48;
-  lblPesoDisplay.Font.Style := [fsBold]; lblPesoDisplay.Font.Color := CLR_WHITE;
+  lblPesoDisplay.Parent := pnlDisplay;
+  lblPesoDisplay.Align := alClient;
+  lblPesoDisplay.Alignment := taCenter;
+  lblPesoDisplay.Layout := tlCenter;
+  lblPesoDisplay.Caption := '0 kg';
+  lblPesoDisplay.Font.Height := -36;
+  lblPesoDisplay.Font.Style := [fsBold];
+  lblPesoDisplay.Font.Color := CLR_WHITE;
+  YPos := YPos + 176;
 
-  lblEstadoConexion := TLabel.Create(pnlLeft);
-  lblEstadoConexion.Parent := pnlLeft;
-  lblEstadoConexion.SetBounds(10, 310, 360, 24);
-  lblEstadoConexion.Alignment := taCenter;
-  lblEstadoConexion.Caption := 'SIN CONEXION';
-  lblEstadoConexion.Font.Height := -13;
-  lblEstadoConexion.Font.Style := [fsBold];
-  lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
+  with TPanel.Create(pnlRegistro) do
+  begin
+    Parent := pnlRegistro;
+    SetBounds(24, YPos, InnerW, 1);
+    BevelOuter := bvNone;
+    Color := CLR_BORDER;
+  end;
+  YPos := YPos + 20;
 
-  pnlConectar := CrearBoton(pnlLeft, 345, 40, 140, 36, 'CONECTAR', CLR_PRIMARY, CLR_WHITE, 0, @ConectarClick);
-  pnlTara := CrearBoton(pnlLeft, 345, 200, 140, 36, 'TARA', CLR_PRIMARY, CLR_WHITE, 0, @TaraClick);
-  pnlTara.Enabled := False;
+  // Switch conectar | Capturar peso | Capturar tara
+  pnlSwitchConectar := TPanel.Create(pnlRegistro);
+  pnlSwitchConectar.Parent := pnlRegistro;
+  pnlSwitchConectar.SetBounds(24, YPos, 90, 40);
+  pnlSwitchConectar.BevelOuter := bvNone;
+  pnlSwitchConectar.Color := CLR_CARD;
+  pnlSwitchConectar.Cursor := crHandPoint;
+  pnlSwitchConectar.OnPaint := @SwitchConectarPaint;
+  pnlSwitchConectar.OnClick := @SwitchConectarClick;
 
-  lblResultados := TLabel.Create(pnlLeft);
-  lblResultados.Parent := pnlLeft;
-  lblResultados.SetBounds(10, 395, 360, 45);
-  lblResultados.Alignment := taCenter;
-  lblResultados.Caption := '';
-  lblResultados.Font.Height := -13;
-  lblResultados.Font.Color := CLR_TEXT_HEADING;
+  Lbl := TLabel.Create(pnlRegistro);
+  Lbl.Parent := pnlRegistro;
+  Lbl.SetBounds(24, YPos + 42, 90, 14);
+  Lbl.Caption := 'Conexion';
+  Lbl.Font.Size := 10;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.Alignment := taCenter;
+
+  pnlCapturarPeso := CrearBoton(pnlRegistro, YPos, 120, 100, 40, 'Capturar peso', CLR_PRIMARY, CLR_WHITE, 0, @CapturarPesoClick);
+  pnlCapturarPeso.Enabled := False;
+
+  pnlCapturarTara := CrearBoton(pnlRegistro, YPos, 228, 100, 40, 'Capturar tara', CLR_WHITE, CLR_PRIMARY, 1, @TaraClick);
+  pnlCapturarTara.Enabled := False;
+  YPos := YPos + 64;
+
+  // Peso Bruto | Peso tara | Peso Neto
+  Lbl := TLabel.Create(pnlRegistro);
+  Lbl.Parent := pnlRegistro;
+  Lbl.SetBounds(24, YPos, 100, 16);
+  Lbl.Caption := 'Peso Bruto';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+
+  Lbl := TLabel.Create(pnlRegistro);
+  Lbl.Parent := pnlRegistro;
+  Lbl.SetBounds(132, YPos, 100, 16);
+  Lbl.Caption := 'Peso tara';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+
+  Lbl := TLabel.Create(pnlRegistro);
+  Lbl.Parent := pnlRegistro;
+  Lbl.SetBounds(240, YPos, 100, 16);
+  Lbl.Caption := 'Peso Neto';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  YPos := YPos + 24;
+
+  po := TPanel.Create(pnlRegistro);
+  po.Parent := pnlRegistro;
+  po.SetBounds(24, YPos, 100, 40);
+  po.BevelOuter := bvNone;
+  po.Color := CLR_BORDER;
+  pi := TPanel.Create(po);
+  pi.Parent := po;
+  pi.SetBounds(1, 1, 98, 38);
+  pi.BevelOuter := bvNone;
+  pi.Color := CLR_WHITE;
+  pi.BorderWidth := 6;
+  lblValBruto := TLabel.Create(pi);
+  lblValBruto.Parent := pi;
+  lblValBruto.Align := alClient;
+  lblValBruto.Alignment := taCenter;
+  lblValBruto.Layout := tlCenter;
+  lblValBruto.Caption := '0';
+  lblValBruto.Font.Size := 12;
+  lblValBruto.Font.Style := [fsBold];
+  lblValBruto.Font.Color := CLR_TEXT_HEADING;
+
+  po := TPanel.Create(pnlRegistro);
+  po.Parent := pnlRegistro;
+  po.SetBounds(132, YPos, 100, 40);
+  po.BevelOuter := bvNone;
+  po.Color := CLR_BORDER;
+  pi := TPanel.Create(po);
+  pi.Parent := po;
+  pi.SetBounds(1, 1, 98, 38);
+  pi.BevelOuter := bvNone;
+  pi.Color := CLR_WHITE;
+  pi.BorderWidth := 6;
+  lblValTara := TLabel.Create(pi);
+  lblValTara.Parent := pi;
+  lblValTara.Align := alClient;
+  lblValTara.Alignment := taCenter;
+  lblValTara.Layout := tlCenter;
+  lblValTara.Caption := '0';
+  lblValTara.Font.Size := 12;
+  lblValTara.Font.Style := [fsBold];
+  lblValTara.Font.Color := CLR_TEXT_HEADING;
+
+  po := TPanel.Create(pnlRegistro);
+  po.Parent := pnlRegistro;
+  po.SetBounds(240, YPos, 116, 40);
+  po.BevelOuter := bvNone;
+  po.Color := CLR_BORDER;
+  pi := TPanel.Create(po);
+  pi.Parent := po;
+  pi.SetBounds(1, 1, 114, 38);
+  pi.BevelOuter := bvNone;
+  pi.Color := CLR_WHITE;
+  pi.BorderWidth := 6;
+  lblValNeto := TLabel.Create(pi);
+  lblValNeto.Parent := pi;
+  lblValNeto.Align := alClient;
+  lblValNeto.Alignment := taCenter;
+  lblValNeto.Layout := tlCenter;
+  lblValNeto.Caption := '0';
+  lblValNeto.Font.Size := 12;
+  lblValNeto.Font.Style := [fsBold];
+  lblValNeto.Font.Color := CLR_TEXT_HEADING;
 
   // ── RIGHT PANEL ──
   pnlForm := TPanel.Create(Self);
   pnlForm.Parent := Self;
-  pnlForm.SetBounds(0, 60, 775, Self.ClientHeight - 330);
-  pnlForm.Anchors := [akTop, akRight, akBottom];
+  pnlForm.SetBounds(420, 80, Self.ClientWidth - 444, Self.ClientHeight - 330);
+  pnlForm.Anchors := [akTop, akLeft, akRight, akBottom];
   pnlForm.BevelOuter := bvLowered;
   pnlForm.BevelInner := bvNone;
   pnlForm.BevelWidth := 1;
@@ -367,10 +488,6 @@ begin
   TimerLectura := TTimer.Create(Self);
   TimerLectura.Interval := 300; TimerLectura.OnTimer := @TimerLecturaTimer;
   TimerLectura.Enabled := False;
-  TimerReloj := TTimer.Create(Self);
-  TimerReloj.Interval := 1000; TimerReloj.OnTimer := @TimerRelojTimer;
-  TimerReloj.Enabled := True;
-
   CargarCombos;
   RefrescarPesajes(nil);
 end;
@@ -393,11 +510,68 @@ begin
   if Trama <> '' then ProcesarTrama(Trama);
 end;
 
-procedure TFramePesaje.TimerRelojTimer(Sender: TObject);
-var LblHora: TLabel;
+procedure TFramePesaje.ActualizarResumenPesos;
 begin
-  LblHora := TLabel(FindComponent('lblHora'));
-  if LblHora <> nil then LblHora.Caption := FormatDateTime('HH:nn:ss', Now);
+  if lblValBruto <> nil then lblValBruto.Caption := IntToStr(FPesoBruto);
+  if lblValTara <> nil then lblValTara.Caption := IntToStr(FTara);
+  if lblValNeto <> nil then lblValNeto.Caption := IntToStr(FPesoNeto);
+  if pnlSwitchConectar <> nil then pnlSwitchConectar.Invalidate;
+end;
+
+function PesoDesdeDisplay(const ACaption: string): Integer;
+var S: string;
+begin
+  S := Trim(ACaption);
+  if EndsText(' kg', S) then
+    Delete(S, Length(S) - 2, 3);
+  Result := StrToIntDef(S, 0);
+end;
+
+procedure TFramePesaje.SwitchConectarPaint(Sender: TObject);
+var
+  Pnl: TPanel;
+  Ts: TTextStyle;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Font.Height := -13;
+  Pnl.Canvas.Font.Style := [fsBold];
+  Ts := Pnl.Canvas.TextStyle;
+  Ts.Alignment := taCenter;
+  Ts.Layout := tlCenter;
+  if FConectado then
+  begin
+    Pnl.Canvas.Font.Color := CLR_SUCCESS;
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '● ──', Ts);
+  end
+  else
+  begin
+    Pnl.Canvas.Font.Color := CLR_DESTRUCTIVE;
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '○ ──', Ts);
+  end;
+end;
+
+procedure TFramePesaje.SwitchConectarClick(Sender: TObject);
+begin
+  ConectarClick(Sender);
+end;
+
+procedure TFramePesaje.CapturarPesoClick(Sender: TObject);
+begin
+  if not FConectado then
+  begin
+    ShowMessage('Conecte la balanza primero');
+    Exit;
+  end;
+  FPesoBruto := PesoDesdeDisplay(lblPesoDisplay.Caption);
+  if FPesoBruto <= 0 then
+  begin
+    ShowMessage('Peso invalido');
+    Exit;
+  end;
+  FPesoNeto := FPesoBruto - FTara;
+  ActualizarResumenPesos;
 end;
 
 procedure TFramePesaje.ProcesarTrama(const Trama: string);
@@ -406,12 +580,12 @@ begin
   PesoStr := ExtraerPeso(Trama);
   if PesoStr = '' then Exit;
   PesoVal := StrToIntDef(PesoStr, 0);
-  lblPesoDisplay.Caption := IntToStr(PesoVal);
+  lblPesoDisplay.Caption := IntToStr(PesoVal) + ' kg';
   if FTara > 0 then
   begin
-    FPesoBruto := PesoVal; FPesoNeto := FPesoBruto - FTara;
-    lblResultados.Caption := 'Bruto: ' + IntToStr(FPesoBruto) + ' kg  |  ' +
-      'Tara: ' + IntToStr(FTara) + ' kg  |  Neto: ' + IntToStr(FPesoNeto) + ' kg';
+    FPesoBruto := PesoVal;
+    FPesoNeto := FPesoBruto - FTara;
+    ActualizarResumenPesos;
   end;
 end;
 
@@ -469,7 +643,7 @@ begin
     begin
       FTara := Q.Fields[0].AsInteger;
       edtTipo.Text := UpperCase(Q.Fields[1].AsString);
-      lblResultados.Caption := 'Tara del vehiculo: ' + IntToStr(FTara) + ' kg';
+      ActualizarResumenPesos;
     end;
   finally Q.Close; end;
 end;
@@ -706,9 +880,8 @@ begin
     cmbDestino.ItemIndex := BuscarComboIndex(cmbDestino, Q.Fields[5].AsInteger);
     FPesoBruto := Q.Fields[6].AsInteger; FTara := Q.Fields[7].AsInteger;
     FPesoNeto := FPesoBruto - FTara;
-    lblPesoDisplay.Caption := IntToStr(FPesoBruto);
-    lblResultados.Caption := 'Bruto: ' + IntToStr(FPesoBruto) + ' kg  |  ' +
-      'Tara: ' + IntToStr(FTara) + ' kg  |  Neto: ' + IntToStr(FPesoNeto) + ' kg';
+    lblPesoDisplay.Caption := IntToStr(FPesoBruto) + ' kg';
+    ActualizarResumenPesos;
     edtCosto.Text := Q.Fields[8].AsString;
     edtFlete.Text := Q.Fields[9].AsString;
     lblFormTitle.Caption := 'Editar Pesaje #' + IntToStr(ID);
@@ -753,25 +926,46 @@ end;
 
 procedure TFramePesaje.ConectarClick(Sender: TObject);
 begin
-  if FConectado then begin
-    DM.DesconectarSerial; TimerLectura.Enabled := False; FConectado := False;
-    lblEstadoConexion.Caption := 'SIN CONEXION'; lblEstadoConexion.Font.Color := CLR_DESTRUCTIVE;
-    TLabel(pnlConectar.Controls[0]).Caption := 'CONECTAR'; pnlTara.Enabled := False;
-  end else begin
-    if DM.ConectarSerial('COM4', 9600, 8, 'N', 1) then begin
-      TimerLectura.Enabled := True; FConectado := True;
-      lblEstadoConexion.Caption := 'CONECTADO - COM4'; lblEstadoConexion.Font.Color := CLR_SUCCESS;
-      TLabel(pnlConectar.Controls[0]).Caption := 'DESCONECTAR'; pnlTara.Enabled := True;
-    end else ShowMessage('No se pudo conectar al puerto COM4');
+  if FConectado then
+  begin
+    DM.DesconectarSerial;
+    TimerLectura.Enabled := False;
+    FConectado := False;
+    pnlCapturarPeso.Enabled := False;
+    pnlCapturarTara.Enabled := False;
+    ActualizarResumenPesos;
+  end
+  else
+  begin
+    if DM.ConectarSerial('COM4', 9600, 8, 'N', 1) then
+    begin
+      TimerLectura.Enabled := True;
+      FConectado := True;
+      pnlCapturarPeso.Enabled := True;
+      pnlCapturarTara.Enabled := True;
+      ActualizarResumenPesos;
+    end
+    else
+      ShowMessage('No se pudo conectar al puerto COM4');
   end;
 end;
 
 procedure TFramePesaje.TaraClick(Sender: TObject);
-var PesoStr: string;
 begin
-  PesoStr := lblPesoDisplay.Caption; FTara := StrToIntDef(PesoStr, 0);
-  FPesoBruto := 0; FPesoNeto := 0;
-  lblResultados.Caption := 'TARA capturada: ' + IntToStr(FTara) + ' kg  |  Espere el peso bruto...';
+  if not FConectado then
+  begin
+    ShowMessage('Conecte la balanza primero');
+    Exit;
+  end;
+  FTara := PesoDesdeDisplay(lblPesoDisplay.Caption);
+  if FTara <= 0 then
+  begin
+    ShowMessage('Peso invalido');
+    Exit;
+  end;
+  FPesoBruto := 0;
+  FPesoNeto := 0;
+  ActualizarResumenPesos;
 end;
 
 procedure TFramePesaje.GuardarClick(Sender: TObject);
@@ -850,7 +1044,8 @@ end;
 procedure TFramePesaje.LimpiarClick(Sender: TObject);
 begin
   FTara := 0; FPesoBruto := 0; FPesoNeto := 0;
-  lblPesoDisplay.Caption := '0'; lblResultados.Caption := '';
+  lblPesoDisplay.Caption := '0 kg';
+  ActualizarResumenPesos;
   cmbVehiculo.ItemIndex := 0; cmbChofer.ItemIndex := 0; cmbProveedor.ItemIndex := 0;
   cmbProducto.ItemIndex := 0; cmbOrigen.ItemIndex := 0; cmbDestino.ItemIndex := 0;
   edtCosto.Text := '0'; edtFlete.Text := '0';
