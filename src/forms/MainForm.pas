@@ -263,7 +263,7 @@ begin
   else
     Exit;
   if Pnl <> FActiveNav then
-    Pnl.Color := CLR_CARD;
+    Pnl.Color := CLR_SIDEBAR_ACTIVE;
 end;
 
 procedure TfrmMain.NavPaint(Sender: TObject);
@@ -290,7 +290,7 @@ begin
   Btn.Tag := ATag;
   Btn.SetBounds(0, Y, 180, 36);
   Btn.Flat := True;
-  Btn.Font.Size := 14;
+  Btn.Font.Size := 12;
   Btn.Font.Color := CLR_TEXT;
   Btn.Alignment := taLeftJustify;
   Btn.OnClick := @SubItemClick;

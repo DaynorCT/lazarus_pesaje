@@ -475,12 +475,12 @@ begin
   cmbChofer := TComboBox.Create(pnlForm);
   ConfigCombo(cmbChofer, YPos, COL1, COMBO_W);
   cmbChofer.OnChange := @ChoferChange;
-  btnChoNuevo := CrearBoton(pnlForm, YPos, COL1 + COMBO_W + 4, 24, 40, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickChoferClick);
+  btnChoNuevo := CrearBoton(pnlForm, YPos, COL1 + COMBO_W + 4, 24, 40, '+', CLR_WHITE, CLR_SUCCESS, 1, @QuickChoferClick);
 
   cmbVehiculo := TComboBox.Create(pnlForm);
   ConfigCombo(cmbVehiculo, YPos, COL2, COMBO_W);
   cmbVehiculo.OnChange := @VehiculoChange;
-  btnVehNuevo := CrearBoton(pnlForm, YPos, COL2 + COMBO_W + 4, 24, 40, '+', CLR_WHITE, CLR_PRIMARY, 1, @QuickVehiculoClick);
+  btnVehNuevo := CrearBoton(pnlForm, YPos, COL2 + COMBO_W + 4, 24, 40, '+', CLR_WHITE, CLR_SUCCESS, 1, @QuickVehiculoClick);
 
   edtLicencia := MakeEditConBorde(YPos, COL3, FIELD_W, True);
   edtLicencia.Text := '';
