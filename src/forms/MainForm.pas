@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
   Buttons, AuthService, DataModule, LoginForm,
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
-  ProveedoresFrame, UsuariosFrame, EmpresasFrame, AbmSimpleFrame, Theme, base64, SQLDB;
+  ProveedoresFrame, UsuariosFrame, EmpresasFrame, ProductosFrame,
+  OrigenesFrame, DestinosFrame, AbmSimpleFrame, Theme, base64, SQLDB;
 
 type
   TFrameClass = class of TFrame;
@@ -468,10 +469,10 @@ begin
     2: LoadFrame(TFrameEmpresas, 'Empresas');
     3: LoadFrame(TFrameChoferes, 'Choferes');
     4: LoadFrame(TFrameProveedores, 'Proveedores');
-    5: begin FrameP := TFrameAbmSimple.CreateWithConfig(Self, ConfigProductos); LoadFrameInstance(FrameP, 'Productos'); end;
+     5: LoadFrame(TFrameProductos, 'Productos');
     6: LoadFrame(TFrameVehiculos, 'Vehiculos');
-    7: begin FrameP := TFrameAbmSimple.CreateWithConfig(Self, ConfigOrigenes); LoadFrameInstance(FrameP, 'Origenes'); end;
-    8: begin FrameD := TFrameAbmSimple.CreateWithConfig(Self, ConfigDestinos); LoadFrameInstance(FrameD, 'Destinos'); end;
+     7: LoadFrame(TFrameOrigenes, 'Origenes');
+     8: LoadFrame(TFrameDestinos, 'Destinos');
     10: LoadFrame(TFrameUsuarios, 'Usuarios');
     11: ShowMessage('Reportes - Fase 3');
     12: ShowMessage('Configuracion Boleta - Fase 3');
