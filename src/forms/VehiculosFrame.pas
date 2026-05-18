@@ -15,14 +15,22 @@ type
     constructor Create(AOwner: TComponent); override;
   private
     Grid: TStringGrid;
+    pnlCard: TPanel;
+    pnlNuevo: TPanel;
+    lblNuevo: TLabel;
     edtBuscar: TEdit;
-    btnNuevo, btnEditar, btnEliminar: TButton;
+    FEditingID: Integer;
+    FModalForm: TForm;
     procedure Refrescar(Sender: TObject);
     procedure btnNuevoClick(Sender: TObject);
-    procedure btnEditarClick(Sender: TObject);
-    procedure btnEliminarClick(Sender: TObject);
-    procedure GridSelectCell(Sender: TObject; aCol, aRow: Integer; var CanSelect: Boolean);
-    function GetSelectedID: Integer;
+    procedure GuardarClick(Sender: TObject);
+    procedure CancelarClick(Sender: TObject);
+    procedure GridDblClick(Sender: TObject);
+    procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
+    procedure GridMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ToggleEstado(ID: Integer; EstadoActual: string);
+    procedure PaintRounded(Sender: TObject);
+    procedure ShowVehicleForm(ID: Integer);
   end;
 
 implementation
@@ -31,63 +39,137 @@ implementation
 
 constructor TFrameVehiculos.Create(AOwner: TComponent);
 var
-  PnlTop: TPanel;
+  Pnl: TPanel;
   Lbl: TLabel;
+  pnlOuter, pnlInner: TPanel;
 begin
   inherited Create(AOwner);
+  FEditingID := 0;
   Self.Color := CLR_BG;
 
-  PnlTop := TPanel.Create(Self);
-  PnlTop.Parent := Self;
-  PnlTop.Align := alTop;
-  PnlTop.Height := 56;
-  PnlTop.BevelOuter := bvNone;
-  PnlTop.Color := CLR_CARD;
+  // Header
+  Pnl := TPanel.Create(Self);
+  Pnl.Parent := Self;
+  Pnl.Align := alTop;
+  Pnl.Height := 64;
+  Pnl.BevelOuter := bvNone;
+  Pnl.Color := CLR_BG;
+  Pnl.BorderSpacing.Top := 15;
 
-  Lbl := TLabel.Create(Self); Lbl.Parent := PnlTop;
-  Lbl.SetBounds(24, 14, 200, 28);
-  Lbl.Caption := 'Vehículos'; Lbl.Font.Height := -18;
-  Lbl.Font.Style := [fsBold]; Lbl.Font.Color := $333333;
-  
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(24, 18, 200, 28);
+  Lbl.Caption := 'Vehículos';
+  Lbl.Font.Height := -24;
+  Lbl.Font.Style := [fsBold];
+  Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  edtBuscar := TEdit.Create(Self); edtBuscar.Parent := PnlTop;
-  edtBuscar.SetBounds(240, 14, 250, 28); edtBuscar.Font.Size := 12;
-  edtBuscar.TextHint := 'Buscar por placa o tipo...';
+  // Búsqueda por placa
+  pnlOuter := TPanel.Create(Pnl);
+  pnlOuter.Parent := Pnl;
+  pnlOuter.SetBounds(240, 19, 300, 40);
+  pnlOuter.BevelOuter := bvNone;
+  pnlOuter.Color := CLR_BORDER;
+
+  pnlInner := TPanel.Create(pnlOuter);
+  pnlInner.Parent := pnlOuter;
+  pnlInner.SetBounds(1, 1, 298, 38);
+  pnlInner.BevelOuter := bvNone;
+  pnlInner.Color := CLR_WHITE;
+  pnlInner.BorderWidth := 8;
+
+  edtBuscar := TEdit.Create(pnlInner);
+  edtBuscar.Parent := pnlInner;
+  edtBuscar.Align := alClient;
+  edtBuscar.BorderStyle := bsNone;
+  edtBuscar.Font.Size := 11;
+  edtBuscar.Font.Color := CLR_TEXT;
+  edtBuscar.Color := CLR_WHITE;
+  edtBuscar.CharCase := ecUpperCase;
+  edtBuscar.TextHint := 'Buscar por placa...';
   edtBuscar.OnChange := @Refrescar;
 
-  btnNuevo := TButton.Create(Self); btnNuevo.Parent := PnlTop;
-  btnNuevo.SetBounds(500, 12, 100, 32);
-  btnNuevo.Caption := '+ Nuevo'; btnNuevo.Font.Style := [fsBold];
-  btnNuevo.Font.Color := CLR_PRIMARY;
-  
-  btnNuevo.OnClick := @btnNuevoClick;
+  // Botón + AGREGAR (panel azul + label blanco)
+  pnlNuevo := TPanel.Create(Self);
+  pnlNuevo.Parent := Pnl;
+  pnlNuevo.Width := 120;
+  pnlNuevo.Height := 36;
+  pnlNuevo.Top := 14;
+  pnlNuevo.Anchors := [akTop, akRight];
+  pnlNuevo.BorderSpacing.Right := 8;
+  pnlNuevo.BevelOuter := bvNone;
+  pnlNuevo.Color := CLR_PRIMARY;
+  pnlNuevo.ParentBackground := False;
+  pnlNuevo.ParentColor := False;
+  pnlNuevo.Cursor := crHandPoint;
+  pnlNuevo.OnClick := @btnNuevoClick;
+  pnlNuevo.OnPaint := @PaintRounded;
 
-  Grid := TStringGrid.Create(Self); Grid.Parent := Self;
-  Grid.SetBounds(24, 72, Self.ClientWidth - 48, Self.ClientHeight - 152);
+  lblNuevo := TLabel.Create(Self);
+  lblNuevo.Parent := pnlNuevo;
+  lblNuevo.Align := alClient;
+  lblNuevo.Alignment := taCenter;
+  lblNuevo.Layout := tlCenter;
+  lblNuevo.Caption := '+ Agregar';
+  lblNuevo.Font.Size := 12;
+  lblNuevo.Font.Style := [];
+  lblNuevo.Font.Color := CLR_WHITE;
+  lblNuevo.Transparent := True;
+  lblNuevo.ParentColor := False;
+  lblNuevo.OnClick := @btnNuevoClick;
+
+  // Card contenedor de la tabla
+  pnlCard := TPanel.Create(Self);
+  pnlCard.Parent := Self;
+  pnlCard.SetBounds(24, 90, Self.ClientWidth - 48, Self.ClientHeight - 116);
+  pnlCard.Anchors := [akTop, akLeft, akRight, akBottom];
+  pnlCard.BevelOuter := bvLowered;
+  pnlCard.BevelInner := bvNone;
+  pnlCard.BevelWidth := 1;
+  pnlCard.Color := CLR_CARD;
+
+  // Grid
+  Grid := TStringGrid.Create(Self);
+  Grid.Parent := pnlCard;
+  Grid.SetBounds(2, 2, pnlCard.ClientWidth - 4, pnlCard.ClientHeight - 4);
   Grid.Anchors := [akTop, akLeft, akRight, akBottom];
-  Grid.ColCount := 5; Grid.RowCount := 2; Grid.FixedRows := 1;
-  Grid.FixedCols := 0; Grid.Options := Grid.Options + [goRowSelect];
+  Grid.ColCount := 6;
+  Grid.RowCount := 2;
+  Grid.FixedRows := 1;
+  Grid.FixedCols := 0;
+  Grid.Options := Grid.Options + [goRowSelect];
+  Grid.DefaultRowHeight := 36;
+  Grid.RowHeights[0] := 40;
   Grid.Color := CLR_CARD;
   Grid.FixedColor := CLR_CARD;
-  Grid.ParentFont := False;
-  Grid.Font.Color := CLR_TEXT;
-  Grid.DefaultRowHeight := 26;
-  Grid.Cells[0, 0] := 'ID'; Grid.Cells[1, 0] := 'Placa';
-  Grid.Cells[2, 0] := 'Tipo'; Grid.Cells[3, 0] := 'Tara (kg)';
-  Grid.Cells[4, 0] := 'Estado';
-  Grid.ColWidths[0] := 50; Grid.ColWidths[1] := 130;
-  Grid.ColWidths[2] := 250; Grid.ColWidths[3] := 100;
-  Grid.OnSelectCell := @GridSelectCell;
+  Grid.Font.Height := -12;
+  Grid.Font.Color := CLR_TEXT_HEADING;
+  Grid.TitleFont.Height := -10;
+  Grid.TitleFont.Style := [fsBold];
+  Grid.TitleFont.Color := CLR_TEXT_SLATE;
+  Grid.GridLineWidth := 0;
+  Grid.GridLineColor := CLR_BORDER_LIGHT;
+  Grid.Flat := True;
+  Grid.FocusRectVisible := False;
+  Grid.BorderStyle := bsNone;
 
-  btnEditar := TButton.Create(Self); btnEditar.Parent := Self;
-  btnEditar.SetBounds(24, Self.ClientHeight - 60, 100, 32);
-  btnEditar.Anchors := [akLeft,akBottom]; btnEditar.Caption := 'Editar';
-  btnEditar.Enabled := False; btnEditar.OnClick := @btnEditarClick;
+  Grid.Cells[0, 0] := 'Placa';
+  Grid.Cells[1, 0] := 'Tipo de Vehículo';
+  Grid.Cells[2, 0] := 'Tara (kg)';
+  Grid.Cells[3, 0] := 'Estado';
+  Grid.Cells[4, 0] := 'Acciones';
+  Grid.Cells[5, 0] := 'ID';
 
-  btnEliminar := TButton.Create(Self); btnEliminar.Parent := Self;
-  btnEliminar.SetBounds(132, Self.ClientHeight - 60, 160, 32);
-  btnEliminar.Anchors := [akLeft,akBottom]; btnEliminar.Caption := 'Activar/Desactivar';
-  btnEliminar.Enabled := False; btnEliminar.OnClick := @btnEliminarClick;
+  Grid.ColWidths[0] := 180;
+  Grid.ColWidths[1] := 240;
+  Grid.ColWidths[2] := 140;
+  Grid.ColWidths[3] := 200;
+  Grid.ColWidths[4] := 200;
+  Grid.ColWidths[5] := 0; // ID oculto
+
+  Grid.OnDblClick := @GridDblClick;
+  Grid.OnDrawCell := @GridDrawCell;
+  Grid.OnMouseDown := @GridMouseDown;
 
   Refrescar(nil);
 end;
@@ -96,166 +178,494 @@ procedure TFrameVehiculos.Refrescar(Sender: TObject);
 var
   Q: TSQLQuery;
   Filtro: string;
-  Row: Integer;
+  Row, ID: Integer;
 begin
   if (DM = nil) or (not DM.Conexion.Connected) then Exit;
 
-  Filtro := Trim(edtBuscar.Text);
-  if Filtro <> '' then
-    Filtro := ' WHERE (placa LIKE ''%' + StringReplace(Filtro, '''', '''''', [rfReplaceAll]) +
-      '%'' OR tipo_vehiculo LIKE ''%' + StringReplace(Filtro, '''', '''''', [rfReplaceAll]) + '%'') '
-  else
-    Filtro := ' WHERE 1=1 ';
+  Filtro := '';
+  if Trim(edtBuscar.Text) <> '' then
+    Filtro := ' WHERE placa LIKE ''%' +
+      StringReplace(Trim(edtBuscar.Text), '''', '''''', [rfReplaceAll]) + '%'' ';
 
-  Q := DM.AbrirQuery('SELECT id, placa, tipo_vehiculo, tara, estado FROM vehiculos' + Filtro + ' ORDER BY id DESC');
+  Q := DM.AbrirQuery(
+    'SELECT id, placa, tipo_vehiculo, tara, estado ' +
+    'FROM vehiculos ' + Filtro + ' ORDER BY id DESC');
+
   Grid.RowCount := Q.RecordCount + 1;
   Row := 1;
   while not Q.EOF do
   begin
-    Grid.Cells[0, Row] := Q.Fields[0].AsString;
-    Grid.Cells[1, Row] := Q.Fields[1].AsString;
-    Grid.Cells[2, Row] := Q.Fields[2].AsString;
-    Grid.Cells[3, Row] := Q.Fields[3].AsString;
-    Grid.Cells[4, Row] := Q.Fields[4].AsString;
-    Q.Next; Inc(Row);
+    ID := Q.Fields[0].AsInteger;
+    Grid.Objects[0, Row] := TObject(PtrInt(ID));
+    Grid.Cells[0, Row] := UpperCase(Q.Fields[1].AsString);
+    Grid.Cells[1, Row] := UpperCase(Q.Fields[2].AsString);
+    Grid.Cells[2, Row] := Q.Fields[3].AsString;
+    Grid.Cells[3, Row] := UpperCase(Q.Fields[4].AsString);
+    Grid.Cells[4, Row] := '✏️';
+    Grid.Cells[5, Row] := IntToStr(ID);
+    Q.Next;
+    Inc(Row);
   end;
   Q.Close;
-  btnEditar.Enabled := False; btnEliminar.Enabled := False;
 end;
 
-procedure TFrameVehiculos.GridSelectCell(Sender: TObject; aCol, aRow: Integer; var CanSelect: Boolean);
+procedure TFrameVehiculos.GridDrawCell(Sender: TObject; aCol, aRow: Integer;
+  aRect: TRect; aState: TGridDrawState);
+var
+  Ts: TTextStyle;
+  IsSelected: Boolean;
 begin
-  btnEditar.Enabled := (aRow >= 1) and (Grid.Cells[0, aRow] <> '');
-  btnEliminar.Enabled := btnEditar.Enabled;
+  // Header row: fondo blanco + borde inferior
+  if aRow = 0 then
+  begin
+    Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+    Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+    Ts := Grid.Canvas.TextStyle;
+    Ts.Alignment := taCenter;
+    Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
+    Exit;
+  end;
+
+  IsSelected := gdSelected in aState;
+
+  // Columna Acciones: switch (izquierda) + lápiz (derecha)
+  if aCol = 4 then
+  begin
+    if IsSelected then
+      Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else
+      Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+
+    Ts := Grid.Canvas.TextStyle;
+    Ts.Layout := tlCenter;
+
+    // Switch toggle (izquierda del grupo centrado)
+    Grid.Canvas.Font.Height := -13;
+    Grid.Canvas.Font.Style := [fsBold];
+    if Grid.Cells[3, aRow] = 'ACTIVO' then
+    begin
+      Grid.Canvas.Font.Color := CLR_SUCCESS;
+      Ts.Alignment := taCenter;
+      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, '● ──', Ts);
+    end
+    else
+    begin
+      Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
+      Ts.Alignment := taCenter;
+      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, '○ ──', Ts);
+    end;
+
+    // Lápiz editar (derecha del grupo centrado)
+    Grid.Canvas.Font.Height := -13;
+    Grid.Canvas.Font.Color := CLR_PRIMARY;
+    Grid.Canvas.Font.Style := [fsBold];
+    Ts.Alignment := taCenter;
+    Grid.Canvas.TextRect(Rect(aRect.Left + 105, aRect.Top, aRect.Left + 155, aRect.Bottom),
+      aRect.Left + 105, aRect.Top + 2, '✏️', Ts);
+    Exit;
+  end;
+
+  // Columna Estado: badge coloreado centrado
+  if aCol = 3 then
+  begin
+    if IsSelected then
+      Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else
+      Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+
+    if Grid.Cells[3, aRow] = 'ACTIVO' then
+    begin
+      Grid.Canvas.Brush.Color := CLR_SUCCESS_BG;
+      Grid.Canvas.Font.Color := CLR_TEAL;
+    end
+    else
+    begin
+      Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG;
+      Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
+    end;
+
+    Grid.Canvas.Pen.Style := psClear;
+    Grid.Canvas.RoundRect(
+      aRect.Left + 55, aRect.Top + 6,
+      aRect.Left + 145, aRect.Top + 30,
+      12, 12);
+
+    Grid.Canvas.Font.Height := -11;
+    Grid.Canvas.Font.Style := [fsBold];
+    Ts := Grid.Canvas.TextStyle;
+    Ts.Alignment := taCenter;
+    Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top,
+      Grid.Cells[3, aRow], Ts);
+    Exit;
+  end;
+
+  // Fondo de fila seleccionada
+  if IsSelected then
+    Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+  else
+    Grid.Canvas.Brush.Color := CLR_CARD;
+
+  Grid.Canvas.FillRect(aRect);
+
+  // Texto normal de celda
+  Ts := Grid.Canvas.TextStyle;
+  Ts.Alignment := taCenter;
+  Ts.Layout := tlCenter;
+  Grid.Canvas.Font.Height := -12;
+  Grid.Canvas.Font.Color := CLR_TEXT_HEADING;
+  Grid.Canvas.Font.Style := [];
+  Grid.Canvas.TextRect(aRect, aRect.Left + 6, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
+
+  // Línea divisora horizontal suave (solo en col 0)
+  if aCol = 0 then
+  begin
+    Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+  end;
 end;
 
-function TFrameVehiculos.GetSelectedID: Integer;
+procedure TFrameVehiculos.GridMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  Col, Row: Integer;
+  ID, TotalH, I: Integer;
 begin
-  Result := StrToIntDef(Grid.Cells[0, Grid.Row], 0);
+  if Button <> mbLeft then Exit;
+  Grid.MouseToCell(X, Y, Col, Row);
+  if (Row < 1) or (Row >= Grid.RowCount) then Exit;
+
+  TotalH := 0;
+  for I := 0 to Grid.RowCount - 1 do
+    TotalH := TotalH + Grid.RowHeights[I];
+  if Y > TotalH then Exit;
+
+  // Columna Acciones
+  if Col = 4 then
+  begin
+    ID := PtrInt(Grid.Objects[0, Row]);
+    if X < Grid.CellRect(Col, Row).Left + 105 then
+      ToggleEstado(ID, Grid.Cells[3, Row])
+    else
+      ShowVehicleForm(ID);
+  end;
+end;
+
+procedure TFrameVehiculos.GridDblClick(Sender: TObject);
+var
+  Row: Integer;
+  ID: Integer;
+begin
+  Row := Grid.Row;
+  if (Row < 1) or (Row >= Grid.RowCount) then Exit;
+  ID := PtrInt(Grid.Objects[0, Row]);
+  if ID > 0 then ShowVehicleForm(ID);
 end;
 
 procedure TFrameVehiculos.btnNuevoClick(Sender: TObject);
-var
-  F: TForm;
-  edtPlaca, edtTipo, edtTara: TEdit;
-  BtnOK, BtnCancel: TButton;
-  Lbl: TLabel;
 begin
-  F := TForm.Create(nil);
-  try
-    F.Caption := 'Nuevo Vehículo'; F.Width := 400; F.Height := 300;
-    F.Position := poOwnerFormCenter; F.BorderStyle := bsDialog;
-
-    Lbl := TLabel.Create(F); Lbl.Parent := F;
-    Lbl.SetBounds(24, 16, 100, 16); Lbl.Caption := 'Placa *'; Lbl.Font.Style := [fsBold];
-  
-    edtPlaca := TEdit.Create(F); edtPlaca.Parent := F;
-    edtPlaca.SetBounds(24, 36, 340, 32); edtPlaca.Font.Size := 12;
-
-    Lbl := TLabel.Create(F); Lbl.Parent := F;
-    Lbl.SetBounds(24, 76, 100, 16); Lbl.Caption := 'Tipo'; Lbl.Font.Style := [fsBold];
-  
-    edtTipo := TEdit.Create(F); edtTipo.Parent := F;
-    edtTipo.SetBounds(24, 96, 340, 32); edtTipo.Font.Size := 12;
-
-    Lbl := TLabel.Create(F); Lbl.Parent := F;
-    Lbl.SetBounds(24, 136, 100, 16); Lbl.Caption := 'Tara (kg)'; Lbl.Font.Style := [fsBold];
-  
-    edtTara := TEdit.Create(F); edtTara.Parent := F;
-    edtTara.SetBounds(24, 156, 120, 32); edtTara.Font.Size := 12; edtTara.Text := '0';
-
-    BtnOK := TButton.Create(F); BtnOK.Parent := F;
-    BtnOK.SetBounds(100, 210, 100, 36); BtnOK.Caption := 'Guardar';
-    BtnOK.Font.Style := [fsBold]; BtnOK.ModalResult := mrOK;
-  
-
-    BtnCancel := TButton.Create(F); BtnCancel.Parent := F;
-    BtnCancel.SetBounds(210, 210, 100, 36); BtnCancel.Caption := 'Cancelar';
-    BtnCancel.ModalResult := mrCancel;
-
-    if F.ShowModal = mrOK then
-    begin
-      if Trim(edtPlaca.Text) = '' then
-      begin ShowMessage('La placa es obligatoria'); Exit; end;
-      DM.EjecutarSQL('INSERT INTO vehiculos (placa, tipo_vehiculo, tara, estado, ' +
-        'fecha_creacion, fecha_modificacion) VALUES (' +
-        QuotedStr(Trim(edtPlaca.Text)) + ', ' +
-        QuotedStr(Trim(edtTipo.Text)) + ', ' + edtTara.Text +
-        ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
-      Refrescar(nil);
-    end;
-  finally
-    F.Free;
-  end;
+  ShowVehicleForm(0);
 end;
 
-procedure TFrameVehiculos.btnEditarClick(Sender: TObject);
-var
-  ID: Integer;
-  F: TForm;
-  Lbl: TLabel;
-  edtPlaca, edtTipo, edtTara: TEdit;
-  Q: TSQLQuery;
+procedure TFrameVehiculos.GuardarClick(Sender: TObject);
 begin
-  ID := GetSelectedID; if ID = 0 then Exit;
-
-  Q := DM.AbrirQuery('SELECT placa, tipo_vehiculo, tara FROM vehiculos WHERE id=' + IntToStr(ID));
-  if Q.EOF then begin Q.Close; Exit; end;
-
-  F := TForm.Create(nil);
-  try
-    F.Caption := 'Editar Vehículo #' + IntToStr(ID);
-    F.Width := 400; F.Height := 300;
-    F.Position := poOwnerFormCenter; F.BorderStyle := bsDialog;
-
-    Lbl := TLabel.Create(F); Lbl.Parent := F;
-    Lbl.SetBounds(24, 16, 100, 16); Lbl.Caption := 'Placa'; Lbl.Font.Style := [fsBold];
-  
-    edtPlaca.SetBounds(24, 36, 340, 32); edtPlaca.Font.Size := 12;
-    edtPlaca.Text := Q.FieldByName('placa').AsString;
-
-    edtTipo := TEdit.Create(F); edtTipo.Parent := F;
-    edtTipo.SetBounds(24, 96, 340, 32); edtTipo.Font.Size := 12;
-    edtTipo.Text := Q.FieldByName('tipo_vehiculo').AsString;
-
-    edtTara := TEdit.Create(F); edtTara.Parent := F;
-    edtTara.SetBounds(24, 156, 120, 32); edtTara.Font.Size := 12;
-    edtTara.Text := Q.FieldByName('tara').AsString;
-    Q.Close;
-
-    with TButton.Create(F) do begin Parent := F; SetBounds(100, 210, 100, 36);
-      Caption := 'Guardar'; Font.Style := [fsBold]; ModalResult := mrOK; end;
-    with TButton.Create(F) do begin Parent := F; SetBounds(210, 210, 100, 36);
-      Caption := 'Cancelar'; ModalResult := mrCancel; end;
-
-    if F.ShowModal = mrOK then
-    begin
-      if Trim(edtPlaca.Text) = '' then
-      begin ShowMessage('La placa es obligatoria'); Exit; end;
-      DM.EjecutarSQL('UPDATE vehiculos SET placa=' + QuotedStr(Trim(edtPlaca.Text)) +
-        ', tipo_vehiculo=' + QuotedStr(Trim(edtTipo.Text)) +
-        ', tara=' + edtTara.Text + ', fecha_modificacion=''' + FechaHoraActual +
-        ''' WHERE id=' + IntToStr(ID));
-      Refrescar(nil);
-    end;
-  finally
-    F.Free;
-  end;
+  FModalForm.ModalResult := mrOK;
 end;
 
-procedure TFrameVehiculos.btnEliminarClick(Sender: TObject);
-var
-  ID: Integer;
-  Est, Msg, NuevoEst: string;
+procedure TFrameVehiculos.CancelarClick(Sender: TObject);
 begin
-  ID := GetSelectedID; if ID = 0 then Exit;
-  Est := Grid.Cells[4, Grid.Row];
-  if Est = 'ACTIVO' then begin Msg := 'Desactivar #' + IntToStr(ID) + '?'; NuevoEst := 'INACTIVO'; end
-  else begin Msg := 'Reactivar #' + IntToStr(ID) + '?'; NuevoEst := 'ACTIVO'; end;
-  if MessageDlg('Confirmar', Msg, mtConfirmation, [mbYes,mbNo], 0) <> mrYes then Exit;
-  DM.EjecutarSQL('UPDATE vehiculos SET estado=''' + NuevoEst +
+  FModalForm.ModalResult := mrCancel;
+end;
+
+procedure TFrameVehiculos.ToggleEstado(ID: Integer; EstadoActual: string);
+var
+  NuevoEstado: string;
+begin
+  if ID = 0 then Exit;
+  if EstadoActual = 'ACTIVO' then
+    NuevoEstado := 'INACTIVO'
+  else
+    NuevoEstado := 'ACTIVO';
+
+  DM.EjecutarSQL('UPDATE vehiculos SET estado=''' + NuevoEstado +
     ''', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
   Refrescar(nil);
+end;
+
+procedure TFrameVehiculos.PaintRounded(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_BG;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  if Pnl.Tag = 1 then
+  begin
+    Pnl.Canvas.Pen.Color := CLR_INFO;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end
+  else
+  begin
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  end;
+end;
+
+procedure TFrameVehiculos.ShowVehicleForm(ID: Integer);
+var
+  F: TForm;
+  LblSection: TLabel;
+  ePlaca, eTipo, eTara: TEdit;
+  Placa, Tipo, TaraStr: string;
+  Q: TSQLQuery;
+  IsNew: Boolean;
+  YPos: Integer;
+
+  function MakeLabel(ATop, ALeft: Integer; ACaption: string): TLabel;
+  begin
+    Result := TLabel.Create(F);
+    Result.Parent := F;
+    Result.SetBounds(ALeft, ATop, 200, 16);
+    Result.Caption := ACaption;
+    Result.Font.Size := 11;
+    Result.Font.Style := [];
+    Result.Font.Color := CLR_TEXT_HEADING;
+  end;
+
+  function MakeEditConBorde(ATop, ALeft, AWidth: Integer; ANumerico: Boolean = False): TEdit;
+  var
+    pnlOuter, pnlInner: TPanel;
+  begin
+    pnlOuter := TPanel.Create(F);
+    pnlOuter.Parent := F;
+    pnlOuter.SetBounds(ALeft, ATop, AWidth, 40);
+    pnlOuter.BevelOuter := bvNone;
+    pnlOuter.Color := CLR_BORDER;
+
+    pnlInner := TPanel.Create(pnlOuter);
+    pnlInner.Parent := pnlOuter;
+    pnlInner.SetBounds(1, 1, AWidth - 2, 38);
+    pnlInner.BevelOuter := bvNone;
+    pnlInner.Color := CLR_WHITE;
+    pnlInner.BorderWidth := 6;
+
+    Result := TEdit.Create(pnlInner);
+    Result.Parent := pnlInner;
+    Result.Align := alClient;
+    Result.BorderStyle := bsNone;
+    Result.Font.Size := 11;
+    Result.Font.Color := CLR_TEXT;
+    Result.Color := CLR_WHITE;
+    if ANumerico then
+      Result.CharCase := ecNormal
+    else
+      Result.CharCase := ecUpperCase;
+  end;
+
+begin
+  IsNew := ID = 0;
+  Placa := ''; Tipo := ''; TaraStr := '0';
+
+  // Cargar datos si editar
+  if not IsNew then
+  begin
+    Q := DM.AbrirQuery(
+      'SELECT placa, tipo_vehiculo, tara FROM vehiculos WHERE id=' + IntToStr(ID));
+    try
+      if not Q.EOF then
+      begin
+        Placa := UpperCase(Q.FieldByName('placa').AsString);
+        Tipo := UpperCase(Q.FieldByName('tipo_vehiculo').AsString);
+        TaraStr := Q.FieldByName('tara').AsString;
+      end;
+    finally
+      Q.Close;
+    end;
+  end;
+
+  F := TForm.Create(nil);
+  FModalForm := F;
+  try
+    F.Caption := '';
+    F.Width := 500;
+    F.Position := poOwnerFormCenter;
+    F.BorderStyle := bsDialog;
+    F.Color := CLR_WHITE;
+
+    // Header del modal
+    with TPanel.Create(F) do
+    begin
+      Parent := F;
+      Align := alTop;
+      Height := 60;
+      BevelOuter := bvNone;
+      Color := CLR_WHITE;
+      with TLabel.Create(F) do
+      begin
+        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        SetBounds(24, 14, 400, 24);
+        if IsNew then Caption := 'Nuevo vehículo'
+        else Caption := 'Editar vehículo';
+        Font.Size := 14;
+        Font.Style := [];
+        Font.Color := CLR_TEXT_HEADING;
+      end;
+      // Línea separadora
+      with TPanel.Create(F) do
+      begin
+        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        Align := alBottom;
+        Height := 1;
+        BevelOuter := bvNone;
+        Color := CLR_BORDER;
+      end;
+    end;
+
+    YPos := 80;
+
+    // Sección: Datos del vehículo
+    LblSection := TLabel.Create(F);
+    LblSection.Parent := F;
+    LblSection.SetBounds(24, YPos, 300, 20);
+    LblSection.Caption := 'Datos del vehículo';
+    LblSection.Font.Size := 11;
+    LblSection.Font.Style := [];
+    LblSection.Font.Color := CLR_TEXT_HEADING;
+
+    YPos := YPos + 33;
+
+    // Placa
+    MakeLabel(YPos, 24, 'Placa *');
+    YPos := YPos + 28;
+    ePlaca := MakeEditConBorde(YPos, 24, 200);
+    ePlaca.Text := Placa;
+    YPos := YPos + 48;
+
+    // Tipo de vehículo
+    MakeLabel(YPos, 24, 'Tipo de vehículo');
+    YPos := YPos + 28;
+    eTipo := MakeEditConBorde(YPos, 24, 440);
+    eTipo.Text := Tipo;
+    YPos := YPos + 48;
+
+    // Tara
+    MakeLabel(YPos, 24, 'Tara (kg)');
+    YPos := YPos + 28;
+    eTara := MakeEditConBorde(YPos, 24, 160, True);
+    eTara.Text := TaraStr;
+    YPos := YPos + 56;
+
+    // Línea divisora
+    with TPanel.Create(F) do
+    begin
+      Parent := F;
+      SetBounds(24, YPos, 440, 1);
+      BevelOuter := bvNone;
+      Color := CLR_BORDER;
+    end;
+    YPos := YPos + 16;
+
+    F.Height := YPos + 70;
+
+    // Botones
+    // CANCELAR: panel blanco con borde info
+    with TPanel.Create(F) do
+    begin
+      Parent := F;
+      SetBounds(210, YPos, 130, 36);
+      BevelOuter := bvNone;
+      Color := CLR_WHITE;
+      Tag := 1;
+      Cursor := crHandPoint;
+      OnPaint := @PaintRounded;
+      OnClick := @CancelarClick;
+      with TLabel.Create(F) do
+      begin
+        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        Align := alClient;
+        Alignment := taCenter;
+        Layout := tlCenter;
+        Caption := 'CANCELAR';
+        Font.Size := 12;
+        Font.Style := [];
+        Font.Color := CLR_PRIMARY;
+        OnClick := @CancelarClick;
+      end;
+    end;
+
+    // GUARDAR: panel azul con letra blanca
+    with TPanel.Create(F) do
+    begin
+      Parent := F;
+      SetBounds(350, YPos, 130, 36);
+      BevelOuter := bvNone;
+      Color := CLR_PRIMARY;
+      Cursor := crHandPoint;
+      OnPaint := @PaintRounded;
+      OnClick := @GuardarClick;
+      with TLabel.Create(F) do
+      begin
+        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        Align := alClient;
+        Alignment := taCenter;
+        Layout := tlCenter;
+        Caption := 'GUARDAR';
+        Font.Size := 12;
+        Font.Style := [];
+        Font.Color := CLR_WHITE;
+        OnClick := @GuardarClick;
+      end;
+    end;
+
+    if F.ShowModal = mrOK then
+    begin
+      if Trim(ePlaca.Text) = '' then
+      begin
+        ShowMessage('La placa es obligatoria');
+        Exit;
+      end;
+
+      if DM.Transaccion.Active then
+        DM.Transaccion.Rollback;
+      DM.Transaccion.StartTransaction;
+      try
+        if IsNew then
+        begin
+          DM.EjecutarSQL('INSERT INTO vehiculos (placa, tipo_vehiculo, tara, estado, ' +
+            'fecha_creacion, fecha_modificacion) VALUES (' +
+            QuotedStr(UpperCase(Trim(ePlaca.Text))) + ', ' +
+            QuotedStr(UpperCase(Trim(eTipo.Text))) + ', ' +
+            eTara.Text + ', ''ACTIVO'', ''' +
+            FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+        end
+        else
+        begin
+          DM.EjecutarSQL('UPDATE vehiculos SET placa=' +
+            QuotedStr(UpperCase(Trim(ePlaca.Text))) +
+            ', tipo_vehiculo=' + QuotedStr(UpperCase(Trim(eTipo.Text))) +
+            ', tara=' + eTara.Text +
+            ', fecha_modificacion=''' + FechaHoraActual +
+            ''' WHERE id=' + IntToStr(ID));
+        end;
+        DM.Transaccion.Commit;
+        Refrescar(nil);
+      except
+        DM.Transaccion.Rollback;
+        ShowMessage('Error al guardar vehículo');
+      end;
+    end;
+  finally
+    F.Free;
+  end;
 end;
 
 end.
