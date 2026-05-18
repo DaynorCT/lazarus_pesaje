@@ -27,6 +27,7 @@ type
     FActiveFrame: TFrame;
     FNavItems: array of TPanel;
     FActiveNav: TPanel;
+    FActiveSub: TPanel;
     FSubCatalogo, FSubConfig, FUserMenu: TPanel;
     FUserBtn: TSpeedButton;
     imgLogo: TImage;
@@ -40,6 +41,8 @@ type
     procedure NavMouseEnter(Sender: TObject);
     procedure NavMouseLeave(Sender: TObject);
     procedure SubItemClick(Sender: TObject);
+    procedure SubMouseEnter(Sender: TObject);
+    procedure SubMouseLeave(Sender: TObject);
     procedure UserBtnClick(Sender: TObject);
     procedure CrearSubItem(AParent: TPanel; const ACaption: string; ATag, Y: Integer);
     procedure ResetNavItems(KeepActive: TPanel);
@@ -70,6 +73,7 @@ var
 begin
   FActiveFrame := nil;
   FActiveNav := nil;
+  FActiveSub := nil;
   Caption := 'Sistema de Pesaje';
 
   pnlTop.Height := 80;
@@ -230,16 +234,76 @@ begin
   CerrarSubmenus;
   ResetNavItems(Pnl);
   FActiveNav := Pnl;
+
+  if FActiveSub <> nil then
+  begin
+    FActiveSub.Color := CLR_CARD;
+    FActiveSub := nil;
+  end;
+
   NavigateTo(TagVal);
 end;
 
 procedure TfrmMain.SubItemClick(Sender: TObject);
 var
-  Btn: TSpeedButton;
+  Pnl: TPanel;
+  parentTag: Integer;
+  I: Integer;
 begin
-  Btn := TSpeedButton(Sender);
+  if Sender is TPanel then
+    Pnl := TPanel(Sender)
+  else if Sender is TLabel then
+    Pnl := TPanel(TLabel(Sender).Parent)
+  else
+    Exit;
+
+  if (FActiveSub <> nil) and (FActiveSub <> Pnl) then
+    FActiveSub.Color := CLR_CARD;
+
+  FActiveSub := Pnl;
+  Pnl.Color := CLR_SIDEBAR_ACTIVE;
+
+  if Pnl.Parent = FSubCatalogo then
+    parentTag := 100
+  else
+    parentTag := 200;
+
+  for I := 0 to High(FNavItems) do
+  begin
+    if FNavItems[I].Tag = parentTag then
+    begin
+      ResetNavItems(FNavItems[I]);
+      FActiveNav := FNavItems[I];
+      Break;
+    end;
+  end;
+
   CerrarSubmenus;
-  NavigateTo(Btn.Tag);
+  NavigateTo(Pnl.Tag);
+end;
+
+procedure TfrmMain.SubMouseEnter(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  if Sender is TPanel then
+    Pnl := TPanel(Sender)
+  else
+    Exit;
+  if Pnl <> FActiveSub then
+    Pnl.Color := CLR_SIDEBAR_ACTIVE;
+end;
+
+procedure TfrmMain.SubMouseLeave(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  if Sender is TPanel then
+    Pnl := TPanel(Sender)
+  else
+    Exit;
+  if Pnl <> FActiveSub then
+    Pnl.Color := CLR_CARD;
 end;
 
 procedure TfrmMain.NavMouseEnter(Sender: TObject);
@@ -263,7 +327,7 @@ begin
   else
     Exit;
   if Pnl <> FActiveNav then
-    Pnl.Color := CLR_SIDEBAR_ACTIVE;
+    Pnl.Color := CLR_CARD;
 end;
 
 procedure TfrmMain.NavPaint(Sender: TObject);
@@ -282,18 +346,31 @@ end;
 
 procedure TfrmMain.CrearSubItem(AParent: TPanel; const ACaption: string; ATag, Y: Integer);
 var
-  Btn: TSpeedButton;
+  Pnl: TPanel;
+  Lbl: TLabel;
 begin
-  Btn := TSpeedButton.Create(AParent);
-  Btn.Parent := AParent;
-  Btn.Caption := '  ' + ACaption;
-  Btn.Tag := ATag;
-  Btn.SetBounds(0, Y, 180, 36);
-  Btn.Flat := True;
-  Btn.Font.Size := 12;
-  Btn.Font.Color := CLR_TEXT;
-  Btn.Alignment := taLeftJustify;
-  Btn.OnClick := @SubItemClick;
+  Pnl := TPanel.Create(AParent);
+  Pnl.Parent := AParent;
+  Pnl.Tag := ATag;
+  Pnl.SetBounds(0, Y, 180, 36);
+  Pnl.BevelOuter := bvNone;
+  Pnl.Color := CLR_CARD;
+  Pnl.Cursor := crHandPoint;
+  Pnl.OnClick := @SubItemClick;
+  Pnl.OnMouseEnter := @SubMouseEnter;
+  Pnl.OnMouseLeave := @SubMouseLeave;
+
+  Lbl := TLabel.Create(Pnl);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(12, 0, 168, 36);
+  Lbl.Alignment := taLeftJustify;
+  Lbl.Layout := tlCenter;
+  Lbl.Caption := ACaption;
+  Lbl.Font.Size := 12;
+  Lbl.Font.Color := CLR_TEXT;
+  Lbl.Font.Style := [];
+  Lbl.ControlStyle := Lbl.ControlStyle + [csNoStdEvents];
+  Lbl.OnClick := @SubItemClick;
 end;
 
 procedure TfrmMain.UserBtnClick(Sender: TObject);
