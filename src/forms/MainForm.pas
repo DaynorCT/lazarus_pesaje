@@ -328,7 +328,7 @@ begin
     Exit;
   if Pnl <> FActiveNav then
     Pnl.Color := CLR_CARD;
-end;
+end;       
 
 procedure TfrmMain.NavPaint(Sender: TObject);
 var

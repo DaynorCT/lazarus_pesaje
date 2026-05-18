@@ -9,6 +9,9 @@ object DM: TDM
     LoginPrompt = False
     DatabaseName = 'pesaje.db'
     KeepConnection = False
+    Params.Strings = (
+      'AlwaysUseMemo=0'
+    )
     AlwaysUseBigint = False
     AlwaysUseMemo = False
   end

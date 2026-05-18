@@ -434,7 +434,7 @@ var
   begin
     Result := TLabel.Create(F);
     Result.Parent := F;
-    Result.SetBounds(ALeft, ATop, 200, 16);
+    Result.SetBounds(ALeft, ATop, 300, 16);
     Result.Caption := ACaption;
     Result.Font.Size := 11;
     Result.Font.Style := [];
@@ -496,7 +496,7 @@ begin
   FModalForm := F;
   try
     F.Caption := '';
-    F.Width := 500;
+    F.Width := 600;
     F.Position := poOwnerFormCenter;
     F.BorderStyle := bsDialog;
     F.Color := CLR_WHITE;
@@ -532,43 +532,44 @@ begin
 
     YPos := 80;
 
-    // Sección: Datos del vehículo
+    // Sección: Datos del Vehículo
     LblSection := TLabel.Create(F);
     LblSection.Parent := F;
     LblSection.SetBounds(24, YPos, 300, 20);
-    LblSection.Caption := 'Datos del vehículo';
+    LblSection.Caption := 'Datos del Vehículo';
     LblSection.Font.Size := 11;
     LblSection.Font.Style := [];
     LblSection.Font.Color := CLR_TEXT_HEADING;
 
     YPos := YPos + 33;
 
-    // Placa
+    // Fila 1: Placa * (izquierda) | Tipo de vehículo (derecha)
     MakeLabel(YPos, 24, 'Placa *');
+    MakeLabel(YPos, 314, 'Tipo de vehículo');
     YPos := YPos + 28;
-    ePlaca := MakeEditConBorde(YPos, 24, 200);
+
+    ePlaca := MakeEditConBorde(YPos, 24, 280);
     ePlaca.Text := Placa;
-    YPos := YPos + 48;
 
-    // Tipo de vehículo
-    MakeLabel(YPos, 24, 'Tipo de vehículo');
-    YPos := YPos + 28;
-    eTipo := MakeEditConBorde(YPos, 24, 440);
+    eTipo := MakeEditConBorde(YPos, 314, 260);
     eTipo.Text := Tipo;
+
     YPos := YPos + 48;
 
-    // Tara
+    // Fila 2: Tara (kg) (izquierda)
     MakeLabel(YPos, 24, 'Tara (kg)');
     YPos := YPos + 28;
+
     eTara := MakeEditConBorde(YPos, 24, 160, True);
     eTara.Text := TaraStr;
+
     YPos := YPos + 56;
 
     // Línea divisora
     with TPanel.Create(F) do
     begin
       Parent := F;
-      SetBounds(24, YPos, 440, 1);
+      SetBounds(24, YPos, 556, 1);
       BevelOuter := bvNone;
       Color := CLR_BORDER;
     end;
@@ -581,7 +582,7 @@ begin
     with TPanel.Create(F) do
     begin
       Parent := F;
-      SetBounds(210, YPos, 130, 36);
+      SetBounds(310, YPos, 130, 36);
       BevelOuter := bvNone;
       Color := CLR_WHITE;
       Tag := 1;
@@ -606,7 +607,7 @@ begin
     with TPanel.Create(F) do
     begin
       Parent := F;
-      SetBounds(350, YPos, 130, 36);
+      SetBounds(450, YPos, 130, 36);
       BevelOuter := bvNone;
       Color := CLR_PRIMARY;
       Cursor := crHandPoint;
@@ -665,6 +666,7 @@ begin
     end;
   finally
     F.Free;
+    FModalForm := nil;
   end;
 end;
 
