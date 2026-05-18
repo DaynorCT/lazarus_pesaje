@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme;
+  Grids, sqldb, DataModule, Utils, Theme, LoginForm;
 
 type
   { TFramePesaje }
@@ -1035,9 +1035,25 @@ end;
 // ═══════════════════════════════════════════════
 
 procedure TFramePesaje.FinalizarPesaje(ID: Integer);
+var
+  Q: TSQLQuery;
+  Neto: Integer;
 begin
-  DM.EjecutarSQL('UPDATE pesajes SET estado_balanza=''FINALIZADO'', fecha_modificacion=''' +
-    FechaHoraActual + ''' WHERE id=' + IntToStr(ID) + ' AND estado_balanza=''EN_PROCESO''');
+  Q := DM.AbrirQuery('SELECT peso_neto FROM pesajes WHERE id=' + IntToStr(ID));
+  try
+    Neto := Q.FieldByName('peso_neto').AsInteger;
+  finally
+    Q.Close;
+  end;
+  if Neto <= 0 then
+  begin
+    ShowMessage('No se puede finalizar un pesaje con peso neto menor o igual a cero');
+    Exit;
+  end;
+  DM.EjecutarSQL('UPDATE pesajes SET estado_balanza=''FINALIZADO'',' +
+    ' usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
+    ', fecha_modificacion=''' + FechaHoraActual +
+    ''' WHERE id=' + IntToStr(ID) + ' AND estado_balanza=''EN_PROCESO''');
   RefrescarPesajes(nil);
 end;
 
@@ -1045,8 +1061,10 @@ procedure TFramePesaje.AnularPesaje(ID: Integer);
 begin
   if MessageDlg('Anular pesaje', 'Se cambiara el estado a INACTIVO. Continuar?',
     mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
-  DM.EjecutarSQL('UPDATE pesajes SET estado=''INACTIVO'', fecha_modificacion=''' +
-    FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
+  DM.EjecutarSQL('UPDATE pesajes SET estado=''INACTIVO'',' +
+    ' usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
+    ', fecha_modificacion=''' + FechaHoraActual +
+    ''' WHERE id=' + IntToStr(ID));
   RefrescarPesajes(nil);
 end;
 
@@ -1055,7 +1073,8 @@ var NuevoEstado: string;
 begin
   if EstadoActual = 'ACTIVO' then NuevoEstado := 'INACTIVO' else NuevoEstado := 'ACTIVO';
   DM.EjecutarSQL('UPDATE pesajes SET estado=''' + NuevoEstado +
-    ''', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
+    ''', usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
+    ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
   RefrescarPesajes(nil);
 end;
 
@@ -1207,9 +1226,13 @@ end;
 procedure TFramePesaje.GuardarClick(Sender: TObject);
 var VehiculoID, ChoferID, ProveedorID, ProductoID, OrigenID, DestinoID: Integer;
   Costo, Flete: Integer;
+  Guia, Anio: string;
+  ProximoID: Integer;
+  Q: TSQLQuery;
 begin
   if cmbVehiculo.ItemIndex < 1 then begin ShowMessage('Seleccione un vehiculo'); Exit; end;
   if (FPesoBruto <= 0) or (FTara <= 0) then begin ShowMessage('Capture tara y peso bruto primero'); Exit; end;
+  if FPesoBruto < FTara then begin ShowMessage('El peso bruto no puede ser menor que la tara'); Exit; end;
 
   VehiculoID := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
   ChoferID:=0; ProveedorID:=0; ProductoID:=0; OrigenID:=0; DestinoID:=0;
@@ -1219,6 +1242,22 @@ begin
   if cmbOrigen.ItemIndex > 0 then OrigenID := PtrInt(cmbOrigen.Items.Objects[cmbOrigen.ItemIndex]);
   if cmbDestino.ItemIndex > 0 then DestinoID := PtrInt(cmbDestino.Items.Objects[cmbDestino.ItemIndex]);
   Costo := StrToIntDef(edtCosto.Text, 0); Flete := StrToIntDef(edtFlete.Text, 0);
+
+  // Duplicate check: same vehicle already has an active pesaje in process
+  if not FEditMode then
+  begin
+    Q := DM.AbrirQuery('SELECT id FROM pesajes WHERE vehiculo_id=' + IntToStr(VehiculoID) +
+      ' AND estado_balanza=''EN_PROCESO'' AND estado=''ACTIVO''');
+    try
+      if not Q.EOF then
+      begin
+        ShowMessage('Ya existe un pesaje en proceso para este vehiculo (#' + Q.Fields[0].AsString + ')');
+        Exit;
+      end;
+    finally
+      Q.Close;
+    end;
+  end;
 
   if not FEditMode then
   begin
@@ -1240,13 +1279,26 @@ begin
         ', peso_bruto=' + IntToStr(FPesoBruto) + ', tara=' + IntToStr(FTara) +
         ', peso_neto=' + IntToStr(FPesoNeto) +
         ', costo_bs=' + IntToStr(Costo) + ', flete_bs_pendiente=' + IntToStr(Flete) +
+        ', usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
         ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(FEditID));
     end
     else
     begin
-      DM.EjecutarSQL('INSERT INTO pesajes (vehiculo_id, chofer_id, proveedor_id, producto_id, ' +
+      // Generate guia: PESO-{YEAR}-{6-digit ID}
+      Q := DM.AbrirQuery('SELECT MAX(id) AS max_id FROM pesajes');
+      try
+        ProximoID := Q.FieldByName('max_id').AsInteger + 1;
+      finally
+        Q.Close;
+      end;
+      Anio := FormatDateTime('yyyy', Now);
+      Guia := 'PESO-' + Anio + '-' + Format('%.6d', [ProximoID]);
+
+      DM.EjecutarSQL('INSERT INTO pesajes (guia, lote, vehiculo_id, chofer_id, proveedor_id, producto_id, ' +
         'id_origen, id_destino, peso_bruto, tara, peso_neto, costo_bs, flete_bs_pendiente, ' +
-        'estado, estado_balanza, fecha_creacion, fecha_modificacion) VALUES (' +
+        'pesador_id, estado, estado_balanza, usuario_creacion, usuario_modificacion, ' +
+        'fecha_creacion, fecha_modificacion) VALUES (' +
+        QuotedStr(Guia) + ', '''', ' +
         IntToStr(VehiculoID) + ', ' +
         IfThen(ChoferID > 0, IntToStr(ChoferID), 'NULL') + ', ' +
         IfThen(ProveedorID > 0, IntToStr(ProveedorID), 'NULL') + ', ' +
@@ -1254,7 +1306,11 @@ begin
         IfThen(OrigenID > 0, IntToStr(OrigenID), 'NULL') + ', ' +
         IfThen(DestinoID > 0, IntToStr(DestinoID), 'NULL') + ', ' +
         IntToStr(FPesoBruto) + ', ' + IntToStr(FTara) + ', ' + IntToStr(FPesoNeto) + ', ' +
-        IntToStr(Costo) + ', ' + IntToStr(Flete) + ', ''ACTIVO'', ''EN_PROCESO'', ''' +
+        IntToStr(Costo) + ', ' + IntToStr(Flete) + ', ' +
+        IntToStr(UsuarioActual.PersonaID) + ', ' +
+        '''ACTIVO'', ''EN_PROCESO'', ' +
+        IntToStr(UsuarioActual.ID) + ', ' +
+        IntToStr(UsuarioActual.ID) + ', ''' +
         FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
     end;
     DM.Transaccion.Commit;
@@ -1299,7 +1355,7 @@ end;
 
 procedure TFramePesaje.QuickVehiculoClick(Sender: TObject);
 var
-  F: TForm; ePlaca, eTipo, eTara: TEdit; Lbl: TLabel; YPos: Integer;
+  F: TForm; ePlaca, eTipo, eTara: TEdit; Lbl, LblSection: TLabel; YPos: Integer;
   pnlOuter, pnlInner: TPanel;
 begin
   F := TForm.Create(nil);
@@ -1308,32 +1364,38 @@ begin
     F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
     with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(24,14,400,24); Caption:='Nuevo vehiculo'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+        SetBounds(24,14,400,24); Caption:='Nuevo vehículo'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
       with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
-    Lbl.Caption:='Placa *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
-    Lbl.Caption:='Tipo'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    LblSection:=TLabel.Create(F); LblSection.Parent:=F; LblSection.SetBounds(24,YPos,300,20);
+    LblSection.Caption:='Datos del Vehículo'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
+    YPos:=YPos+33;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    // Fila 1: Placa * (izquierda) | Tipo (derecha)
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
+    Lbl.Caption:='Placa *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
+    Lbl.Caption:='Tipo de vehículo'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,280,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,278,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     ePlaca:=TEdit.Create(pnlInner); ePlaca.Parent:=pnlInner; ePlaca.Align:=alClient; ePlaca.BorderStyle:=bsNone;
     ePlaca.Font.Size:=11; ePlaca.Font.Color:=CLR_TEXT; ePlaca.Color:=CLR_WHITE; ePlaca.CharCase:=ecUpperCase;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(314,YPos,260,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,258,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eTipo:=TEdit.Create(pnlInner); eTipo.Parent:=pnlInner; eTipo.Align:=alClient; eTipo.BorderStyle:=bsNone;
     eTipo.Font.Size:=11; eTipo.Font.Color:=CLR_TEXT; eTipo.Color:=CLR_WHITE; eTipo.CharCase:=ecUpperCase;
     YPos:=YPos+48;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    // Fila 2: Tara (kg)
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Tara (kg)'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,160,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,158,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eTara:=TEdit.Create(pnlInner); eTara.Parent:=pnlInner; eTara.Align:=alClient; eTara.BorderStyle:=bsNone;
     eTara.Font.Size:=11; eTara.Font.Color:=CLR_TEXT; eTara.Color:=CLR_WHITE; eTara.Text:='0';
     YPos:=YPos+56;
@@ -1363,7 +1425,7 @@ end;
 
 procedure TFramePesaje.QuickChoferClick(Sender: TObject);
 var
-  F: TForm; eNom, eCI, eLic, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+  F: TForm; eNom, eCI, eLic, eTel: TEdit; Lbl, LblSection: TLabel; YPos: Integer;
   pnlOuter, pnlInner: TPanel;
 begin
   F := TForm.Create(nil);
@@ -1377,34 +1439,40 @@ begin
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
-    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
-    Lbl.Caption:='CI'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    LblSection:=TLabel.Create(F); LblSection.Parent:=F; LblSection.SetBounds(24,YPos,300,20);
+    LblSection.Caption:='Datos del Chofer'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
+    YPos:=YPos+33;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    // Fila 1: Nombre * (izquierda) | CI (derecha)
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
+    Lbl.Caption:='Nro. Documento'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,280,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,278,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eNom:=TEdit.Create(pnlInner); eNom.Parent:=pnlInner; eNom.Align:=alClient; eNom.BorderStyle:=bsNone;
     eNom.Font.Size:=11; eNom.Font.Color:=CLR_TEXT; eNom.Color:=CLR_WHITE; eNom.CharCase:=ecUpperCase;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(314,YPos,260,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,258,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eCI:=TEdit.Create(pnlInner); eCI.Parent:=pnlInner; eCI.Align:=alClient; eCI.BorderStyle:=bsNone;
     eCI.Font.Size:=11; eCI.Font.Color:=CLR_TEXT; eCI.Color:=CLR_WHITE; eCI.CharCase:=ecUpperCase;
     YPos:=YPos+48;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    // Fila 2: Licencia (izquierda) | Teléfono (derecha)
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Licencia'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
-    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
+    Lbl.Caption:='Teléfono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,280,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,278,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eLic:=TEdit.Create(pnlInner); eLic.Parent:=pnlInner; eLic.Align:=alClient; eLic.BorderStyle:=bsNone;
     eLic.Font.Size:=11; eLic.Font.Color:=CLR_TEXT; eLic.Color:=CLR_WHITE;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(314,YPos,260,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,258,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eTel:=TEdit.Create(pnlInner); eTel.Parent:=pnlInner; eTel.Align:=alClient; eTel.BorderStyle:=bsNone;
     eTel.Font.Size:=11; eTel.Font.Color:=CLR_TEXT; eTel.Color:=CLR_WHITE; eTel.CharCase:=ecUpperCase;
     YPos:=YPos+56;
@@ -1441,7 +1509,7 @@ end;
 
 procedure TFramePesaje.QuickProveedorClick(Sender: TObject);
 var
-  F: TForm; eNom, eEmp, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+  F: TForm; eNom, eEmp, eTel: TEdit; Lbl, LblSection: TLabel; YPos: Integer;
   pnlOuter, pnlInner: TPanel;
 begin
   F := TForm.Create(nil);
@@ -1455,27 +1523,33 @@ begin
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    LblSection:=TLabel.Create(F); LblSection.Parent:=F; LblSection.SetBounds(24,YPos,300,20);
+    LblSection.Caption:='Datos del Proveedor'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
+    YPos:=YPos+33;
+
+    // Fila 1: Nombre * (izquierda) | Empresa (derecha)
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
     Lbl.Caption:='Empresa'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,280,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,278,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eNom:=TEdit.Create(pnlInner); eNom.Parent:=pnlInner; eNom.Align:=alClient; eNom.BorderStyle:=bsNone;
     eNom.Font.Size:=11; eNom.Font.Color:=CLR_TEXT; eNom.Color:=CLR_WHITE; eNom.CharCase:=ecUpperCase;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(314,YPos,260,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,258,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eEmp:=TEdit.Create(pnlInner); eEmp.Parent:=pnlInner; eEmp.Align:=alClient; eEmp.BorderStyle:=bsNone;
     eEmp.Font.Size:=11; eEmp.Font.Color:=CLR_TEXT; eEmp.Color:=CLR_WHITE; eEmp.CharCase:=ecUpperCase;
     YPos:=YPos+48;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
-    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    // Fila 2: Teléfono (izquierda)
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
+    Lbl.Caption:='Teléfono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,280,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,278,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eTel:=TEdit.Create(pnlInner); eTel.Parent:=pnlInner; eTel.Align:=alClient; eTel.BorderStyle:=bsNone;
     eTel.Font.Size:=11; eTel.Font.Color:=CLR_TEXT; eTel.Color:=CLR_WHITE; eTel.CharCase:=ecUpperCase;
     YPos:=YPos+56;
@@ -1512,29 +1586,45 @@ end;
 
 procedure TFramePesaje.QuickSimpleClick(Sender: TObject);
 var
-  F: TForm; eNom: TEdit; TagVal: Integer; Tabla: string; Lbl: TLabel; YPos: Integer;
+  F: TForm; eNom, eDes: TEdit; TagVal: Integer; Tabla, Titulo: string;
+  Lbl, LblSection: TLabel; YPos: Integer;
   pnlOuter, pnlInner: TPanel;
 begin
   TagVal := TPanel(Sender).Tag;
-  case TagVal of 4: Tabla:='productos'; 5: Tabla:='origenes'; 6: Tabla:='destinos'; else Exit; end;
+  case TagVal of 4: begin Tabla:='productos'; Titulo:='Nuevo producto'; end;
+    5: begin Tabla:='origenes'; Titulo:='Nuevo origen'; end;
+    6: begin Tabla:='destinos'; Titulo:='Nuevo destino'; end;
+    else Exit; end;
   F := TForm.Create(nil);
   try
     F.Caption := ''; F.Width := 600; F.Position := poOwnerFormCenter;
     F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
     with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(24,14,400,24); Caption:='Nuevo registro'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+        SetBounds(24,14,400,24); Caption:=Titulo; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
       with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
-    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    LblSection:=TLabel.Create(F); LblSection.Parent:=F; LblSection.SetBounds(24,YPos,300,20);
+    LblSection.Caption:='Datos del registro'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
+    YPos:=YPos+33;
 
-    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
-    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    // Fila 1: Nombre * (izquierda) | Descripción (derecha)
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
+    Lbl.Caption:='Descripción'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,280,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,278,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
     eNom:=TEdit.Create(pnlInner); eNom.Parent:=pnlInner; eNom.Align:=alClient; eNom.BorderStyle:=bsNone;
     eNom.Font.Size:=11; eNom.Font.Color:=CLR_TEXT; eNom.Color:=CLR_WHITE; eNom.CharCase:=ecUpperCase;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(314,YPos,260,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,258,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eDes:=TEdit.Create(pnlInner); eDes.Parent:=pnlInner; eDes.Align:=alClient; eDes.BorderStyle:=bsNone;
+    eDes.Font.Size:=11; eDes.Font.Color:=CLR_TEXT; eDes.Color:=CLR_WHITE; eDes.CharCase:=ecUpperCase;
     YPos:=YPos+56;
 
     with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end;
@@ -1552,8 +1642,9 @@ begin
 
     if F.ShowModal = mrOK then begin
       if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
-      DM.EjecutarSQL('INSERT INTO ' + Tabla + ' (nombre, estado, fecha_creacion, fecha_modificacion) VALUES (' +
-        QuotedStr(Trim(eNom.Text)) + ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+      DM.EjecutarSQL('INSERT INTO ' + Tabla + ' (nombre, descripcion, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+        QuotedStr(Trim(eNom.Text)) + ', ' + QuotedStr(Trim(eDes.Text)) +
+        ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
       CargarCombos;
     end;
   finally F.Free; end;
