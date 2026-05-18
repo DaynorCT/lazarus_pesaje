@@ -21,6 +21,9 @@ type
     FConectado: Boolean;
     FEditMode: Boolean;
     FEditID: Integer;
+    FUsarTaraManual: Boolean;
+    FTaraManual: string;
+    FTaraCapturada: Integer;
     TimerLectura: TTimer;
     pnlRegistroCard, pnlDisplay, pnlCard: TPanel;
     lblPesoDisplay, lblRegistroTitle: TLabel;
@@ -29,8 +32,10 @@ type
     cmbVehiculo, cmbChofer, cmbProveedor: TComboBox;
     cmbProducto, cmbOrigen, cmbDestino: TComboBox;
     edtCosto, edtFlete, edtLicencia, edtTipo: TEdit;
+    edtTaraManual: TEdit;
     Grid: TStringGrid;
     pnlSwitchConectar, pnlCapturarPeso, pnlCapturarTara: TPanel;
+    pnlSwitchTara, pnlGuardarTara: TPanel;
     pnlGuardar, pnlLimpiar, pnlCancelEdit: TPanel;
     btnVehNuevo, btnChoNuevo, btnPrvNuevo: TPanel;
     btnProNuevo, btnOriNuevo, btnDesNuevo: TPanel;
@@ -47,6 +52,10 @@ type
     function ExtraerPeso(const Trama: string): string;
     procedure ConectarClick(Sender: TObject);
     procedure TaraClick(Sender: TObject);
+    procedure SwitchTaraPaint(Sender: TObject);
+    procedure SwitchTaraClick(Sender: TObject);
+    procedure TaraManualChange(Sender: TObject);
+    procedure GuardarTaraClick(Sender: TObject);
     procedure GuardarClick(Sender: TObject);
     procedure QuickGuardarClick(Sender: TObject);
     procedure QuickCancelarClick(Sender: TObject);
@@ -149,6 +158,7 @@ begin
   inherited Create(AOwner);
   FTara := 0; FPesoBruto := 0; FPesoNeto := 0; FConectado := False;
   FEditMode := False; FEditID := 0;
+  FUsarTaraManual := False; FTaraManual := ''; FTaraCapturada := -1;
   Self.Color := CLR_BG;
 
   // Header
@@ -525,7 +535,45 @@ begin
 
   edtFlete := MakeEditConBorde(YPos, COL1, FIELD_W, False);
   edtFlete.Text := '0';
-  MakeEditConBorde(YPos, COL2, COL3 + FIELD_W - COL2, True);
+
+  pnlSwitchTara := TPanel.Create(pnlForm);
+  pnlSwitchTara.Parent := pnlForm;
+  pnlSwitchTara.SetBounds(COL2, YPos, 40, 40);
+  pnlSwitchTara.BevelOuter := bvNone;
+  pnlSwitchTara.Color := CLR_CARD;
+  pnlSwitchTara.Cursor := crHandPoint;
+  pnlSwitchTara.OnPaint := @SwitchTaraPaint;
+  pnlSwitchTara.OnClick := @SwitchTaraClick;
+
+  edtTaraManual := MakeEditConBorde(YPos, COL2 + 46, 124, True);
+  edtTaraManual.Text := '0';
+  edtTaraManual.OnChange := @TaraManualChange;
+
+  pnlGuardarTara := TPanel.Create(pnlForm);
+  pnlGuardarTara.Parent := pnlForm;
+  pnlGuardarTara.SetBounds(COL2 + 176, YPos, 34, 40);
+  pnlGuardarTara.BevelOuter := bvNone;
+  pnlGuardarTara.Color := CLR_SUCCESS;
+  pnlGuardarTara.ParentBackground := False;
+  pnlGuardarTara.ParentColor := False;
+  pnlGuardarTara.Cursor := crHandPoint;
+  pnlGuardarTara.Visible := False;
+  pnlGuardarTara.OnPaint := @PaintRounded;
+  pnlGuardarTara.OnClick := @GuardarTaraClick;
+  with TLabel.Create(pnlGuardarTara) do
+  begin
+    Parent := pnlGuardarTara;
+    Align := alClient;
+    Alignment := taCenter;
+    Layout := tlCenter;
+    Caption := '+';
+    Font.Size := 16;
+    Font.Style := [];
+    Font.Color := CLR_WHITE;
+    Cursor := crHandPoint;
+    OnClick := @GuardarTaraClick;
+  end;
+
   YPos := YPos + 56;
 
   with TPanel.Create(pnlForm) do
@@ -732,6 +780,8 @@ begin
     begin
       FTara := Q.Fields[0].AsInteger;
       edtTipo.Text := UpperCase(Q.Fields[1].AsString);
+      edtTaraManual.Text := IntToStr(FTara);
+      FTaraManual := IntToStr(FTara);
       ActualizarResumenPesos;
     end;
   finally Q.Close; end;
@@ -1046,15 +1096,112 @@ begin
     ShowMessage('Conecte la balanza primero');
     Exit;
   end;
+  if not FUsarTaraManual then
+  begin
+    ShowMessage('Active el modo manual de tara para capturar');
+    Exit;
+  end;
   FTara := PesoDesdeDisplay(lblPesoDisplay.Caption);
   if FTara <= 0 then
   begin
     ShowMessage('Peso invalido');
     Exit;
   end;
+  FTaraCapturada := FTara;
+  FTaraManual := IntToStr(FTara);
+  edtTaraManual.Text := FTaraManual;
+  edtTaraManual.ReadOnly := True;
   FPesoBruto := 0;
   FPesoNeto := 0;
   ActualizarResumenPesos;
+end;
+
+procedure TFramePesaje.SwitchTaraPaint(Sender: TObject);
+var
+  Pnl: TPanel;
+  Ts: TTextStyle;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Font.Height := -11;
+  Pnl.Canvas.Font.Style := [fsBold];
+  Ts := Pnl.Canvas.TextStyle;
+  Ts.Alignment := taCenter;
+  Ts.Layout := tlCenter;
+  if FUsarTaraManual then
+  begin
+    Pnl.Canvas.Font.Color := CLR_SUCCESS;
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '● ──', Ts);
+  end
+  else
+  begin
+    Pnl.Canvas.Font.Color := CLR_DESTRUCTIVE;
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '○ ──', Ts);
+  end;
+end;
+
+procedure TFramePesaje.SwitchTaraClick(Sender: TObject);
+begin
+  FUsarTaraManual := not FUsarTaraManual;
+
+  if not FUsarTaraManual then
+  begin
+    FTaraManual := '';
+    FTaraCapturada := -1;
+    pnlGuardarTara.Visible := False;
+    edtTaraManual.ReadOnly := True;
+    edtTaraManual.Text := IntToStr(FTara);
+  end
+  else
+  begin
+    edtTaraManual.ReadOnly := False;
+    pnlGuardarTara.Visible := True;
+    if FTara > 0 then
+    begin
+      FTaraManual := IntToStr(FTara);
+      edtTaraManual.Text := FTaraManual;
+    end
+    else
+    begin
+      FTaraManual := '';
+      edtTaraManual.Text := '0';
+    end;
+    FTaraCapturada := -1;
+  end;
+
+  pnlSwitchTara.Invalidate;
+end;
+
+procedure TFramePesaje.TaraManualChange(Sender: TObject);
+begin
+  if not FUsarTaraManual then Exit;
+  FTaraCapturada := -1;
+  FTaraManual := edtTaraManual.Text;
+  FTara := StrToIntDef(FTaraManual, 0);
+  FPesoNeto := FPesoBruto - FTara;
+  lblValTara.Caption := IntToStr(FTara);
+  lblValNeto.Caption := IntToStr(FPesoNeto);
+end;
+
+procedure TFramePesaje.GuardarTaraClick(Sender: TObject);
+var
+  VehiculoID: Integer;
+  NuevaTara: Integer;
+begin
+  if cmbVehiculo.ItemIndex < 1 then
+  begin
+    ShowMessage('Seleccione un vehiculo primero');
+    Exit;
+  end;
+  NuevaTara := StrToIntDef(FTaraManual, 0);
+  VehiculoID := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
+  DM.EjecutarSQL('UPDATE vehiculos SET tara=' + IntToStr(NuevaTara) +
+    ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(VehiculoID));
+  FTara := NuevaTara;
+  FPesoNeto := FPesoBruto - FTara;
+  ActualizarResumenPesos;
+  ShowMessage('Tara guardada en el vehiculo');
 end;
 
 procedure TFramePesaje.GuardarClick(Sender: TObject);
@@ -1133,12 +1280,17 @@ end;
 procedure TFramePesaje.LimpiarClick(Sender: TObject);
 begin
   FTara := 0; FPesoBruto := 0; FPesoNeto := 0;
+  FUsarTaraManual := False; FTaraManual := ''; FTaraCapturada := -1;
   lblPesoDisplay.Caption := '0 kg';
   ActualizarResumenPesos;
   cmbVehiculo.ItemIndex := 0; cmbChofer.ItemIndex := 0; cmbProveedor.ItemIndex := 0;
   cmbProducto.ItemIndex := 0; cmbOrigen.ItemIndex := 0; cmbDestino.ItemIndex := 0;
   edtCosto.Text := '0'; edtFlete.Text := '0';
   edtLicencia.Text := ''; edtTipo.Text := '';
+  edtTaraManual.Text := '0';
+  edtTaraManual.ReadOnly := True;
+  pnlGuardarTara.Visible := False;
+  pnlSwitchTara.Invalidate;
 end;
 
 // ═══════════════════════════════════════════════
