@@ -1298,11 +1298,13 @@ end;
 // ═══════════════════════════════════════════════
 
 procedure TFramePesaje.QuickVehiculoClick(Sender: TObject);
-var F: TForm; ePlaca, eTipo, eTara: TEdit; Lbl: TLabel; YPos: Integer;
+var
+  F: TForm; ePlaca, eTipo, eTara: TEdit; Lbl: TLabel; YPos: Integer;
+  pnlOuter, pnlInner: TPanel;
 begin
   F := TForm.Create(nil);
   try
-    F.Caption := ''; F.Width := 380; F.Position := poOwnerFormCenter;
+    F.Caption := ''; F.Width := 600; F.Position := poOwnerFormCenter;
     F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
     with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
@@ -1311,40 +1313,43 @@ begin
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Placa *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        ePlaca:=TEdit.Create(F); ePlaca.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        ePlaca.Align:=alClient; ePlaca.BorderStyle:=bsNone; ePlaca.Font.Size:=11; ePlaca.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+48;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Tipo'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eTipo:=TEdit.Create(F); eTipo.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eTipo.Align:=alClient; eTipo.BorderStyle:=bsNone; eTipo.Font.Size:=11; eTipo.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+48;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Tara (kg)'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eTara:=TEdit.Create(F); eTara.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eTara.Align:=alClient; eTara.BorderStyle:=bsNone; eTara.Font.Size:=11; eTara.Text:='0'; end; end;
-    YPos:=YPos+60;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    Lbl.Caption:='Placa *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
+    Lbl.Caption:='Tipo'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(58,YPos,130,36);
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    ePlaca:=TEdit.Create(pnlInner); ePlaca.Parent:=pnlInner; ePlaca.Align:=alClient; ePlaca.BorderStyle:=bsNone;
+    ePlaca.Font.Size:=11; ePlaca.Font.Color:=CLR_TEXT; ePlaca.Color:=CLR_WHITE; ePlaca.CharCase:=ecUpperCase;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eTipo:=TEdit.Create(pnlInner); eTipo.Parent:=pnlInner; eTipo.Align:=alClient; eTipo.BorderStyle:=bsNone;
+    eTipo.Font.Size:=11; eTipo.Font.Color:=CLR_TEXT; eTipo.Color:=CLR_WHITE; eTipo.CharCase:=ecUpperCase;
+    YPos:=YPos+48;
+
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    Lbl.Caption:='Tara (kg)'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eTara:=TEdit.Create(pnlInner); eTara.Parent:=pnlInner; eTara.Align:=alClient; eTara.BorderStyle:=bsNone;
+    eTara.Font.Size:=11; eTara.Font.Color:=CLR_TEXT; eTara.Color:=CLR_WHITE; eTara.Text:='0';
+    YPos:=YPos+56;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    YPos:=YPos+16;
+
+    F.Height:=YPos+70;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(310,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(196,YPos,130,36);
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; OnClick:=@QuickCancelarClick; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(450,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
-    F.Height:=YPos+60;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
 
     if F.ShowModal = mrOK then begin
       if Trim(ePlaca.Text) = '' then begin ShowMessage('Placa obligatoria'); Exit; end;
@@ -1357,11 +1362,13 @@ begin
 end;
 
 procedure TFramePesaje.QuickChoferClick(Sender: TObject);
-var F: TForm; eNom, eCI, eLic, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+var
+  F: TForm; eNom, eCI, eLic, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+  pnlOuter, pnlInner: TPanel;
 begin
   F := TForm.Create(nil);
   try
-    F.Caption := ''; F.Width := 380; F.Position := poOwnerFormCenter;
+    F.Caption := ''; F.Width := 600; F.Position := poOwnerFormCenter;
     F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
     with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
@@ -1370,48 +1377,50 @@ begin
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eNom:=TEdit.Create(F); eNom.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=11; eNom.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+48;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='CI'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eCI:=TEdit.Create(F); eCI.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eCI.Align:=alClient; eCI.BorderStyle:=bsNone; eCI.Font.Size:=11; eCI.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+48;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Licencia'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eLic:=TEdit.Create(F); eLic.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eLic.Align:=alClient; eLic.BorderStyle:=bsNone; eLic.Font.Size:=11; eLic.CharCase:=ecNormal; end; end;
-    YPos:=YPos+48;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eTel:=TEdit.Create(F); eTel.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eTel.Align:=alClient; eTel.BorderStyle:=bsNone; eTel.Font.Size:=11; eTel.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+60;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
+    Lbl.Caption:='CI'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(58,YPos,130,36);
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eNom:=TEdit.Create(pnlInner); eNom.Parent:=pnlInner; eNom.Align:=alClient; eNom.BorderStyle:=bsNone;
+    eNom.Font.Size:=11; eNom.Font.Color:=CLR_TEXT; eNom.Color:=CLR_WHITE; eNom.CharCase:=ecUpperCase;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eCI:=TEdit.Create(pnlInner); eCI.Parent:=pnlInner; eCI.Align:=alClient; eCI.BorderStyle:=bsNone;
+    eCI.Font.Size:=11; eCI.Font.Color:=CLR_TEXT; eCI.Color:=CLR_WHITE; eCI.CharCase:=ecUpperCase;
+    YPos:=YPos+48;
+
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    Lbl.Caption:='Licencia'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
+    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eLic:=TEdit.Create(pnlInner); eLic.Parent:=pnlInner; eLic.Align:=alClient; eLic.BorderStyle:=bsNone;
+    eLic.Font.Size:=11; eLic.Font.Color:=CLR_TEXT; eLic.Color:=CLR_WHITE;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eTel:=TEdit.Create(pnlInner); eTel.Parent:=pnlInner; eTel.Align:=alClient; eTel.BorderStyle:=bsNone;
+    eTel.Font.Size:=11; eTel.Font.Color:=CLR_TEXT; eTel.Color:=CLR_WHITE; eTel.CharCase:=ecUpperCase;
+    YPos:=YPos+56;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    YPos:=YPos+16;
+
+    F.Height:=YPos+70;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(310,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(196,YPos,130,36);
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; OnClick:=@QuickCancelarClick; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(450,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
-    F.Height:=YPos+60;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
 
     if F.ShowModal = mrOK then begin
       if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
@@ -1431,11 +1440,13 @@ begin
 end;
 
 procedure TFramePesaje.QuickProveedorClick(Sender: TObject);
-var F: TForm; eNom, eEmp, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+var
+  F: TForm; eNom, eEmp, eTel: TEdit; Lbl: TLabel; YPos: Integer;
+  pnlOuter, pnlInner: TPanel;
 begin
   F := TForm.Create(nil);
   try
-    F.Caption := ''; F.Width := 380; F.Position := poOwnerFormCenter;
+    F.Caption := ''; F.Width := 600; F.Position := poOwnerFormCenter;
     F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
     with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
@@ -1444,40 +1455,43 @@ begin
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eNom:=TEdit.Create(F); eNom.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=11; eNom.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+48;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Empresa'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eEmp:=TEdit.Create(F); eEmp.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eEmp.Align:=alClient; eEmp.BorderStyle:=bsNone; eEmp.Font.Size:=11; eEmp.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+48;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,330,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,328,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eTel:=TEdit.Create(F); eTel.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eTel.Align:=alClient; eTel.BorderStyle:=bsNone; eTel.Font.Size:=11; eTel.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+60;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
+    Lbl.Caption:='Empresa'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(58,YPos,130,36);
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eNom:=TEdit.Create(pnlInner); eNom.Parent:=pnlInner; eNom.Align:=alClient; eNom.BorderStyle:=bsNone;
+    eNom.Font.Size:=11; eNom.Font.Color:=CLR_TEXT; eNom.Color:=CLR_WHITE; eNom.CharCase:=ecUpperCase;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(212,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eEmp:=TEdit.Create(pnlInner); eEmp.Parent:=pnlInner; eEmp.Align:=alClient; eEmp.BorderStyle:=bsNone;
+    eEmp.Font.Size:=11; eEmp.Font.Color:=CLR_TEXT; eEmp.Color:=CLR_WHITE; eEmp.CharCase:=ecUpperCase;
+    YPos:=YPos+48;
+
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    Lbl.Caption:='Telefono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eTel:=TEdit.Create(pnlInner); eTel.Parent:=pnlInner; eTel.Align:=alClient; eTel.BorderStyle:=bsNone;
+    eTel.Font.Size:=11; eTel.Font.Color:=CLR_TEXT; eTel.Color:=CLR_WHITE; eTel.CharCase:=ecUpperCase;
+    YPos:=YPos+56;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    YPos:=YPos+16;
+
+    F.Height:=YPos+70;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(310,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(196,YPos,130,36);
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; OnClick:=@QuickCancelarClick; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(450,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
-    F.Height:=YPos+60;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
 
     if F.ShowModal = mrOK then begin
       if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
@@ -1497,13 +1511,15 @@ begin
 end;
 
 procedure TFramePesaje.QuickSimpleClick(Sender: TObject);
-var F: TForm; eNom: TEdit; TagVal: Integer; Tabla: string; Lbl: TLabel; YPos: Integer;
+var
+  F: TForm; eNom: TEdit; TagVal: Integer; Tabla: string; Lbl: TLabel; YPos: Integer;
+  pnlOuter, pnlInner: TPanel;
 begin
   TagVal := TPanel(Sender).Tag;
   case TagVal of 4: Tabla:='productos'; 5: Tabla:='origenes'; 6: Tabla:='destinos'; else Exit; end;
   F := TForm.Create(nil);
   try
-    F.Caption := ''; F.Width := 360; F.Position := poOwnerFormCenter;
+    F.Caption := ''; F.Width := 600; F.Position := poOwnerFormCenter;
     F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
     with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
@@ -1512,24 +1528,27 @@ begin
         Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end;
     end; YPos:=80;
 
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,100,14);
-    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,310,36); BevelOuter:=bvNone; Color:=CLR_BORDER;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        SetBounds(1,1,308,34); BevelOuter:=bvNone; Color:=CLR_WHITE; BorderWidth:=6;
-        eNom:=TEdit.Create(F); eNom.Parent:=TPanel(F.Controls[F.ControlCount-1]);
-        eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=11; eNom.CharCase:=ecUpperCase; end; end;
-    YPos:=YPos+60;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
+    Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(48,YPos,130,36);
+    pnlOuter:=TPanel.Create(F); pnlOuter.Parent:=F; pnlOuter.SetBounds(24,YPos,180,40); pnlOuter.BevelOuter:=bvNone; pnlOuter.Color:=CLR_BORDER;
+    pnlInner:=TPanel.Create(pnlOuter); pnlInner.Parent:=pnlOuter; pnlInner.SetBounds(1,1,178,38); pnlInner.BevelOuter:=bvNone; pnlInner.Color:=CLR_WHITE; pnlInner.BorderWidth:=6;
+    eNom:=TEdit.Create(pnlInner); eNom.Parent:=pnlInner; eNom.Align:=alClient; eNom.BorderStyle:=bsNone;
+    eNom.Font.Size:=11; eNom.Font.Color:=CLR_TEXT; eNom.Color:=CLR_WHITE; eNom.CharCase:=ecUpperCase;
+    YPos:=YPos+56;
+
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end;
+    YPos:=YPos+16;
+
+    F.Height:=YPos+70;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(310,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; end; end;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(186,YPos,130,36);
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_PRIMARY; OnClick:=@QuickCancelarClick; end; end;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(450,YPos,130,36);
       BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient;
-        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; end; end;
-    F.Height:=YPos+60;
+        Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=12; Font.Style:=[]; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
 
     if F.ShowModal = mrOK then begin
       if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
