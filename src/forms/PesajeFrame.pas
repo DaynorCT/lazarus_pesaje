@@ -1119,7 +1119,7 @@ begin
 end;
 
 procedure TFramePesaje.ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
-var NuevoEstado: string;
+var NuevoEstado: string; Row: Integer;
 begin
   if EstadoActual = 'ACTIVO' then NuevoEstado := 'INACTIVO' else NuevoEstado := 'ACTIVO';
   if DM.Transaccion.Active then DM.Transaccion.Rollback;
@@ -1129,7 +1129,15 @@ begin
       ''', usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
       ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
     DM.Transaccion.Commit;
-    RefrescarPesajes(nil);
+    // Actualizar solo la celda en la grilla sin re-consultar toda la BD
+    for Row := 1 to Grid.RowCount - 1 do
+      if PtrInt(Grid.Objects[0, Row]) = ID then
+      begin
+        Grid.Cells[16, Row] := NuevoEstado;
+        Grid.InvalidateCell(16, Row);
+        Grid.InvalidateCell(18, Row);
+        Break;
+      end;
   except
     DM.Transaccion.Rollback;
   end;
