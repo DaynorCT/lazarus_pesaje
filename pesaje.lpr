@@ -15,7 +15,8 @@ uses
   DashboardFrame in 'src/forms/DashboardFrame.pas' {FrameDashboard: TFrameDashboard},
   EmpresasFrame in 'src/forms/EmpresasFrame.pas' {FrameEmpresas: TFrameEmpresas},
   ChoferesFrame in 'src/forms/ChoferesFrame.pas' {FrameChoferes: TFrameChoferes},
-  Utils in 'src/utils/Utils.pas';
+  Utils in 'src/utils/Utils.pas',
+  FinalizarPesajeDialog in 'src/dialogs/FinalizarPesajeDialog.pas';
 
 {$IFDEF DARWIN}
 {$linkframework UserNotifications}

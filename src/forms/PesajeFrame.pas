@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme, LoginForm;
+  Grids, sqldb, DataModule, Utils, Theme, LoginForm, FinalizarPesajeDialog;
 
 type
   { TFramePesaje }
@@ -1064,24 +1064,38 @@ end;
 procedure TFramePesaje.FinalizarPesaje(ID: Integer);
 var
   Q: TSQLQuery;
-  Neto: Integer;
+  Bruto, Tara, Neto: Integer;
 begin
-  Q := DM.AbrirQuery('SELECT peso_neto FROM pesajes WHERE id=' + IntToStr(ID));
+  Q := DM.AbrirQuery('SELECT peso_bruto, tara, peso_neto FROM pesajes WHERE id=' + IntToStr(ID));
   try
+    Bruto := Q.FieldByName('peso_bruto').AsInteger;
+    Tara := Q.FieldByName('tara').AsInteger;
     Neto := Q.FieldByName('peso_neto').AsInteger;
   finally
     Q.Close;
   end;
-  if Neto <= 0 then
+
+  if (Bruto <= 0) or (Tara <= 0) then
   begin
-    ShowMessage('No se puede finalizar un pesaje con peso neto menor o igual a cero');
+    ShowMessage('No se puede finalizar. Falta registrar el peso bruto o la tara.');
     Exit;
   end;
-  DM.EjecutarSQL('UPDATE pesajes SET estado_balanza=''FINALIZADO'',' +
-    ' usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
-    ', fecha_modificacion=''' + FechaHoraActual +
-    ''' WHERE id=' + IntToStr(ID) + ' AND estado_balanza=''EN_PROCESO''');
-  RefrescarPesajes(nil);
+
+  if not MostrarFinalizarPesaje(ID, Bruto, Tara, Neto) then Exit;
+
+  if DM.Transaccion.Active then DM.Transaccion.Rollback;
+  DM.Transaccion.StartTransaction;
+  try
+    DM.EjecutarSQL('UPDATE pesajes SET estado_balanza=''FINALIZADO'',' +
+      ' usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
+      ', fecha_modificacion=''' + FechaHoraActual +
+      ''' WHERE id=' + IntToStr(ID) + ' AND estado_balanza=''EN_PROCESO''');
+    DM.Transaccion.Commit;
+    RefrescarPesajes(nil);
+  except
+    DM.Transaccion.Rollback;
+    ShowMessage('Error al finalizar el pesaje');
+  end;
 end;
 
 procedure TFramePesaje.AnularPesaje(ID: Integer);
