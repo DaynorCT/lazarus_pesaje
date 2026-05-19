@@ -955,16 +955,12 @@ begin
         // Toggle ●/○
         Grid.Canvas.Font.Color := CLR_SUCCESS;
         Ts.Alignment := taCenter;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
+        Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 90, aRect.Bottom),
           aRect.Left + 20, aRect.Top + 2, '● ──', Ts);
         // Boleta
         Grid.Canvas.Font.Color := CLR_PRIMARY;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 55, aRect.Top, aRect.Left + 110, aRect.Bottom),
-          aRect.Left + 55, aRect.Top + 2, '📄', Ts);
-        // Anular
-        Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 110, aRect.Top, aRect.Left + 160, aRect.Bottom),
-          aRect.Left + 110, aRect.Top + 2, '✕', Ts);
+        Grid.Canvas.TextRect(Rect(aRect.Left + 90, aRect.Top, aRect.Left + 160, aRect.Bottom),
+          aRect.Left + 90, aRect.Top + 2, '📄', Ts);
       end;
     end
     else // INACTIVO
@@ -1016,12 +1012,10 @@ begin
     end
     else // FINALIZADO
     begin
-      if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
+      if X < Grid.CellRect(Col, Row).Left + CellW div 2 then
         ToggleEstadoPesaje(ID, Grid.Cells[16, Row])
-      else if X < Grid.CellRect(Col, Row).Left + 2 * CellW div 3 then
-        ShowMessage('Boleta PDF - Fase 3')
       else
-        AnularPesaje(ID);
+        ShowMessage('Boleta PDF - Fase 3');
     end;
   end
   else // INACTIVO
