@@ -44,6 +44,7 @@ const
   CLR_WARNING        = $026CED;  // #ED6C02 - orange
   CLR_WARNING_BG     = $E0F3FF;  // #FFF3E0
   CLR_INFO           = $D18802;  // #0288D1 - blue
+  CLR_INFO_BG        = $FDF2E3;  // #E3F2FD - light blue bg
   CLR_TEAL           = $82B030;  // #30B082 - teal
 
   // Texto

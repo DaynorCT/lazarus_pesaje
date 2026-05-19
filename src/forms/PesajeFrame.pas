@@ -602,7 +602,7 @@ begin
   Grid.Parent := pnlCard;
   Grid.SetBounds(2, 2, pnlCard.ClientWidth - 4, pnlCard.ClientHeight - 4);
   Grid.Anchors := [akTop, akLeft, akRight, akBottom];
-  Grid.ColCount := 20; Grid.RowCount := 2; Grid.FixedRows := 1; Grid.FixedCols := 0;
+  Grid.ColCount := 19; Grid.RowCount := 2; Grid.FixedRows := 1; Grid.FixedCols := 0;
   Grid.Options := Grid.Options + [goRowSelect];
   Grid.DefaultRowHeight := 36; Grid.RowHeights[0] := 40;
   Grid.Color := CLR_CARD; Grid.FixedColor := CLR_CARD;
@@ -610,15 +610,21 @@ begin
   Grid.TitleFont.Height := -10; Grid.TitleFont.Style := [fsBold]; Grid.TitleFont.Color := CLR_TEXT_SLATE;
   Grid.GridLineWidth := 0; Grid.Flat := True; Grid.FocusRectVisible := False; Grid.BorderStyle := bsNone;
 
-  Grid.Cells[0,0]:='Chofer'; Grid.Cells[1,0]:='Placa'; Grid.Cells[2,0]:='Licencia';
-  Grid.Cells[3,0]:='Tipo'; Grid.Cells[4,0]:='Proveedor'; Grid.Cells[5,0]:='Producto';
-  Grid.Cells[6,0]:='Origen'; Grid.Cells[7,0]:='Destino'; Grid.Cells[8,0]:='Costo';
-  Grid.Cells[9,0]:='Flete'; Grid.Cells[10,0]:='Fecha'; Grid.Cells[11,0]:='Hora';
-  Grid.Cells[12,0]:='P.Bruto'; Grid.Cells[13,0]:='P.Tara'; Grid.Cells[14,0]:='P.Neto';
-  Grid.Cells[15,0]:='Pesador'; Grid.Cells[16,0]:='Estado'; Grid.Cells[17,0]:='Acciones';
-  Grid.Cells[18,0]:='ID'; Grid.Cells[19,0]:='EstPesaje';
-  // ...
-  Grid.ColWidths[18]:=0; Grid.ColWidths[19]:=0;
+  Grid.Cells[0,0]:='ID'; Grid.Cells[1,0]:='Chofer'; Grid.Cells[2,0]:='Placa';
+  Grid.Cells[3,0]:='Licencia'; Grid.Cells[4,0]:='Tipo'; Grid.Cells[5,0]:='Proveedor';
+  Grid.Cells[6,0]:='Producto'; Grid.Cells[7,0]:='Origen'; Grid.Cells[8,0]:='Destino';
+  Grid.Cells[9,0]:='Costo'; Grid.Cells[10,0]:='Flete'; Grid.Cells[11,0]:='Fecha';
+  Grid.Cells[12,0]:='Hora'; Grid.Cells[13,0]:='P.Bruto'; Grid.Cells[14,0]:='P.Tara';
+  Grid.Cells[15,0]:='P.Neto'; Grid.Cells[16,0]:='Estado'; Grid.Cells[17,0]:='Est.Pesaje';
+  Grid.Cells[18,0]:='Acciones';
+
+  Grid.ColWidths[0]:=50; Grid.ColWidths[1]:=180; Grid.ColWidths[2]:=100;
+  Grid.ColWidths[3]:=100; Grid.ColWidths[4]:=100; Grid.ColWidths[5]:=180;
+  Grid.ColWidths[6]:=120; Grid.ColWidths[7]:=120; Grid.ColWidths[8]:=120;
+  Grid.ColWidths[9]:=70; Grid.ColWidths[10]:=70; Grid.ColWidths[11]:=70;
+  Grid.ColWidths[12]:=50; Grid.ColWidths[13]:=70; Grid.ColWidths[14]:=70;
+  Grid.ColWidths[15]:=70; Grid.ColWidths[16]:=85; Grid.ColWidths[17]:=90;
+  Grid.ColWidths[18]:=180;
   Grid.OnDrawCell := @GridDrawCell;
   Grid.OnMouseDown := @GridMouseDown;
 
@@ -841,33 +847,32 @@ begin
   while not Q.EOF do begin
     ID := Q.Fields[0].AsInteger;
     Grid.Objects[0, Row] := TObject(PtrInt(ID));
-    FechaStr := Q.Fields[10].AsString;
+    FechaStr := Q.Fields[11].AsString;
     if Length(FechaStr) >= 16 then
     begin
-      Grid.Cells[10,Row] := Copy(FechaStr,9,2)+'/'+Copy(FechaStr,6,2)+'/'+Copy(FechaStr,1,4);
-      Grid.Cells[11,Row] := Copy(FechaStr,12,5);
+      Grid.Cells[11,Row] := Copy(FechaStr,9,2)+'/'+Copy(FechaStr,6,2)+'/'+Copy(FechaStr,1,4);
+      Grid.Cells[12,Row] := Copy(FechaStr,12,5);
     end else begin
-      Grid.Cells[10,Row] := Copy(FechaStr,1,10);
-      Grid.Cells[11,Row] := '';
+      Grid.Cells[11,Row] := Copy(FechaStr,1,10);
+      Grid.Cells[12,Row] := '';
     end;
-    Grid.Cells[0,Row]:=UpperCase(Q.Fields[1].AsString);
-    Grid.Cells[1,Row]:=UpperCase(Q.Fields[2].AsString);
-    Grid.Cells[2,Row]:=UpperCase(Q.Fields[3].AsString);
-    Grid.Cells[3,Row]:=UpperCase(Q.Fields[4].AsString);
-    Grid.Cells[4,Row]:=UpperCase(Q.Fields[5].AsString);
-    Grid.Cells[5,Row]:=UpperCase(Q.Fields[6].AsString);
-    Grid.Cells[6,Row]:=UpperCase(Q.Fields[7].AsString);
-    Grid.Cells[7,Row]:=UpperCase(Q.Fields[8].AsString);
-    Grid.Cells[8,Row]:=Q.Fields[9].AsString;
-    Grid.Cells[9,Row]:=Q.Fields[10].AsString;
-    Grid.Cells[12,Row]:=Q.Fields[11].AsString;
+    Grid.Cells[0,Row] := IntToStr(ID);
+    Grid.Cells[1,Row]:=UpperCase(Q.Fields[1].AsString);
+    Grid.Cells[2,Row]:=UpperCase(Q.Fields[2].AsString);
+    Grid.Cells[3,Row]:=UpperCase(Q.Fields[3].AsString);
+    Grid.Cells[4,Row]:=UpperCase(Q.Fields[4].AsString);
+    Grid.Cells[5,Row]:=UpperCase(Q.Fields[5].AsString);
+    Grid.Cells[6,Row]:=UpperCase(Q.Fields[6].AsString);
+    Grid.Cells[7,Row]:=UpperCase(Q.Fields[7].AsString);
+    Grid.Cells[8,Row]:=UpperCase(Q.Fields[8].AsString);
+    Grid.Cells[9,Row]:=Q.Fields[9].AsString;
+    Grid.Cells[10,Row]:=Q.Fields[10].AsString;
     Grid.Cells[13,Row]:=Q.Fields[12].AsString;
     Grid.Cells[14,Row]:=Q.Fields[13].AsString;
-    Grid.Cells[15,Row]:=UpperCase(Q.Fields[14].AsString);
-    Grid.Cells[16,Row]:=UpperCase(Q.Fields[15].AsString);
-    Grid.Cells[17,Row]:='';
-    Grid.Cells[18,Row]:=IntToStr(ID);
-    Grid.Cells[19,Row]:=UpperCase(Q.Fields[16].AsString);
+    Grid.Cells[15,Row]:=Q.Fields[14].AsString;
+    Grid.Cells[16,Row]:=UpperCase(Q.Fields[16].AsString);
+    Grid.Cells[17,Row]:=UpperCase(Q.Fields[17].AsString);
+    Grid.Cells[18,Row]:='';
     Q.Next; Inc(Row);
   end;
   Q.Close;
@@ -903,8 +908,24 @@ begin
     Exit;
   end;
 
-  // Columna Acciones
+  // Columna EstPesaje: badge
   if aCol = 17 then begin
+    if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else Grid.Canvas.Brush.Color := CLR_CARD;
+    Grid.Canvas.FillRect(aRect);
+    if Grid.Cells[17, aRow] = 'FINALIZADO' then
+    begin Grid.Canvas.Brush.Color := CLR_INFO_BG; Grid.Canvas.Font.Color := CLR_INFO; end
+    else begin Grid.Canvas.Brush.Color := CLR_WARNING_BG; Grid.Canvas.Font.Color := CLR_WARNING; end;
+    Grid.Canvas.Pen.Style := psClear;
+    Grid.Canvas.RoundRect(aRect.Left + 2, aRect.Top + 6, aRect.Left + (aRect.Right - aRect.Left) - 2, aRect.Top + 30, 12, 12);
+    Grid.Canvas.Font.Height := -10; Grid.Canvas.Font.Style := [fsBold];
+    Ts := Grid.Canvas.TextStyle; Ts.Alignment := taCenter; Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[17, aRow], Ts);
+    Exit;
+  end;
+
+  // Columna Acciones
+  if aCol = 18 then begin
     if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
     else Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
@@ -913,7 +934,7 @@ begin
 
     if Grid.Cells[16, aRow] = 'ACTIVO' then
     begin
-      if Grid.Cells[19, aRow] = 'EN_PROCESO' then
+      if Grid.Cells[17, aRow] = 'EN_PROCESO' then
       begin
         // Toggle ●/○
         Grid.Canvas.Font.Color := CLR_SUCCESS;
@@ -978,13 +999,13 @@ begin
   TotalH := 0;
   for I := 0 to Grid.RowCount - 1 do TotalH := TotalH + Grid.RowHeights[I];
   if Y > TotalH then Exit;
-  if Col <> 17 then Exit;
+  if Col <> 18 then Exit;
   ID := PtrInt(Grid.Objects[0, Row]);
   CellW := Grid.CellRect(Col, Row).Right - Grid.CellRect(Col, Row).Left;
 
   if Grid.Cells[16, Row] = 'ACTIVO' then
   begin
-    if Grid.Cells[19, Row] = 'EN_PROCESO' then
+    if Grid.Cells[17, Row] = 'EN_PROCESO' then
     begin
       if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
         ToggleEstadoPesaje(ID, Grid.Cells[16, Row])
@@ -1225,12 +1246,21 @@ begin
   end;
   NuevaTara := StrToIntDef(FTaraManual, 0);
   VehiculoID := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
-  DM.EjecutarSQL('UPDATE vehiculos SET tara=' + IntToStr(NuevaTara) +
-    ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(VehiculoID));
-  FTara := NuevaTara;
-  FPesoNeto := FPesoBruto - FTara;
-  ActualizarResumenPesos;
-  ShowMessage('Tara guardada en el vehiculo');
+
+  if DM.Transaccion.Active then DM.Transaccion.Rollback;
+  DM.Transaccion.StartTransaction;
+  try
+    DM.EjecutarSQL('UPDATE vehiculos SET tara=' + IntToStr(NuevaTara) +
+      ', usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
+      ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(VehiculoID));
+    DM.Transaccion.Commit;
+    FTara := NuevaTara;
+    FPesoNeto := FPesoBruto - FTara;
+    ActualizarResumenPesos;
+  except
+    DM.Transaccion.Rollback;
+    ShowMessage('Error al guardar tara');
+  end;
 end;
 
 procedure TFramePesaje.GuardarClick(Sender: TObject);
