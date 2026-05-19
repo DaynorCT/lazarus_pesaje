@@ -13,6 +13,7 @@ type
 
   TFrameOrigenes = class(TFrame)
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   private
     Grid: TStringGrid;
     pnlCard: TPanel;
@@ -21,6 +22,11 @@ type
     edtBuscar: TEdit;
     FEditingID: Integer;
     FModalForm: TForm;
+    FHoverRow: Integer;
+    FHoverZone: Integer;
+    FHintWindow: THintWindow;
+    FHintTimer: TTimer;
+    FHintActive: Boolean;
     procedure Refrescar(Sender: TObject);
     procedure btnNuevoClick(Sender: TObject);
     procedure GuardarClick(Sender: TObject);
@@ -28,6 +34,9 @@ type
     procedure GridDblClick(Sender: TObject);
     procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
     procedure GridMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure HintTimerTick(Sender: TObject);
+    procedure MostrarHintAccion(const Texto: string);
     procedure ToggleEstado(ID: Integer; EstadoActual: string);
     procedure PaintRounded(Sender: TObject);
     procedure ShowOrigenForm(ID: Integer);
@@ -168,6 +177,11 @@ begin
   Grid.OnDblClick := @GridDblClick;
   Grid.OnDrawCell := @GridDrawCell;
   Grid.OnMouseDown := @GridMouseDown;
+  Grid.OnMouseMove := @GridMouseMove;
+  FHintTimer := TTimer.Create(Self);
+  FHintTimer.Interval := 400; FHintTimer.OnTimer := @HintTimerTick;
+  FHintTimer.Enabled := False;
+  FHintActive := False;
 
   Refrescar(nil);
 end;
@@ -236,6 +250,16 @@ begin
     else
       Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
+
+    if (aRow = FHoverRow) and (FHoverZone > 0) then
+    begin
+      Grid.Canvas.Brush.Color := CLR_SIDEBAR_ACTIVE;
+      Grid.Canvas.Pen.Style := psClear;
+      case FHoverZone of
+        1: Grid.Canvas.RoundRect(aRect.Left + 41, aRect.Top + 4, aRect.Left + 109, aRect.Bottom - 4, 6, 6);
+        2: Grid.Canvas.RoundRect(aRect.Left + 101, aRect.Top + 4, aRect.Left + 159, aRect.Bottom - 4, 6, 6);
+      end;
+    end;
 
     Ts := Grid.Canvas.TextStyle;
     Ts.Layout := tlCenter;
@@ -355,6 +379,50 @@ begin
   end;
 end;
 
+procedure TFrameOrigenes.GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var Col, Row: Integer; Zona: Integer; NewZone: Integer;
+begin
+  Grid.MouseToCell(X, Y, Col, Row);
+  if (Col <> 3) or (Row < 1) or (Row >= Grid.RowCount) then begin NewZone := 0; Row := 0; end
+  else begin
+    if X < Grid.CellRect(Col, Row).Left + 105 then Zona := 1 else Zona := 2;
+    NewZone := Zona;
+  end;
+  if (FHoverRow <> Row) or (FHoverZone <> NewZone) then begin
+    if (FHoverRow > 0) and (FHoverRow < Grid.RowCount) then Grid.InvalidateCell(3, FHoverRow);
+    FHoverRow := Row; FHoverZone := NewZone;
+    if (Row > 0) and (Row < Grid.RowCount) then Grid.InvalidateCell(3, Row);
+    if FHintActive then begin FHintWindow.Hide; FHintActive := False; end;
+    FHintTimer.Enabled := NewZone > 0;
+  end;
+end;
+
+procedure TFrameOrigenes.HintTimerTick(Sender: TObject);
+var Texto: string; P: TPoint;
+begin
+  FHintTimer.Enabled := False;
+  if FHoverZone = 0 then Exit;
+  case FHoverZone of
+    1: if Grid.Cells[2, FHoverRow] = 'ACTIVO' then Texto := 'Desactivar' else Texto := 'Activar';
+    2: Texto := 'Editar origen';
+  else Exit; end;
+  P := Mouse.CursorPos;
+  MostrarHintAccion(Texto);
+  FHintWindow.Top := P.Y + 20; FHintWindow.Left := P.X + 12;
+  FHintWindow.Show; FHintActive := True;
+end;
+
+procedure TFrameOrigenes.MostrarHintAccion(const Texto: string);
+var R: TRect;
+begin
+  if FHintWindow = nil then begin
+    FHintWindow := THintWindow.Create(Self);
+    FHintWindow.Color := CLR_TEXT; FHintWindow.Font.Size := 11; FHintWindow.Font.Color := CLR_WHITE;
+  end;
+  R := FHintWindow.CalcHintRect(250, Texto, nil);
+  FHintWindow.ActivateHint(R, Texto);
+end;
+
 procedure TFrameOrigenes.GridDblClick(Sender: TObject);
 var
   Row: Integer;
@@ -383,7 +451,7 @@ end;
 
 procedure TFrameOrigenes.ToggleEstado(ID: Integer; EstadoActual: string);
 var
-  NuevoEstado: string;
+  NuevoEstado: string; Row: Integer;
 begin
   if ID = 0 then Exit;
   if EstadoActual = 'ACTIVO' then
@@ -391,9 +459,23 @@ begin
   else
     NuevoEstado := 'ACTIVO';
 
-  DM.EjecutarSQL('UPDATE origenes SET estado=''' + NuevoEstado +
-    ''', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
-  Refrescar(nil);
+  if DM.Transaccion.Active then DM.Transaccion.Rollback;
+  DM.Transaccion.StartTransaction;
+  try
+    DM.EjecutarSQL('UPDATE origenes SET estado=''' + NuevoEstado +
+      ''', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
+    DM.Transaccion.Commit;
+    for Row := 1 to Grid.RowCount - 1 do
+      if PtrInt(Grid.Objects[0, Row]) = ID then
+      begin
+        Grid.Cells[2, Row] := NuevoEstado;
+        Grid.InvalidateCell(2, Row);
+        Grid.InvalidateCell(3, Row);
+        Break;
+      end;
+  except
+    DM.Transaccion.Rollback;
+  end;
 end;
 
 procedure TFrameOrigenes.PaintRounded(Sender: TObject);
@@ -650,6 +732,12 @@ begin
     F.Free;
     FModalForm := nil;
   end;
+end;
+
+destructor TFrameOrigenes.Destroy;
+begin
+  if FHintWindow <> nil then FreeAndNil(FHintWindow);
+  inherited Destroy;
 end;
 
 end.

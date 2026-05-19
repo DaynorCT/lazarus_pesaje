@@ -39,6 +39,11 @@ type
     pnlGuardar, pnlCancelEdit: TPanel;
     btnVehNuevo, btnChoNuevo, btnPrvNuevo: TPanel;
     btnProNuevo, btnOriNuevo, btnDesNuevo: TPanel;
+    FHoverRow: Integer;
+    FHoverZone: Integer;
+    FHintWindow: THintWindow;
+    FHintTimer: TTimer;
+    FHintActive: Boolean;
     procedure RefrescarPesajes(Sender: TObject);
     procedure CargarCombos;
     procedure VehiculoChange(Sender: TObject);
@@ -67,6 +72,9 @@ type
     procedure QuickSimpleClick(Sender: TObject);
     procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
     procedure GridMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure HintTimerTick(Sender: TObject);
+    procedure MostrarHintAccion(const Texto: string);
     procedure CargarPesaje(ID: Integer);
     procedure FinalizarPesaje(ID: Integer);
     procedure AnularPesaje(ID: Integer);
@@ -629,10 +637,15 @@ begin
   Grid.ColWidths[18]:=180;
   Grid.OnDrawCell := @GridDrawCell;
   Grid.OnMouseDown := @GridMouseDown;
+  Grid.OnMouseMove := @GridMouseMove;
 
   TimerLectura := TTimer.Create(Self);
   TimerLectura.Interval := 300; TimerLectura.OnTimer := @TimerLecturaTimer;
   TimerLectura.Enabled := False;
+  FHintTimer := TTimer.Create(Self);
+  FHintTimer.Interval := 400; FHintTimer.OnTimer := @HintTimerTick;
+  FHintTimer.Enabled := False;
+  FHintActive := False;
   CargarCombos;
   RefrescarPesajes(nil);
 end;
@@ -640,6 +653,7 @@ end;
 destructor TFramePesaje.Destroy;
 begin
   if FConectado then begin DM.DesconectarSerial; FConectado := False; end;
+  if FHintWindow <> nil then FreeAndNil(FHintWindow);
   inherited Destroy;
 end;
 
@@ -934,6 +948,30 @@ begin
     Grid.Canvas.Font.Height := -11; Grid.Canvas.Font.Style := [fsBold];
     Ts := Grid.Canvas.TextStyle; Ts.Layout := tlCenter;
 
+    // Hover highlight
+    if (aRow = FHoverRow) and (FHoverZone > 0) then
+    begin
+      Grid.Canvas.Brush.Color := CLR_SIDEBAR_ACTIVE;
+      Grid.Canvas.Pen.Style := psClear;
+      if Grid.Cells[16, aRow] = 'ACTIVO' then
+      begin
+        if Grid.Cells[17, aRow] = 'EN_PROCESO' then
+          case FHoverZone of
+            1: Grid.Canvas.RoundRect(aRect.Left + 16, aRect.Top + 4, aRect.Left + 59, aRect.Bottom - 4, 6, 6);
+            2: Grid.Canvas.RoundRect(aRect.Left + 55, aRect.Top + 4, aRect.Left + 114, aRect.Bottom - 4, 6, 6);
+            3: Grid.Canvas.RoundRect(aRect.Left + 110, aRect.Top + 4, aRect.Left + 164, aRect.Bottom - 4, 6, 6);
+          end
+        else // FINALIZADO
+          case FHoverZone of
+            1: Grid.Canvas.RoundRect(aRect.Left + 16, aRect.Top + 4, aRect.Left + 94, aRect.Bottom - 4, 6, 6);
+            2: Grid.Canvas.RoundRect(aRect.Left + 90, aRect.Top + 4, aRect.Left + 164, aRect.Bottom - 4, 6, 6);
+          end
+      end
+      else // INACTIVO
+        if FHoverZone = 1 then
+          Grid.Canvas.RoundRect(aRect.Left + 16, aRect.Top + 4, aRect.Left + 59, aRect.Bottom - 4, 6, 6);
+    end;
+
     if Grid.Cells[16, aRow] = 'ACTIVO' then
     begin
       if Grid.Cells[17, aRow] = 'EN_PROCESO' then
@@ -1025,6 +1063,103 @@ begin
     if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
       ToggleEstadoPesaje(ID, Grid.Cells[16, Row]);
   end;
+end;
+
+procedure TFramePesaje.GridMouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+var Col, Row: Integer; CellW, Zona: Integer; NewZone: Integer;
+begin
+  Grid.MouseToCell(X, Y, Col, Row);
+  if (Col <> 18) or (Row < 1) or (Row >= Grid.RowCount) then
+  begin
+    NewZone := 0; Row := 0;
+  end
+  else
+  begin
+    CellW := Grid.CellRect(Col, Row).Right - Grid.CellRect(Col, Row).Left;
+    if Grid.Cells[16, Row] = 'ACTIVO' then
+    begin
+      if Grid.Cells[17, Row] = 'EN_PROCESO' then
+      begin
+        if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
+          Zona := 1
+        else if X < Grid.CellRect(Col, Row).Left + 2 * CellW div 3 then
+          Zona := 2
+        else
+          Zona := 3;
+      end
+      else
+        if X < Grid.CellRect(Col, Row).Left + CellW div 2 then
+          Zona := 1
+        else
+          Zona := 2;
+    end
+    else
+      if X < Grid.CellRect(Col, Row).Left + CellW div 3 then
+        Zona := 1
+      else
+        Zona := 0;
+    NewZone := Zona;
+  end;
+
+  if (FHoverRow <> Row) or (FHoverZone <> NewZone) then
+  begin
+    if (FHoverRow > 0) and (FHoverRow < Grid.RowCount) then
+      Grid.InvalidateCell(18, FHoverRow);
+    FHoverRow := Row;
+    FHoverZone := NewZone;
+    if (Row > 0) and (Row < Grid.RowCount) then
+      Grid.InvalidateCell(18, Row);
+
+    // Hint: ocultar al cambiar de zona
+    if FHintActive then
+    begin
+      FHintWindow.Hide;
+      FHintActive := False;
+    end;
+    FHintTimer.Enabled := NewZone > 0;
+  end;
+end;
+
+procedure TFramePesaje.HintTimerTick(Sender: TObject);
+var Texto: string; P: TPoint;
+begin
+  FHintTimer.Enabled := False;
+  if FHoverZone = 0 then Exit;
+
+  case FHoverZone of
+    1: if Grid.Cells[16, FHoverRow] = 'ACTIVO' then
+         Texto := 'Desactivar'
+       else
+         Texto := 'Activar';
+    2: if Grid.Cells[17, FHoverRow] = 'EN_PROCESO' then
+         Texto := 'Editar pesaje'
+       else
+         Texto := 'Imprimir boleta';
+    3: Texto := 'Finalizar';
+  else Exit;
+  end;
+
+  P := Mouse.CursorPos;
+  MostrarHintAccion(Texto);
+  FHintWindow.Top := P.Y + 20;
+  FHintWindow.Left := P.X + 12;
+  FHintWindow.Show;
+  FHintActive := True;
+end;
+
+procedure TFramePesaje.MostrarHintAccion(const Texto: string);
+var R: TRect;
+begin
+  if FHintWindow = nil then
+  begin
+    FHintWindow := THintWindow.Create(Self);
+    FHintWindow.Color := CLR_TEXT;
+    FHintWindow.Font.Size := 11;
+    FHintWindow.Font.Color := CLR_WHITE;
+  end;
+  R := FHintWindow.CalcHintRect(250, Texto, nil);
+  FHintWindow.ActivateHint(R, Texto);
 end;
 
 // ═══════════════════════════════════════════════
@@ -1327,8 +1462,8 @@ begin
       end;
     finally
       Q.Close;
-    end;
   end;
+end;
 
   if not FEditMode then
   begin

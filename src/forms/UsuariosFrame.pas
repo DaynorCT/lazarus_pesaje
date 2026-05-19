@@ -13,6 +13,7 @@ type
 
   TFrameUsuarios = class(TFrame)
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   private
     Grid: TStringGrid;
     pnlCard: TPanel;
@@ -21,6 +22,11 @@ type
     edtBuscarNombre, edtBuscarCI: TEdit;
     FEditingID: Integer;
     FModalForm: TForm;
+    FHoverRow: Integer;
+    FHoverZone: Integer;
+    FHintWindow: THintWindow;
+    FHintTimer: TTimer;
+    FHintActive: Boolean;
     procedure Refrescar(Sender: TObject);
     procedure btnNuevoClick(Sender: TObject);
     procedure GuardarClick(Sender: TObject);
@@ -28,6 +34,9 @@ type
     procedure GridDblClick(Sender: TObject);
     procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
     procedure GridMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure HintTimerTick(Sender: TObject);
+    procedure MostrarHintAccion(const Texto: string);
     procedure ToggleEstado(ID: Integer; EstadoActual: string);
     procedure PaintRounded(Sender: TObject);
     function GetColByName(const ColName: string): Integer;
@@ -198,6 +207,11 @@ begin
   Grid.OnDblClick := @GridDblClick;
   Grid.OnDrawCell := @GridDrawCell;
   Grid.OnMouseDown := @GridMouseDown;
+  Grid.OnMouseMove := @GridMouseMove;
+  FHintTimer := TTimer.Create(Self);
+  FHintTimer.Interval := 400; FHintTimer.OnTimer := @HintTimerTick;
+  FHintTimer.Enabled := False;
+  FHintActive := False;
 
   Refrescar(nil);
 end;
@@ -292,6 +306,17 @@ begin
     else
       Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
+
+    // Hover highlight
+    if (aRow = FHoverRow) and (FHoverZone > 0) then
+    begin
+      Grid.Canvas.Brush.Color := CLR_SIDEBAR_ACTIVE;
+      Grid.Canvas.Pen.Style := psClear;
+      case FHoverZone of
+        1: Grid.Canvas.RoundRect(aRect.Left + 41, aRect.Top + 4, aRect.Left + 109, aRect.Bottom - 4, 6, 6);
+        2: Grid.Canvas.RoundRect(aRect.Left + 101, aRect.Top + 4, aRect.Left + 159, aRect.Bottom - 4, 6, 6);
+      end;
+    end;
 
     Ts := Grid.Canvas.TextStyle;
     Ts.Layout := tlCenter;
@@ -410,6 +435,76 @@ begin
   end;
 end;
 
+procedure TFrameUsuarios.GridMouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+var Col, Row: Integer; CellW, Zona: Integer; NewZone: Integer;
+begin
+  Grid.MouseToCell(X, Y, Col, Row);
+  if (Col <> 6) or (Row < 1) or (Row >= Grid.RowCount) then
+  begin
+    NewZone := 0; Row := 0;
+  end
+  else
+  begin
+    if X < Grid.CellRect(Col, Row).Left + 105 then
+      Zona := 1
+    else
+      Zona := 2;
+    NewZone := Zona;
+  end;
+
+  if (FHoverRow <> Row) or (FHoverZone <> NewZone) then
+  begin
+    if (FHoverRow > 0) and (FHoverRow < Grid.RowCount) then
+      Grid.InvalidateCell(6, FHoverRow);
+    FHoverRow := Row;
+    FHoverZone := NewZone;
+    if (Row > 0) and (Row < Grid.RowCount) then
+      Grid.InvalidateCell(6, Row);
+    if FHintActive then
+    begin
+      FHintWindow.Hide;
+      FHintActive := False;
+    end;
+    FHintTimer.Enabled := NewZone > 0;
+  end;
+end;
+
+procedure TFrameUsuarios.HintTimerTick(Sender: TObject);
+var Texto: string; P: TPoint;
+begin
+  FHintTimer.Enabled := False;
+  if FHoverZone = 0 then Exit;
+  case FHoverZone of
+    1: if Grid.Cells[5, FHoverRow] = 'ACTIVO' then
+         Texto := 'Desactivar'
+       else
+         Texto := 'Activar';
+    2: Texto := 'Editar usuario';
+  else Exit;
+  end;
+  P := Mouse.CursorPos;
+  MostrarHintAccion(Texto);
+  FHintWindow.Top := P.Y + 20;
+  FHintWindow.Left := P.X + 12;
+  FHintWindow.Show;
+  FHintActive := True;
+end;
+
+procedure TFrameUsuarios.MostrarHintAccion(const Texto: string);
+var R: TRect;
+begin
+  if FHintWindow = nil then
+  begin
+    FHintWindow := THintWindow.Create(Self);
+    FHintWindow.Color := CLR_TEXT;
+    FHintWindow.Font.Size := 11;
+    FHintWindow.Font.Color := CLR_WHITE;
+  end;
+  R := FHintWindow.CalcHintRect(250, Texto, nil);
+  FHintWindow.ActivateHint(R, Texto);
+end;
+
 procedure TFrameUsuarios.GridDblClick(Sender: TObject);
 var
   Row: Integer;
@@ -438,7 +533,7 @@ end;
 
 procedure TFrameUsuarios.ToggleEstado(ID: Integer; EstadoActual: string);
 var
-  NuevoEstado: string;
+  NuevoEstado: string; Row: Integer;
 begin
   if ID = 0 then Exit;
   if EstadoActual = 'ACTIVO' then
@@ -446,12 +541,27 @@ begin
   else
     NuevoEstado := 'ACTIVO';
 
-  DM.EjecutarSQL('UPDATE usuarios SET estado=''' + NuevoEstado +
-    ''', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
-  DM.EjecutarSQL('UPDATE personas SET estado=''' + NuevoEstado +
-    ''', fecha_modificacion=''' + FechaHoraActual +
-    ''' WHERE id=(SELECT persona_id FROM usuarios WHERE id=' + IntToStr(ID) + ')');
-  Refrescar(nil);
+  if DM.Transaccion.Active then DM.Transaccion.Rollback;
+  DM.Transaccion.StartTransaction;
+  try
+    DM.EjecutarSQL('UPDATE usuarios SET estado=''' + NuevoEstado +
+      ''', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
+    DM.EjecutarSQL('UPDATE personas SET estado=''' + NuevoEstado +
+      ''', fecha_modificacion=''' + FechaHoraActual +
+      ''' WHERE id=(SELECT persona_id FROM usuarios WHERE id=' + IntToStr(ID) + ')');
+    DM.Transaccion.Commit;
+    // Actualizar celda en grilla sin re-consultar toda la BD
+    for Row := 1 to Grid.RowCount - 1 do
+      if PtrInt(Grid.Objects[0, Row]) = ID then
+      begin
+        Grid.Cells[5, Row] := NuevoEstado;
+        Grid.InvalidateCell(5, Row);
+        Grid.InvalidateCell(6, Row);
+        Break;
+      end;
+  except
+    DM.Transaccion.Rollback;
+  end;
 end;
 
 procedure TFrameUsuarios.PaintRounded(Sender: TObject);
@@ -819,6 +929,12 @@ begin
   finally
     F.Free;
   end;
+end;
+
+destructor TFrameUsuarios.Destroy;
+begin
+  if FHintWindow <> nil then FreeAndNil(FHintWindow);
+  inherited Destroy;
 end;
 
 end.
