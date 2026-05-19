@@ -80,8 +80,8 @@
         <ResourceBaseClass Value="Frame"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
-        <TopLine Value="245"/>
-        <CursorPos X="3" Y="254"/>
+        <TopLine Value="258"/>
+        <CursorPos X="18" Y="258"/>
         <UsageCount Value="122"/>
         <Loaded Value="True"/>
       </Unit>
