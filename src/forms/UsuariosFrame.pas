@@ -195,7 +195,7 @@ begin
   Grid.Cells[6, 0] := 'Acciones';
   Grid.Cells[7, 0] := 'ID';
 
-  Grid.ColWidths[0] := 200;
+  Grid.ColWidths[0] := 150;
   Grid.ColWidths[1] := 200;
   Grid.ColWidths[2] := 200;
   Grid.ColWidths[3] := 200;
