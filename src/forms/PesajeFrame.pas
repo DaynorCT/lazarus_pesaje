@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme, LoginForm, FinalizarPesajeDialog;
+  Grids, sqldb, DataModule, Utils, Theme, LoginForm;
 
 type
   { TFramePesaje }
@@ -72,6 +72,7 @@ type
     procedure AnularPesaje(ID: Integer);
     procedure ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
     procedure PaintRounded(Sender: TObject);
+    procedure DialogFinalizarOk(Sender: TObject);
     function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer; const ACaption: string;
       AColor: TColor; AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
     function BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
@@ -1065,6 +1066,12 @@ procedure TFramePesaje.FinalizarPesaje(ID: Integer);
 var
   Q: TSQLQuery;
   Bruto, Tara, Neto: Integer;
+  F: TForm;
+  pnlWrap, pnlDatos: TPanel;
+  Lbl: TLabel;
+  YPos, W: Integer;
+const
+  DIALOG_W = 440;
 begin
   Q := DM.AbrirQuery('SELECT peso_bruto, tara, peso_neto FROM pesajes WHERE id=' + IntToStr(ID));
   try
@@ -1081,7 +1088,82 @@ begin
     Exit;
   end;
 
-  if not MostrarFinalizarPesaje(ID, Bruto, Tara, Neto) then Exit;
+  // Dialog inline como QuickVehiculoClick
+  F := TForm.Create(nil);
+  try
+    F.Caption := ''; F.Width := DIALOG_W; F.Position := poMainFormCenter;
+    F.BorderStyle := bsDialog; F.Color := CLR_BG;
+    F.Constraints.MinWidth := DIALOG_W; F.Constraints.MaxWidth := DIALOG_W;
+    F.Constraints.MinHeight := 320; F.Constraints.MaxHeight := 320;
+
+    // Card panel (blanco, centrado)
+    pnlWrap := TPanel.Create(F);
+    pnlWrap.Parent := F; pnlWrap.Align := alClient; pnlWrap.BevelOuter := bvNone;
+    pnlWrap.Color := CLR_CARD; pnlWrap.BorderSpacing.Around := 16;
+    // Title
+    with TLabel.Create(F) do begin Parent := pnlWrap;
+      SetBounds(24, 24, DIALOG_W - 48, 28);
+      Caption := 'Finalizar Pesaje #' + IntToStr(ID);
+      Font.Size := 15; Font.Style := [fsBold]; Font.Color := CLR_TEXT_HEADING;
+    end;
+    // Subtitle
+    with TLabel.Create(F) do begin Parent := pnlWrap;
+      SetBounds(24, 54, DIALOG_W - 48, 18);
+      Caption := 'Verifique los pesos antes de finalizar';
+      Font.Size := 11; Font.Color := CLR_TEXT_SLATE;
+    end;
+    // Datos panel (slate-100)
+    pnlDatos := TPanel.Create(F); pnlDatos.Parent := pnlWrap;
+    pnlDatos.SetBounds(24, 84, DIALOG_W - 48, 120);
+    pnlDatos.BevelOuter := bvNone; pnlDatos.Color := CLR_SIDEBAR_ACTIVE;
+    // Bruto label
+    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
+    Lbl.SetBounds(20, 16, 100, 20); Lbl.Caption := 'Peso Bruto';
+    Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_SLATE;
+    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
+    Lbl.SetBounds(200, 16, 150, 20); Lbl.Caption := FormatFloat('#,##0', Bruto) + ' kg';
+    Lbl.Font.Size := 13; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
+    Lbl.Alignment := taRightJustify;
+    // Tara label
+    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
+    Lbl.SetBounds(20, 42, 100, 20); Lbl.Caption := 'Tara';
+    Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_SLATE;
+    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
+    Lbl.SetBounds(200, 42, 150, 20); Lbl.Caption := FormatFloat('#,##0', Tara) + ' kg';
+    Lbl.Font.Size := 13; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
+    Lbl.Alignment := taRightJustify;
+    // Divider
+    with TPanel.Create(F) do begin Parent := pnlDatos;
+      SetBounds(20, 74, pnlDatos.Width - 40, 1); BevelOuter := bvNone;
+      Color := CLR_BORDER;
+    end;
+    // Neto label
+    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
+    Lbl.SetBounds(20, 84, 100, 24); Lbl.Caption := 'Peso Neto';
+    Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_HEADING; Lbl.Font.Style := [fsBold];
+    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
+    Lbl.SetBounds(200, 84, 150, 24); Lbl.Caption := FormatFloat('#,##0', Neto) + ' kg';
+    Lbl.Font.Size := 16; Lbl.Font.Color := CLR_PRIMARY; Lbl.Font.Style := [fsBold];
+    Lbl.Alignment := taRightJustify;
+    // Confirm message
+    YPos := 216;
+    with TLabel.Create(F) do begin Parent := pnlWrap;
+      SetBounds(24, YPos, DIALOG_W - 48, 18);
+      Caption := 'Confirme la finalizacion del pesaje';
+      Font.Size := 11; Font.Color := CLR_TEXT_SLATE;
+    end;
+    // Buttons row
+    YPos := 248;
+    W := DIALOG_W - 32;
+    CrearBoton(pnlWrap, YPos, W - 220, 100, 36,
+      'Cancelar', CLR_CARD, CLR_TEXT, 1, @QuickCancelarClick);
+    CrearBoton(pnlWrap, YPos, W - 108, 100, 36,
+      'Finalizar', CLR_PRIMARY, CLR_PRIMARY_FG, 0, @DialogFinalizarOk);
+
+    if F.ShowModal <> mrOk then Exit;
+  finally
+    F.Free;
+  end;
 
   if DM.Transaccion.Active then DM.Transaccion.Rollback;
   DM.Transaccion.StartTransaction;
@@ -1786,6 +1868,16 @@ begin
     Pnl.Canvas.Pen.Style := psClear;
     Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
   end;
+end;
+
+procedure TFramePesaje.DialogFinalizarOk(Sender: TObject);
+var Pnl: TWinControl; Frm: TCustomForm;
+begin
+  if Sender is TLabel then Pnl := TLabel(Sender).Parent
+  else if Sender is TPanel then Pnl := TPanel(Sender)
+  else Exit;
+  Frm := GetParentForm(Pnl);
+  if Frm <> nil then Frm.ModalResult := mrOk;
 end;
 
 end.
