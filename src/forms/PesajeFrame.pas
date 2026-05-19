@@ -1104,21 +1104,35 @@ procedure TFramePesaje.AnularPesaje(ID: Integer);
 begin
   if MessageDlg('Anular pesaje', 'Se cambiara el estado a INACTIVO. Continuar?',
     mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
-  DM.EjecutarSQL('UPDATE pesajes SET estado=''INACTIVO'',' +
-    ' usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
-    ', fecha_modificacion=''' + FechaHoraActual +
-    ''' WHERE id=' + IntToStr(ID));
-  RefrescarPesajes(nil);
+  if DM.Transaccion.Active then DM.Transaccion.Rollback;
+  DM.Transaccion.StartTransaction;
+  try
+    DM.EjecutarSQL('UPDATE pesajes SET estado=''INACTIVO'',' +
+      ' usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
+      ', fecha_modificacion=''' + FechaHoraActual +
+      ''' WHERE id=' + IntToStr(ID));
+    DM.Transaccion.Commit;
+    RefrescarPesajes(nil);
+  except
+    DM.Transaccion.Rollback;
+  end;
 end;
 
 procedure TFramePesaje.ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
 var NuevoEstado: string;
 begin
   if EstadoActual = 'ACTIVO' then NuevoEstado := 'INACTIVO' else NuevoEstado := 'ACTIVO';
-  DM.EjecutarSQL('UPDATE pesajes SET estado=''' + NuevoEstado +
-    ''', usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
-    ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
-  RefrescarPesajes(nil);
+  if DM.Transaccion.Active then DM.Transaccion.Rollback;
+  DM.Transaccion.StartTransaction;
+  try
+    DM.EjecutarSQL('UPDATE pesajes SET estado=''' + NuevoEstado +
+      ''', usuario_modificacion=' + IntToStr(UsuarioActual.ID) +
+      ', fecha_modificacion=''' + FechaHoraActual + ''' WHERE id=' + IntToStr(ID));
+    DM.Transaccion.Commit;
+    RefrescarPesajes(nil);
+  except
+    DM.Transaccion.Rollback;
+  end;
 end;
 
 // ═══════════════════════════════════════════════
