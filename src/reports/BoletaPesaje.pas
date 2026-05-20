@@ -171,13 +171,13 @@ begin
     PageW := 185; 
 
     // Las 3 coordenadas solicitadas para el encabezado
-    XIzq := 15;
-    XCentro := 78;
-    XDer := 135;
+    XIzq := 27;
+    XCentro := 90;
+    XDer := 147;
 
     // Alineación para centrar el cuerpo de datos de forma equilibrada
-    XCol1 := 25;  // Margen de títulos internos ("Placa:", "Producto:")
-    XCol2 := 78;  // Los datos inician exactamente coordinados con la columna del Centro
+    XCol1 := 37;
+    XCol2 := 90;
 
     // Longitud calibrada para que no salte de línea en una hoja Carta útil
     LineaSeparadora := '-------------------------------------------------------------------------------------------------------------------------';
