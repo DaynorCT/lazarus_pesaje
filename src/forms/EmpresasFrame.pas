@@ -139,8 +139,11 @@ begin
   // Card contenedor de la tabla
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.SetBounds(24, 90, Self.ClientWidth - 48, Self.ClientHeight - 116);
-  pnlCard.Anchors := [akTop, akLeft, akRight, akBottom];
+  pnlCard.Align := alClient;
+  pnlCard.BorderSpacing.Top := 80;
+  pnlCard.BorderSpacing.Left := 24;
+  pnlCard.BorderSpacing.Right := 24;
+  pnlCard.BorderSpacing.Bottom := 24;
   pnlCard.BevelOuter := bvLowered;
   pnlCard.BevelInner := bvNone;
   pnlCard.BevelWidth := 1;
@@ -149,8 +152,9 @@ begin
   // Grid
   Grid := TStringGrid.Create(Self);
   Grid.Parent := pnlCard;
-  Grid.SetBounds(2, 2, pnlCard.ClientWidth - 4, pnlCard.ClientHeight - 4);
-  Grid.Anchors := [akTop, akLeft, akRight, akBottom];
+  Grid.Align := alClient;
+  Grid.BorderSpacing.Around := 2;
+  Grid.ScrollBars := ssAutoBoth;
   Grid.ColCount := 7;
   Grid.RowCount := 2;
   Grid.FixedRows := 1;
