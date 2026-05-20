@@ -5,11 +5,16 @@ unit BoletaPesaje;
 interface
 
 uses
-  Classes, SysUtils, sqldb, fppdf, fpttf, DataModule;
+  Classes, SysUtils, sqldb, fppdf, fpttf, base64, fpimage, FPReadPNG, FPReadJPEG, DataModule;
 
 function GenerarBoletaPDF(PesajeID: Integer; out Stream: TMemoryStream): Boolean;
 
 implementation
+
+function WinCPToUTF8(const S: string): string;
+begin
+  Result := S;
+end;
 
 type
   TBoletaData = record
@@ -88,10 +93,31 @@ begin
     Q.Close;
   end;
 
-  // Forzar valores idénticos a la imagen si la BD viene vacía (Opcional/Respaldo)
   Datos.TituloSuperior := 'BALANZA';
   Datos.Marca := 'PRIMAVERA';
   Datos.TituloDocumento := 'BOLETA DE PESAJE';
+
+  Q := DM.AbrirQuery('SELECT * FROM boleta_config LIMIT 1');
+  try
+    if not Q.EOF then
+    begin
+      Datos.Salida := UpperCase(Q.FieldByName('salida').AsString);
+      Datos.Direccion := UpperCase(Q.FieldByName('direccion').AsString);
+      Datos.Celular1 := UpperCase(Q.FieldByName('celular1').AsString);
+      Datos.Celular2 := UpperCase(Q.FieldByName('celular2').AsString);
+      Datos.Ciudad := UpperCase(Q.FieldByName('ciudad').AsString);
+    end;
+  finally
+    Q.Close;
+  end;
+
+  Q := DM.AbrirQuery('SELECT logo FROM empresas WHERE estado=''ACTIVO'' ORDER BY id DESC LIMIT 1');
+  try
+    if not Q.EOF then
+      Datos.LogoBase64 := Q.FieldByName('logo').AsString;
+  finally
+    Q.Close;
+  end;
 
   Result := True;
 end;
@@ -104,7 +130,7 @@ begin
   if Assigned(fc) then
     Result := fc.TextWidth(Texto, FontSize) * 25.4 / gTTFontCache.DPI
   else
-    Result := Length(Texto) * FontSize * 0.35;
+    Result := Length(Texto) * FontSize * 0.32;
 end;
 
 function GenerarBoletaPDF(PesajeID: Integer; out Stream: TMemoryStream): Boolean;
@@ -113,8 +139,13 @@ var
   Page: TPDFPage;
   Datos: TBoletaData;
   FontH, FontHBold: Integer;
-  Y, PageW, TicketW, XStart: Double;
+  Y, PageW: Double;
   XCol1, XCol2: Double;
+  XIzq, XCentro, XDer: Double;
+  LogoImgIdx: Integer;
+  LogoB64Pos: Integer;
+  LogoDecoded: string;
+  LogoStream: TMemoryStream;
   LineaSeparadora: string;
 begin
   Result := False;
@@ -123,7 +154,7 @@ begin
   Doc := TPDFDocument.Create(nil);
   try
     Doc.DefaultOrientation := ppoPortrait;
-    Doc.DefaultPaperType := ptLetter;
+    Doc.DefaultPaperType := ptLetter; 
     Doc.Options := [poPageOriginAtTop];
     Doc.StartDocument;
 
@@ -136,44 +167,110 @@ begin
     Page.UnitOfMeasure := uomMillimeters;
     Page.PaperType := ptLetter;
 
-    PageW := 215.9;
-    TicketW := 100;
-    XStart := (PageW - TicketW) / 2;
+    // Control estricto de márgenes para evitar el desborde y salto de línea en los guiones
+    PageW := 185; 
 
-    XCol1 := XStart + 5;
-    XCol2 := XStart + 40;
-    LineaSeparadora := '----------------------------------------------------------------------------------';
+    // Las 3 coordenadas solicitadas para el encabezado
+    XIzq := 15;
+    XCentro := 78;
+    XDer := 135;
 
-    // ═══════════ ENCABEZADO CENTRADO ═══════════
+    // Alineación para centrar el cuerpo de datos de forma equilibrada
+    XCol1 := 25;  // Margen de títulos internos ("Placa:", "Producto:")
+    XCol2 := 78;  // Los datos inician exactamente coordinados con la columna del Centro
+
+    // Longitud calibrada para que no salte de línea en una hoja Carta útil
+    LineaSeparadora := '-------------------------------------------------------------------------------------------------------------------------';
+
+    // Cargar logo de la empresa
+    LogoImgIdx := -1;
+    if Datos.LogoBase64 <> '' then
+    begin
+      LogoB64Pos := Pos(';base64,', Datos.LogoBase64);
+      if LogoB64Pos > 0 then
+      begin
+        LogoDecoded := DecodeStringBase64(Copy(Datos.LogoBase64, LogoB64Pos + 8, MaxInt));
+        if Length(LogoDecoded) > 0 then
+        begin
+          LogoStream := TMemoryStream.Create;
+          try
+            LogoStream.Write(LogoDecoded[1], Length(LogoDecoded));
+            LogoStream.Position := 0;
+            if Pos('image/png', Datos.LogoBase64) > 0 then
+              LogoImgIdx := Doc.Images.AddFromStream(LogoStream, TFPReaderPNG)
+            else if Pos('image/jpeg', Datos.LogoBase64) > 0 then
+              LogoImgIdx := Doc.Images.AddFromStream(LogoStream, TFPReaderJPEG);
+          finally
+            LogoStream.Free;
+          end;
+        end;
+      end;
+    end;
+
+    // ═══════════ ENCABEZADO 3 COLUMNAS ═══════════
+
+    // --- FILA 1 ---
     Y := 15;
-    Page.SetFont(FontHBold, 20);
-    Page.WriteText(XStart + (TicketW - MedirTexto(Datos.TituloSuperior, 'Helvetica-Bold', 20)) / 2, Y, Datos.TituloSuperior);
+    Page.SetFont(FontHBold, 10);
+    Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Salida));
+    
+    Page.SetFont(FontHBold, 15);
+    Page.WriteText(XCentro, Y, Datos.TituloSuperior);
+    
+    Page.SetFont(FontH, 7);
+    Page.WriteText(XDer, Y, 'ACREDITADO POR:');
+    if LogoImgIdx >= 0 then
+    begin
+      Page.DrawLine(XDer, Y + 4, XDer + 30, Y + 4, 0.2);
+      Page.DrawLine(XDer, Y + 4, XDer, Y + 26, 0.2);
+      Page.DrawLine(XDer + 30, Y + 4, XDer + 30, Y + 26, 0.2);
+      Page.DrawLine(XDer, Y + 26, XDer + 30, Y + 26, 0.2);
+      Page.DrawImage(XDer + 3, Y + 24, 24, 18, LogoImgIdx);
+    end;
 
-    Y := Y + 7;
-    Page.WriteText(XStart + (TicketW - MedirTexto(Datos.Marca, 'Helvetica-Bold', 20)) / 2, Y, Datos.Marca);
-
-    Y := Y + 8;
-    Page.SetFont(FontHBold, 13);
-    Page.WriteText(XStart + (TicketW - MedirTexto(Datos.TituloDocumento, 'Helvetica-Bold', 13)) / 2, Y, Datos.TituloDocumento);
-
+    // --- FILA 2 ---
     Y := Y + 5;
-    Page.SetFont(FontH, 10);
-    Page.WriteText(XStart + (TicketW - MedirTexto('BOLETA DE PESAJE DIGITAL', 'Helvetica', 10)) / 2, Y, 'BOLETA DE PESAJE DIGITAL');
-
-    // ═══════════ INFORMACIÓN DE GUÍA, FECHA Y HORA ═══════════
-    Y := Y + 7;
     Page.SetFont(FontH, 9);
-    Page.WriteText(XCol1, Y, 'Guia: ' + Datos.Guia);
-    Page.WriteText(XStart + 38, Y, 'Fecha: ' + Datos.Fecha);
-    Page.WriteText(XStart + 72, Y, 'Hora: ' + Datos.Hora);
+    Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Direccion));
+    
+    Page.SetFont(FontHBold, 15);
+    Page.WriteText(XCentro, Y, Datos.Marca);
+
+    // --- FILA 3 ---
+    Y := Y + 5;
+    Page.SetFont(FontH, 9);
+    Page.WriteText(XIzq, Y, 'Cel: ' + Datos.Celular1);
+    
+    Page.SetFont(FontHBold, 11);
+    Page.WriteText(XCentro, Y, Datos.TituloDocumento);
+
+    // --- FILA 4 ---
+    Y := Y + 4.5;
+    Page.SetFont(FontH, 9);
+    Page.WriteText(XIzq + 7, Y, Datos.Celular2);
+    
+    Page.SetFont(FontH, 8.5);
+    Page.WriteText(XCentro - 4, Y, 'BOLETA DE PESAJE DIGITAL');
+
+    // --- FILA 5 ---
+    Y := Y + 4.5;
+    Page.SetFont(FontH, 9);
+    Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Ciudad));
+
+    // --- FILA 6 (Segunda línea informativa del ticket) ---
+    Y := Y + 6;
+    Page.SetFont(FontH, 9);
+    Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
+    Page.WriteText(XCentro, Y, 'Fecha: ' + Datos.Fecha);
+    Page.WriteText(XDer, Y, 'Hora: ' + Datos.Hora);
 
     Y := Y + 3;
-    Page.WriteText(XCol1, Y, LineaSeparadora);
+    Page.WriteText(XIzq, Y, LineaSeparadora);
 
     // ═══════════ DATOS DEL VEHÍCULO ═══════════
     Y := Y + 5;
     Page.SetFont(FontHBold, 10);
-    Page.WriteText(XStart + (TicketW - MedirTexto('DATOS DEL VEHÍCULO', 'Helvetica-Bold', 10)) / 2, Y, 'DATOS DEL VEHÍCULO');
+    Page.WriteText(XCentro - 5, Y, 'DATOS DEL VEHICULO');
 
     Y := Y + 5;
     Page.SetFont(FontH, 9.5);
@@ -182,78 +279,78 @@ begin
 
     Y := Y + 5;
     Page.WriteText(XCol1, Y, 'Chofer:');
-    Page.WriteText(XCol2, Y, Datos.ChoferNombre);
+    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.ChoferNombre));
 
     Y := Y + 5;
     Page.WriteText(XCol1, Y, 'Licencia:');
     Page.WriteText(XCol2, Y, Datos.ChoferLicencia);
 
     Y := Y + 5;
-    Page.WriteText(XCol1, Y, 'Tipo Vehículo:');
-    Page.WriteText(XCol2, Y, Datos.VehiculoTipo);
+    Page.WriteText(XCol1, Y, 'Tipo Vehiculo:');
+    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.VehiculoTipo));
 
     Y := Y + 3;
-    Page.WriteText(XCol1, Y, LineaSeparadora);
+    Page.WriteText(XIzq, Y, LineaSeparadora);
 
     // ═══════════ DATOS DE CARGA ═══════════
     Y := Y + 5;
     Page.SetFont(FontHBold, 10);
-    Page.WriteText(XStart + (TicketW - MedirTexto('DATOS DE CARGA', 'Helvetica-Bold', 10)) / 2, Y, 'DATOS DE CARGA');
+    Page.WriteText(XCentro - 3, Y, 'DATOS DE CARGA');
 
     Y := Y + 5;
     Page.SetFont(FontH, 9.5);
     Page.WriteText(XCol1, Y, 'Producto:');
-    Page.WriteText(XCol2, Y, Datos.ProductoNombre);
+    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.ProductoNombre));
 
     Y := Y + 5;
     Page.WriteText(XCol1, Y, 'Origen:');
-    Page.WriteText(XCol2, Y, Datos.OrigenNombre);
+    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.OrigenNombre));
 
     Y := Y + 5;
     Page.WriteText(XCol1, Y, 'Destino:');
-    Page.WriteText(XCol2, Y, Datos.DestinoNombre);
+    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.DestinoNombre));
 
     Y := Y + 5;
     Page.WriteText(XCol1, Y, 'Costo:');
     Page.WriteText(XCol2, Y, IntToStr(Datos.CostoBs) + ' Bs');
 
     Y := Y + 3;
-    Page.WriteText(XCol1, Y, LineaSeparadora);
+    Page.WriteText(XIzq, Y, LineaSeparadora);
 
-    // ═══════════ BLOQUE DE PESOS ═══════════
+    // ═══════════ BLOQUE DE PESOS EN 3 COLUMNAS COORDINADAS ═══════════
     Y := Y + 5;
-    Page.SetFont(FontHBold, 9);
+    Page.SetFont(FontHBold, 10);
     Page.WriteText(XCol1, Y, '[PESO BRUTO:');
-    Page.WriteText(XStart + 38, Y, '[PESO TARA:');
-    Page.WriteText(XStart + 70, Y, '[PESO NETO:');
+    Page.WriteText(XCentro, Y, '[PESO TARA:');
+    Page.WriteText(XDer, Y, '[PESO NETO:');
 
-    Y := Y + 5.5;
-    Page.SetFont(FontHBold, 12);
+    Y := Y + 6;
+    Page.SetFont(FontHBold, 14); // Pesos grandes y en negrita
     Page.WriteText(XCol1, Y, FormatFloat('#,##0', Datos.PesoBruto) + ' kg');
-    Page.WriteText(XStart + 38, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
-    Page.WriteText(XStart + 70, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
-
-    Y := Y + 3;
-    Page.SetFont(FontH, 9);
-    Page.WriteText(XCol1, Y, LineaSeparadora);
-
-    // ═══════════ PIE DE FECHA PESAJE ═══════════
-    Y := Y + 5;
-    Page.SetFont(FontH, 10);
-    Page.WriteText(XStart + (TicketW - MedirTexto('Fecha Pesaje: ' + Datos.Fecha + ' ' + Datos.Hora, 'Helvetica', 10)) / 2, Y, 'Fecha Pesaje: ' + Datos.Fecha + ' ' + Datos.Hora);
-
-    Y := Y + 5;
-    Page.WriteText(XCol1, Y, LineaSeparadora);
-
-    // ═══════════ ÁREA DE FIRMAS ═══════════
-    Y := Y + 20;
-    Page.SetFont(FontH, 9);
-    Page.WriteText(XStart + 5, Y, '------------------------------');
-    Page.WriteText(XStart + 55, Y, '------------------------------');
+    Page.WriteText(XCentro, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
+    Page.WriteText(XDer, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
 
     Y := Y + 4;
-    Page.WriteText(XStart + 12, Y, '(Operador)');
-    Page.WriteText(XStart + 58, Y, '(Chofer/Productor)');
+    Page.SetFont(FontH, 9);
+    Page.WriteText(XIzq, Y, LineaSeparadora);
+
+    // ═══════════ PIE CON FECHA DE PESAJE ═══════════
+    Y := Y + 5;
+    Page.SetFont(FontH, 10);
+    Page.WriteText(XCentro - 8, Y, 'Fecha Pesaje: ' + Datos.Fecha + ' ' + Datos.Hora);
+
+    Y := Y + 4;
+    Page.WriteText(XIzq, Y, LineaSeparadora);
+
+    // ═══════════ SECCIÓN DE FIRMAS ═══════════
+    Y := Y + 25;
+    Page.SetFont(FontH, 9.5);
+    Page.WriteText(XIzq + 10, Y, '-----------------------------------------------');
+    Page.WriteText(XCentro + 20, Y, '-----------------------------------------------');
+
+    Y := Y + 4;
+    Page.WriteText(XIzq + 25, Y, '(Operador)');
+    Page.WriteText(XCentro + 35, Y, '(Chofer/Productor)');
 
     Stream := TMemoryStream.Create;
     Doc.SaveToStream(Stream);
