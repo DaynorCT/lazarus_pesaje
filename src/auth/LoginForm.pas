@@ -24,10 +24,12 @@ type
     pnlError: TPanel;
     lblError: TLabel;
     lblUsuario: TLabel;
-    pnlBoxUsuario: TPanel;
+    pnlOuterUsuario: TPanel;
+    pnlInnerUsuario: TPanel;
     edtUsuario: TEdit;
     lblContrasena: TLabel;
-    pnlBoxContrasena: TPanel;
+    pnlOuterContrasena: TPanel;
+    pnlInnerContrasena: TPanel;
     edtContrasena: TEdit;
     pnlDiv2: TPanel;
     pnlIngresar: TPanel;
@@ -68,23 +70,21 @@ begin
   lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
   lblLogoIcon.Font.Height := -72;
 
-  pnlBoxUsuario.Color := CLR_WHITE;
+  pnlOuterUsuario.Color := CLR_BORDER;
+  pnlInnerUsuario.Color := CLR_WHITE;
   edtUsuario.Color := CLR_WHITE;
-  edtUsuario.BorderStyle := bsNone;
-  edtUsuario.ParentColor := False;
   edtUsuario.Font.Color := CLR_TEXT;
-  pnlBoxContrasena.Color := CLR_WHITE;
+  pnlOuterContrasena.Color := CLR_BORDER;
+  pnlInnerContrasena.Color := CLR_WHITE;
   edtContrasena.Color := CLR_WHITE;
-  edtContrasena.BorderStyle := bsNone;
-  edtContrasena.ParentColor := False;
   edtContrasena.Font.Color := CLR_TEXT;
 
   lblUsuario.Font.Height := -14;
   lblUsuario.Top := 248;
-  pnlBoxUsuario.Top := 270;
+  pnlOuterUsuario.Top := 270;
   lblContrasena.Font.Height := -14;
   lblContrasena.Top := 338;
-  pnlBoxContrasena.Top := 360;
+  pnlOuterContrasena.Top := 360;
   pnlDiv2.Top := 428;
   pnlIngresar.Top := 449;
   lblSalir.Top := 509;

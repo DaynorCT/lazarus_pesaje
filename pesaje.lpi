@@ -78,9 +78,8 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
-        <TopLine Value="266"/>
+        <TopLine Value="267"/>
         <CursorPos X="31" Y="276"/>
         <UsageCount Value="132"/>
         <Loaded Value="True"/>
@@ -174,6 +173,7 @@
       </Unit>
       <Unit>
         <Filename Value="src/auth/LoginForm.lfm"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
