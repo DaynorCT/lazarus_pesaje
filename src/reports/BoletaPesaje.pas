@@ -139,14 +139,13 @@ var
   Page: TPDFPage;
   Datos: TBoletaData;
   FontH, FontHBold: Integer;
-  Y, PageW: Double;
+  Y: Double;
   XCol1, XCol2: Double;
   XIzq, XCentro, XDer: Double;
   LogoImgIdx: Integer;
   LogoB64Pos: Integer;
   LogoDecoded: string;
   LogoStream: TMemoryStream;
-  LineaSeparadora: string;
 begin
   Result := False;
   if not CargarDatosBoleta(PesajeID, Datos) then Exit;
@@ -167,9 +166,6 @@ begin
     Page.UnitOfMeasure := uomMillimeters;
     Page.PaperType := ptLetter;
 
-    // Control estricto de márgenes para evitar el desborde y salto de línea en los guiones
-    PageW := 185; 
-
     // Las 3 coordenadas solicitadas para el encabezado
     XIzq := 27;
     XCentro := 90;
@@ -178,9 +174,6 @@ begin
     // Alineación para centrar el cuerpo de datos de forma equilibrada
     XCol1 := 37;
     XCol2 := 90;
-
-    // Longitud calibrada para que no salte de línea en una hoja Carta útil
-    LineaSeparadora := '--------------------------------------------------------------------------------------------------------------------------------------------------';
 
     // Cargar logo de la empresa
     LogoImgIdx := -1;
@@ -263,7 +256,7 @@ begin
     Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
 
     Y := Y + 3;
-    Page.WriteText(XIzq, Y, LineaSeparadora);
+    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
 
     // ═══════════ DATOS DEL VEHÍCULO ═══════════
     Y := Y + 5;
@@ -288,7 +281,7 @@ begin
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.VehiculoTipo));
 
     Y := Y + 3;
-    Page.WriteText(XIzq, Y, LineaSeparadora);
+    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
 
     // ═══════════ DATOS DE CARGA ═══════════
     Y := Y + 5;
@@ -313,7 +306,7 @@ begin
     Page.WriteText(XCol2, Y, IntToStr(Datos.CostoBs) + ' Bs');
 
     Y := Y + 3;
-    Page.WriteText(XIzq, Y, LineaSeparadora);
+    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
 
     // ═══════════ BLOQUE DE PESOS EN 3 COLUMNAS COORDINADAS ═══════════
     Y := Y + 5;
@@ -330,7 +323,7 @@ begin
 
     Y := Y + 4;
     Page.SetFont(FontH, 9);
-    Page.WriteText(XIzq, Y, LineaSeparadora);
+    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
 
     // ═══════════ PIE CON FECHA DE PESAJE ═══════════
     Y := Y + 5;
@@ -338,7 +331,7 @@ begin
     Page.WriteText(XCentro - 8, Y, 'Fecha Pesaje: ' + Datos.Fecha + ' ' + Datos.Hora);
 
     Y := Y + 4;
-    Page.WriteText(XIzq, Y, LineaSeparadora);
+    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
 
     // ═══════════ SECCIÓN DE FIRMAS ═══════════
     Y := Y + 25;
