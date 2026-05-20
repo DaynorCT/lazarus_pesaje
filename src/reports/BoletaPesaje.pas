@@ -180,7 +180,7 @@ begin
     XCol2 := 90;
 
     // Longitud calibrada para que no salte de línea en una hoja Carta útil
-    LineaSeparadora := '-------------------------------------------------------------------------------------------------------------------------';
+    LineaSeparadora := '--------------------------------------------------------------------------------------------------------------------------------------------------';
 
     // Cargar logo de la empresa
     LogoImgIdx := -1;
@@ -217,7 +217,7 @@ begin
     Page.SetFont(FontHBold, 15);
     Page.WriteText(XCentro, Y, Datos.TituloSuperior);
     
-    Page.SetFont(FontH, 7);
+    Page.SetFont(FontHBold, 10);
     Page.WriteText(XDer, Y, 'ACREDITADO POR:');
     if LogoImgIdx >= 0 then
     begin
@@ -258,11 +258,9 @@ begin
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Ciudad));
 
     // --- FILA 6 (Segunda línea informativa del ticket) ---
-    Y := Y + 6;
+    Y := Y + 15;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
-    Page.WriteText(XCentro, Y, 'Fecha: ' + Datos.Fecha);
-    Page.WriteText(XDer, Y, 'Hora: ' + Datos.Hora);
 
     Y := Y + 3;
     Page.WriteText(XIzq, Y, LineaSeparadora);
