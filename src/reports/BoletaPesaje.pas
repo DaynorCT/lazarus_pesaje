@@ -31,7 +31,7 @@ var
   Q: TSQLQuery;
 begin
   Result := False;
-  FillChar(Datos, SizeOf(Datos), 0);
+  Datos := Default(TBoletaData);
 
   Q := DM.AbrirQuery(
     'SELECT p.id, p.guia, p.fecha_creacion, ' +
@@ -122,8 +122,9 @@ var
   Doc: TPDFDocument;
   Page: TPDFPage;
   Datos: TBoletaData;
-  FontH, FontHBold, FontSmall: Integer;
+  FontH, FontHBold: Integer;
   Y, XRight, PageW: Double;
+  XIzq, XCentro, XDer: Double;
 begin
   Result := False;
   if not CargarDatosBoleta(PesajeID, Datos) then Exit;
@@ -137,42 +138,74 @@ begin
 
     FontH := Doc.AddFont('Helvetica');
     FontHBold := Doc.AddFont('Helvetica-Bold');
-    FontSmall := Doc.AddFont('Helvetica');
 
     Page := Doc.Pages.AddPage;
     Doc.Sections.AddSection.AddPage(Page);
+
     Page.UnitOfMeasure := uomMillimeters;
     Page.PaperType := ptLetter;
     Page.Orientation := ppoPortrait;
 
     PageW := 196;
-    Y := 10;
+
+    // POSICIONES COLUMNAS
+    XIzq := 10;
+    XCentro := 55;
+    XDer := 160;
 
     // ═══════════ HEADER 3 COLUMNAS ═══════════
-    // Col Izquierda (25%)
-    Page.SetFont(FontHBold, 9);
-    Page.WriteText(10, Y, Datos.Salida);
-    Y := Y + 5;
-    Page.SetFont(FontH, 8);
-    Page.WriteText(10, Y, Datos.Direccion);
-    Y := Y + 4;
-    Page.WriteText(10, Y, 'Cel: ' + Datos.Celular1);
-    Y := Y + 4;
-    Page.WriteText(10, Y, '     ' + Datos.Celular2);
-    Y := Y + 4;
-    Page.WriteText(10, Y, Datos.Ciudad);
 
-    // Col Centro (50%)
+    // ───── Columna Izquierda ─────
     Y := 10;
-    Page.SetFont(FontHBold, 11);
-    Page.WriteText(45, Y, Datos.TituloSuperior);
-    Y := Y + 7;
-    Page.SetFont(FontHBold, 14);
-    Page.WriteText(60, Y, Datos.Marca);
-    Y := Y + 8;
-    Page.SetFont(FontHBold, 11);
-    Page.WriteText(50, Y, Datos.TituloDocumento);
 
+    Page.SetFont(FontHBold, 9);
+    Page.WriteText(XIzq, Y, Datos.Salida);
+
+    Y := Y + 5;
+
+    Page.SetFont(FontH, 8);
+    Page.WriteText(XIzq, Y, Datos.Direccion);
+
+    Y := Y + 4;
+    Page.WriteText(XIzq, Y, 'Cel: ' + Datos.Celular1);
+
+    Y := Y + 4;
+    Page.WriteText(XIzq, Y, '     ' + Datos.Celular2);
+
+    Y := Y + 4;
+    Page.WriteText(XIzq, Y, Datos.Ciudad);
+
+
+    // ───── Columna Centro ─────
+    Y := 10;
+
+    Page.SetFont(FontHBold, 11);
+    Page.WriteText(XCentro, Y, Datos.TituloSuperior);
+
+    Y := Y + 7;
+
+    Page.SetFont(FontHBold, 14);
+    Page.WriteText(XCentro + 10, Y, Datos.Marca);
+
+    Y := Y + 8;
+
+    Page.SetFont(FontHBold, 11);
+    Page.WriteText(XCentro + 2, Y, Datos.TituloDocumento);
+
+
+    // ───── Columna Derecha ─────
+    Y := 10;
+
+    Page.SetFont(FontHBold, 10);
+    Page.WriteText(XDer, Y, 'GUIA: ' + Datos.Guia);
+
+    Y := Y + 6;
+
+    Page.SetFont(FontH, 9);
+    Page.WriteText(XDer, Y, 'FECHA: ' + Datos.Fecha);
+
+    Y := Y + 5;
+    Page.WriteText(XDer, Y, 'HORA: ' + Datos.Hora);
     // Linea separadora
     Page.DrawLine(10, 32, PageW, 32, 0.3);
     Y := 36;
