@@ -93,14 +93,13 @@ begin
     Q.Close;
   end;
 
-  Datos.TituloSuperior := 'BALANZA';
-  Datos.Marca := 'PRIMAVERA';
-  Datos.TituloDocumento := 'BOLETA DE PESAJE';
-
   Q := DM.AbrirQuery('SELECT * FROM boleta_config LIMIT 1');
   try
     if not Q.EOF then
     begin
+      Datos.TituloSuperior := UpperCase(Q.FieldByName('titulo_superior').AsString);
+      Datos.Marca := UpperCase(Q.FieldByName('marca').AsString);
+      Datos.TituloDocumento := UpperCase(Q.FieldByName('titulo_documento').AsString);
       Datos.Salida := UpperCase(Q.FieldByName('salida').AsString);
       Datos.Direccion := UpperCase(Q.FieldByName('direccion').AsString);
       Datos.Celular1 := UpperCase(Q.FieldByName('celular1').AsString);
@@ -146,6 +145,7 @@ var
   LogoB64Pos: Integer;
   LogoDecoded: string;
   LogoStream: TMemoryStream;
+  dashEstilo: Integer;
 begin
   Result := False;
   if not CargarDatosBoleta(PesajeID, Datos) then Exit;
@@ -156,6 +156,8 @@ begin
     Doc.DefaultPaperType := ptLetter; 
     Doc.Options := [poPageOriginAtTop];
     Doc.StartDocument;
+
+    dashEstilo := Doc.AddLineStyleDef(0.3, clBlack, ppsDash);
 
     FontH := Doc.AddFont('Helvetica');
     FontHBold := Doc.AddFont('Helvetica-Bold');
@@ -207,10 +209,10 @@ begin
     Page.SetFont(FontHBold, 10);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Salida));
     
-    Page.SetFont(FontHBold, 15);
+    Page.SetFont(FontHBold, 9);
     Page.WriteText(XCentro, Y, Datos.TituloSuperior);
     
-    Page.SetFont(FontHBold, 10);
+    Page.SetFont(FontH, 9);
     Page.WriteText(XDer, Y, 'ACREDITADO POR:');
     if LogoImgIdx >= 0 then
     begin
@@ -226,7 +228,7 @@ begin
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Direccion));
     
-    Page.SetFont(FontHBold, 15);
+    Page.SetFont(FontHBold, 14);
     Page.WriteText(XCentro, Y, Datos.Marca);
 
     // --- FILA 3 ---
@@ -241,22 +243,21 @@ begin
     Y := Y + 4.5;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq + 7, Y, Datos.Celular2);
-    
-    Page.SetFont(FontH, 8.5);
-    Page.WriteText(XCentro - 4, Y, 'BOLETA DE PESAJE DIGITAL');
 
     // --- FILA 5 ---
     Y := Y + 4.5;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Ciudad));
 
-    // --- FILA 6 (Segunda línea informativa del ticket) ---
-    Y := Y + 15;
+    // --- FILA 6 ---
+    Y := Y + 12;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
+    Page.WriteText(XCentro, Y, 'Fecha: ' + Datos.Fecha);
+    Page.WriteText(XDer, Y, 'Hora: ' + Datos.Hora);
 
     Y := Y + 3;
-    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
+    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ DATOS DEL VEHÍCULO ═══════════
     Y := Y + 5;
@@ -281,7 +282,7 @@ begin
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.VehiculoTipo));
 
     Y := Y + 3;
-    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
+    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ DATOS DE CARGA ═══════════
     Y := Y + 5;
@@ -306,7 +307,7 @@ begin
     Page.WriteText(XCol2, Y, IntToStr(Datos.CostoBs) + ' Bs');
 
     Y := Y + 3;
-    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
+    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ BLOQUE DE PESOS EN 3 COLUMNAS COORDINADAS ═══════════
     Y := Y + 5;
@@ -323,7 +324,7 @@ begin
 
     Y := Y + 4;
     Page.SetFont(FontH, 9);
-    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
+    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ PIE CON FECHA DE PESAJE ═══════════
     Y := Y + 5;
@@ -331,7 +332,7 @@ begin
     Page.WriteText(XCentro - 8, Y, 'Fecha Pesaje: ' + Datos.Fecha + ' ' + Datos.Hora);
 
     Y := Y + 4;
-    Page.DrawLine(XIzq, Y, XDer + 45, Y, 0.3);
+    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ SECCIÓN DE FIRMAS ═══════════
     Y := Y + 25;
