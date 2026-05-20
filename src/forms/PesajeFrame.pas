@@ -604,7 +604,7 @@ begin
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
   pnlCard.Align := alBottom;
-  pnlCard.Height := 310;
+  pnlCard.Height := 210;
   pnlCard.BorderSpacing.Left := 24;
   pnlCard.BorderSpacing.Right := 24;
   pnlCard.BorderSpacing.Bottom := 24;
