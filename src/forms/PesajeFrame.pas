@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme, LoginForm;
+  Grids, sqldb, LCLIntf, DataModule, Utils, Theme, LoginForm, BoletaPesaje;
 
 type
   { TFramePesaje }
@@ -76,6 +76,7 @@ type
     procedure HintTimerTick(Sender: TObject);
     procedure MostrarHintAccion(const Texto: string);
     procedure CargarPesaje(ID: Integer);
+    procedure ImprimirBoleta(ID: Integer);
     procedure FinalizarPesaje(ID: Integer);
     procedure AnularPesaje(ID: Integer);
     procedure ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
@@ -1059,7 +1060,7 @@ begin
       if X < Grid.CellRect(Col, Row).Left + CellW div 2 then
         ToggleEstadoPesaje(ID, Grid.Cells[16, Row])
       else
-        ShowMessage('Boleta PDF - Fase 3');
+        ImprimirBoleta(ID);
     end;
   end
   else // INACTIVO
@@ -1167,8 +1168,33 @@ begin
 end;
 
 // ═══════════════════════════════════════════════
-// LOAD PESAJE FOR EDIT
+// IMPRIMIR BOLETA
 // ═══════════════════════════════════════════════
+
+procedure TFramePesaje.ImprimirBoleta(ID: Integer);
+var
+  Stream: TMemoryStream;
+  Ruta: string;
+begin
+  Screen.Cursor := crHourGlass;
+  try
+    Stream := TMemoryStream.Create;
+    try
+      if not GenerarBoletaPDF(ID, Stream) then
+      begin
+        ShowMessage('No se pudo generar la boleta. Verifique los datos del pesaje.');
+        Exit;
+      end;
+      Ruta := '/tmp/boleta-pesaje-' + IntToStr(ID) + '.pdf';
+      Stream.SaveToFile(Ruta);
+      OpenDocument(Ruta);
+    finally
+      Stream.Free;
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+end;
 
 procedure TFramePesaje.CargarPesaje(ID: Integer);
 var Q: TSQLQuery;
