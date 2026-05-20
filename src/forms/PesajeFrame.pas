@@ -603,15 +603,19 @@ begin
   // ── BOTTOM GRID ──
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.SetBounds(24, Self.ClientHeight - 200, Self.ClientWidth - 48, 310);
-  pnlCard.Anchors := [akLeft, akRight, akBottom];
+  pnlCard.Align := alBottom;
+  pnlCard.Height := 310;
+  pnlCard.BorderSpacing.Left := 24;
+  pnlCard.BorderSpacing.Right := 24;
+  pnlCard.BorderSpacing.Bottom := 24;
   pnlCard.BevelOuter := bvLowered; pnlCard.BevelInner := bvNone;
   pnlCard.BevelWidth := 1; pnlCard.Color := CLR_CARD;
 
   Grid := TStringGrid.Create(Self);
   Grid.Parent := pnlCard;
-  Grid.SetBounds(2, 2, pnlCard.ClientWidth - 4, pnlCard.ClientHeight - 4);
-  Grid.Anchors := [akTop, akLeft, akRight, akBottom];
+  Grid.Align := alClient;
+  Grid.BorderSpacing.Around := 2;
+  Grid.ScrollBars := ssAutoBoth;
   Grid.ColCount := 19; Grid.RowCount := 2; Grid.FixedRows := 1; Grid.FixedCols := 0;
   Grid.Options := Grid.Options + [goRowSelect];
   Grid.DefaultRowHeight := 36; Grid.RowHeights[0] := 40;
