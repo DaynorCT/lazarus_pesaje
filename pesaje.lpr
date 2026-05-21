@@ -16,7 +16,9 @@ uses
   EmpresasFrame in 'src/forms/EmpresasFrame.pas' {FrameEmpresas: TFrameEmpresas},
   ChoferesFrame in 'src/forms/ChoferesFrame.pas' {FrameChoferes: TFrameChoferes},
   Utils in 'src/utils/Utils.pas',
-  BoletaPesaje in 'src/reports/BoletaPesaje.pas';
+  BoletaPesaje in 'src/reports/BoletaPesaje.pas',
+  ReportePesaje in 'src/reports/ReportePesaje.pas',
+  ReportesFrame in 'src/forms/ReportesFrame.pas' {FrameReportes: TFrameReportes};
 
 {$IFDEF DARWIN}
 {$linkframework UserNotifications}

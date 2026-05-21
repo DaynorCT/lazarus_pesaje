@@ -9,7 +9,7 @@ uses
   Buttons, AuthService, DataModule, LoginForm,
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
   ProveedoresFrame, UsuariosFrame, EmpresasFrame, ProductosFrame,
-  OrigenesFrame, DestinosFrame, AbmSimpleFrame, Theme, base64, SQLDB;
+  OrigenesFrame, DestinosFrame, AbmSimpleFrame, ReportesFrame, Theme, base64, SQLDB;
 
 type
   TFrameClass = class of TFrame;
@@ -474,7 +474,7 @@ begin
      7: LoadFrame(TFrameOrigenes, 'Origenes');
      8: LoadFrame(TFrameDestinos, 'Destinos');
     10: LoadFrame(TFrameUsuarios, 'Usuarios');
-    11: ShowMessage('Reportes - Fase 3');
+    11: LoadFrame(TFrameReportes, 'Reportes');
     12: ShowMessage('Configuracion Boleta - Fase 3');
     else ShowMessage('Modulo en desarrollo');
   end;

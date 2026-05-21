@@ -1,0 +1,6 @@
+object FrameReportes: TFrameReportes
+  Left = 0
+  Height = 480
+  Top = 0
+  Width = 640
+end
