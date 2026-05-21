@@ -140,7 +140,7 @@ var
   FontH, FontHBold: Integer;
   Y: Double;
   XCol1, XCol2: Double;
-  XIzq, XCentro, XDer: Double;
+  XIzq, XCentro, XDer, XMid: Double;
   LogoImgIdx: Integer;
   LogoB64Pos: Integer;
   LogoDecoded: string;
@@ -169,13 +169,14 @@ begin
     Page.PaperType := ptLetter;
 
     // Las 3 coordenadas solicitadas para el encabezado
-    XIzq := 27;
-    XCentro := 90;
-    XDer := 147;
+    XIzq := 20;
+    XCentro := 80;
+    XDer := 163;
+    XMid := XCentro + (XDer - XCentro) / 2;
 
     // Alineación para centrar el cuerpo de datos de forma equilibrada
-    XCol1 := 37;
-    XCol2 := 90;
+    XCol1 := 30;
+    XCol2 := 80;
 
     // Cargar logo de la empresa
     LogoImgIdx := -1;
@@ -210,9 +211,9 @@ begin
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Salida));
     
     Page.SetFont(FontHBold, 9);
-    Page.WriteText(XCentro, Y, Datos.TituloSuperior);
+    Page.WriteText(XMid - MedirTexto(Datos.TituloSuperior, 'Helvetica-Bold', 9) / 2, Y, Datos.TituloSuperior);
     
-    Page.SetFont(FontH, 9);
+    Page.SetFont(FontHBold, 9);
     Page.WriteText(XDer, Y, 'ACREDITADO POR:');
     if LogoImgIdx >= 0 then
     begin
@@ -229,7 +230,7 @@ begin
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Direccion));
     
     Page.SetFont(FontHBold, 14);
-    Page.WriteText(XCentro, Y, Datos.Marca);
+    Page.WriteText(XMid - MedirTexto(Datos.Marca, 'Helvetica-Bold', 14) / 2, Y, Datos.Marca);
 
     // --- FILA 3 ---
     Y := Y + 5;
@@ -237,7 +238,7 @@ begin
     Page.WriteText(XIzq, Y, 'Cel: ' + Datos.Celular1);
     
     Page.SetFont(FontHBold, 11);
-    Page.WriteText(XCentro, Y, Datos.TituloDocumento);
+    Page.WriteText(XMid - MedirTexto(Datos.TituloDocumento, 'Helvetica-Bold', 11) / 2, Y, Datos.TituloDocumento);
 
     // --- FILA 4 ---
     Y := Y + 4.5;
@@ -253,8 +254,6 @@ begin
     Y := Y + 12;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
-    Page.WriteText(XCentro, Y, 'Fecha: ' + Datos.Fecha);
-    Page.WriteText(XDer, Y, 'Hora: ' + Datos.Hora);
 
     Y := Y + 3;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
