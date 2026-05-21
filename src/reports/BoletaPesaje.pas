@@ -176,13 +176,13 @@ begin
 
     // Posiciones horizontal (Landscape: 279mm)
     XIzq := 15;
-    XDer := 220;
-    XTit := 80;
-    XMar := 100;
-    XDoc := 95;
-    YCSup := 12;
-    YCMar := 22;
-    YCDoc := 32;
+    XDer := 215;
+    XTit := 95;
+    XMar := 110;
+    XDoc := 108;
+    YCSup := 20;
+    YCMar := 30;
+    YCDoc := 40;
     
     // Columnas de datos (2 columnas lado a lado)
     XColIzq := 15;
@@ -220,11 +220,11 @@ begin
     // ═══════════ ENCABEZADO 3 COLUMNAS ═══════════
 
     // --- FILA 1 ---
-    Y := 12;
-    Page.SetFont(FontHBold, 11);
+    Y := 20;
+    Page.SetFont(FontHBold, 12);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Salida));
 
-    Page.SetFont(FontHBold, 13);
+    Page.SetFont(FontHBold, 15);
     Page.WriteText(XTit, YCSup, Datos.TituloSuperior);
 
     Page.SetFont(FontHBold, 9);
@@ -234,8 +234,8 @@ begin
       ImgW := Doc.Images[LogoImgIdx].Width;
       ImgH := Doc.Images[LogoImgIdx].Height;
       ImgAspect := ImgW / ImgH;
-      MaxW := 34;
-      MaxH := 27;
+      MaxW := 50;
+      MaxH := 40;
 
       if ImgW / MaxW > ImgH / MaxH then
       begin
@@ -258,7 +258,7 @@ begin
 
     // --- FILA 2 ---
     Y := Y + 5;
-    Page.SetFont(FontH, 10);
+    Page.SetFont(FontH, 11);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Direccion));
 
     Page.SetFont(FontHBold, 22);
@@ -266,7 +266,7 @@ begin
 
     // --- FILA 3 ---
     Y := Y + 5;
-    Page.SetFont(FontH, 10);
+    Page.SetFont(FontH, 11);
     Page.WriteText(XIzq, Y, 'Cel: ' + Datos.Celular1);
 
     Page.SetFont(FontHBold, 15);
@@ -274,12 +274,12 @@ begin
 
     // --- FILA 4 ---
     Y := Y + 4;
-    Page.SetFont(FontH, 10);
+    Page.SetFont(FontH, 11);
     Page.WriteText(XIzq + 7, Y, Datos.Celular2);
 
     // --- FILA 5 ---
     Y := Y + 4;
-    Page.SetFont(FontH, 10);
+    Page.SetFont(FontH, 11);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Ciudad));
 
     // --- FILA 6 ---
