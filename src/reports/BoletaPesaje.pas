@@ -64,7 +64,7 @@ begin
     'WHERE p.id=' + IntToStr(PesajeID));
   try
     if Q.EOF then Exit;
-
+    
     Datos.Guia := UpperCase(Q.FieldByName('guia').AsString);
     if Length(Q.FieldByName('fecha_creacion').AsString) >= 16 then
     begin
@@ -148,8 +148,9 @@ var
   LogoImgIdx: Integer;
   LogoB64Pos: Integer;
   LogoDecoded: string;
-  LogoStream: TMemoryStream;
-  dashEstilo: Integer;
+   LogoStream: TMemoryStream;
+   dashEstilo: Integer;
+   ImgW, ImgH, ImgAspect, MaxW, MaxH, DrawW, DrawH, OffX, OffY: Double;
 begin
   Result := False;
   if not CargarDatosBoleta(PesajeID, Datos) then Exit;
@@ -175,14 +176,14 @@ begin
 
     // Posiciones horizontal (Landscape: 279mm)
     XIzq := 15;
-    XDer := 250;
+    XDer := 220;
     XTit := 80;
     XMar := 100;
     XDoc := 95;
     YCSup := 12;
     YCMar := 22;
     YCDoc := 32;
-
+    
     // Columnas de datos (2 columnas lado a lado)
     XColIzq := 15;
     XColIzqVal := 80;
@@ -230,11 +231,28 @@ begin
     Page.WriteText(XDer, Y, 'ACREDITADO POR:');
     if LogoImgIdx >= 0 then
     begin
-      Page.DrawLine(XDer, Y + 4, XDer + 35, Y + 4, 0.2);
-      Page.DrawLine(XDer, Y + 4, XDer, Y + 35, 0.2);
-      Page.DrawLine(XDer + 35, Y + 4, XDer + 35, Y + 35, 0.2);
-      Page.DrawLine(XDer, Y + 35, XDer + 35, Y + 35, 0.2);
-      Page.DrawImage(XDer + 3, Y + 33, 29, 27, LogoImgIdx);
+      // Ajustar logo proporcionalmente sin deformar
+      ImgW := Doc.Images[LogoImgIdx].Width;
+      ImgH := Doc.Images[LogoImgIdx].Height;
+      ImgAspect := ImgW / ImgH;
+      MaxW := 34;
+      MaxH := 27;
+
+      if ImgW / MaxW > ImgH / MaxH then
+      begin
+        DrawW := MaxW;
+        DrawH := MaxW / ImgAspect;
+      end
+      else
+      begin
+        DrawH := MaxH;
+        DrawW := MaxH * ImgAspect;
+      end;
+
+      OffX := (MaxW - DrawW) / 2;
+      OffY := (MaxH - DrawH) / 2;
+
+      Page.DrawImage(XDer + 3 + OffX, Y + 33 - OffY, DrawW, DrawH, LogoImgIdx);
     end;
 
     // --- FILA 2 ---
@@ -264,11 +282,10 @@ begin
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Ciudad));
 
     // --- FILA 6 ---
-    Y := Y + 8;
+    Y := Y + 18;
     Page.SetFont(FontH, 10);
     Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
-    Page.WriteText(XTit, Y, 'Fecha: ' + Datos.Fecha);
-    Page.WriteText(XDer - 10, Y, 'Hora: ' + Datos.Hora);
+ 
 
     Y := Y + 3;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
@@ -277,41 +294,41 @@ begin
     Y := Y + 5;
 
     // Títulos de sección
-    Page.SetFont(FontHBold, 12);
+    Page.SetFont(FontHBold, 13);
     Page.WriteText(XColIzq, Y, 'DATOS DEL VEHICULO:');
     Page.WriteText(XColDer, Y, 'DATOS DEL PESAJE:');
 
     // Row 1
-    Y := Y + 5;
-    Page.SetFont(FontH, 10);
+    Y := Y + 7;
+    Page.SetFont(FontH, 12);
     Page.WriteText(XColIzq, Y, 'Placa:');
     Page.WriteText(XColIzqVal, Y, Datos.VehiculoPlaca);
     Page.WriteText(XColDer, Y, 'Producto:');
     Page.WriteText(XColDerVal, Y, WinCPToUTF8(Datos.ProductoNombre));
 
     // Row 2
-    Y := Y + 5;
+    Y := Y + 7;
     Page.WriteText(XColIzq, Y, 'Chofer:');
     Page.WriteText(XColIzqVal, Y, WinCPToUTF8(Datos.ChoferNombre));
     Page.WriteText(XColDer, Y, 'Costo Bs.:');
     Page.WriteText(XColDerVal, Y, IntToStr(Datos.CostoBs) + ' Bs');
 
     // Row 3
-    Y := Y + 5;
+    Y := Y + 7;
     Page.WriteText(XColIzq, Y, 'Licencia:');
     Page.WriteText(XColIzqVal, Y, Datos.ChoferLicencia);
     Page.WriteText(XColDer, Y, 'Origen:');
     Page.WriteText(XColDerVal, Y, WinCPToUTF8(Datos.OrigenNombre));
 
     // Row 4
-    Y := Y + 5;
+    Y := Y + 7;
     Page.WriteText(XColIzq, Y, 'Proveedor:');
     Page.WriteText(XColIzqVal, Y, Datos.ProveedorNombre);
     Page.WriteText(XColDer, Y, 'Destino:');
     Page.WriteText(XColDerVal, Y, WinCPToUTF8(Datos.DestinoNombre));
 
     // Row 5
-    Y := Y + 5;
+    Y := Y + 7;
     Page.WriteText(XColIzq, Y, 'Tipo Vehiculo:');
     Page.WriteText(XColIzqVal, Y, WinCPToUTF8(Datos.VehiculoTipo));
     Page.WriteText(XColDer, Y, 'Flete Bs.:');
