@@ -328,13 +328,13 @@ begin
     Y := Y + 5;
     Page.SetFont(FontHBold, 10);
     Page.WriteText(XCol1, Y, '[PESO BRUTO:');
-    Page.WriteText(XCentro, Y, '[PESO TARA:');
+    Page.WriteText(XCentro + 20, Y, '[PESO TARA:');
     Page.WriteText(XDer, Y, '[PESO NETO:');
 
     Y := Y + 6;
     Page.SetFont(FontHBold, 14); // Pesos grandes y en negrita
     Page.WriteText(XCol1, Y, FormatFloat('#,##0', Datos.PesoBruto) + ' kg');
-    Page.WriteText(XCentro, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
+    Page.WriteText(XCentro + 20, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
     Page.WriteText(XDer, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
 
     Y := Y + 4;
