@@ -139,6 +139,7 @@ var
   Datos: TBoletaData;
   FontH, FontHBold: Integer;
   Y: Double;
+  EscalaY: Double;
   YCSup, YCMar, YCDoc: Double;
   XCol1, XCol2: Double;
   XIzq, XCentro, XDer: Double;
@@ -180,6 +181,8 @@ begin
     YCSup := 15;
     YCMar := 24;
     YCDoc := 35;
+
+    EscalaY := (279 - 15 - 15) / 153;
 
     // Alineación para centrar el cuerpo de datos de forma equilibrada
     XCol1 := 30;
@@ -232,134 +235,134 @@ begin
     end;
 
     // --- FILA 2 ---
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Direccion));
     
-    Page.SetFont(FontHBold, 14);
+    Page.SetFont(FontHBold, 18);
     Page.WriteText(XMar, YCMar, Datos.Marca);
 
     // --- FILA 3 ---
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, 'Cel: ' + Datos.Celular1);
     
-    Page.SetFont(FontHBold, 11);
+    Page.SetFont(FontHBold, 13);
     Page.WriteText(XDoc, YCDoc, Datos.TituloDocumento);
 
     // --- FILA 4 ---
-    Y := Y + 4.5;
+    Y := Y + 4.5 * EscalaY;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq + 7, Y, Datos.Celular2);
 
     // --- FILA 5 ---
-    Y := Y + 4.5;
+    Y := Y + 4.5 * EscalaY;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Ciudad));
 
     // --- FILA 6 ---
-    Y := Y + 12;
+    Y := Y + 12 * EscalaY;
     Page.SetFont(FontH, 9);
     Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
 
-    Y := Y + 3;
+    Y := Y + 3 * EscalaY;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ DATOS DEL VEHÍCULO ═══════════
-    Y := Y + 5;
-    Page.SetFont(FontHBold, 10);
+    Y := Y + 5 * EscalaY;
+    Page.SetFont(FontHBold, 11);
     Page.WriteText(XCentro - 5, Y, 'DATOS DEL VEHICULO');
 
-    Y := Y + 5;
-    Page.SetFont(FontH, 9.5);
+    Y := Y + 5 * EscalaY;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XCol1, Y, 'Placa:');
     Page.WriteText(XCol2, Y, Datos.VehiculoPlaca);
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Chofer:');
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.ChoferNombre));
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Licencia:');
     Page.WriteText(XCol2, Y, Datos.ChoferLicencia);
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Proveedor:');
     Page.WriteText(XCol2, Y, Datos.ProveedorNombre);
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Tipo Vehiculo:');
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.VehiculoTipo));
 
-    Y := Y + 3;
+    Y := Y + 3 * EscalaY;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ DATOS DE CARGA ═══════════
-    Y := Y + 5;
-    Page.SetFont(FontHBold, 10);
+    Y := Y + 5 * EscalaY;
+    Page.SetFont(FontHBold, 11);
     Page.WriteText(XCentro - 3, Y, 'DATOS DE CARGA');
 
-    Y := Y + 5;
-    Page.SetFont(FontH, 9.5);
+    Y := Y + 5 * EscalaY;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XCol1, Y, 'Producto:');
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.ProductoNombre));
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Costo Bs.:');
     Page.WriteText(XCol2, Y, IntToStr(Datos.CostoBs) + ' Bs');
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Origen:');
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.OrigenNombre));
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Destino:');
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.DestinoNombre));
 
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.WriteText(XCol1, Y, 'Flete Bs.:');
     Page.WriteText(XCol2, Y, IntToStr(Datos.FleteBs) + ' Bs');
 
 
-    Y := Y + 3;
+    Y := Y + 3 * EscalaY;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ BLOQUE DE PESOS EN 3 COLUMNAS COORDINADAS ═══════════
-    Y := Y + 5;
+    Y := Y + 5 * EscalaY;
     Page.SetFont(FontHBold, 10);
     Page.WriteText(XCol1, Y, '[PESO BRUTO:');
     Page.WriteText(XCentro + 20, Y, '[PESO TARA:');
     Page.WriteText(XDer, Y, '[PESO NETO:');
 
-    Y := Y + 6;
-    Page.SetFont(FontHBold, 14); // Pesos grandes y en negrita
+    Y := Y + 6 * EscalaY;
+    Page.SetFont(FontHBold, 16); // Pesos grandes y en negrita
     Page.WriteText(XCol1, Y, FormatFloat('#,##0', Datos.PesoBruto) + ' kg');
     Page.WriteText(XCentro + 20, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
     Page.WriteText(XDer, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
 
-    Y := Y + 4;
+    Y := Y + 4 * EscalaY;
     Page.SetFont(FontH, 9);
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
     // ═══════════ PIE CON FECHA DE PESAJE ═══════════
-    Y := Y + 5;
-    Page.SetFont(FontH, 10);
+    Y := Y + 5 * EscalaY;
+    Page.SetFont(FontH, 11);
     Page.WriteText(XIzq, Y, 'Fecha/Hora (Pes): ' + Datos.Fecha + ' ' + Datos.Hora);
-  
-    Page.SetFont(FontH, 10);
+   
+    Page.SetFont(FontH, 11);
     Page.WriteText(XCentro + 63, Y, 'Fecha/Hora (Imp): ' + Datos.Fecha + ' ' + Datos.Hora);
 
-    Y := Y + 4;
+    Y := Y + 4 * EscalaY;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
     
 
     // ═══════════ SECCIÓN DE FIRMAS ═══════════
-    Y := Y + 25;
-    Page.SetFont(FontH, 9.5);
+    Y := Y + 25 * EscalaY;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XIzq + 10, Y, '-----------------------------------------------');
     Page.WriteText(XCentro + 20, Y, '-----------------------------------------------');
 
-    Y := Y + 4;
+    Y := Y + 4 * EscalaY;
     Page.WriteText(XIzq + 25, Y, '(Operador)');
     Page.WriteText(XCentro + 35, Y, '(Chofer/Productor)');
 
