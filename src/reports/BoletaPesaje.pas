@@ -235,7 +235,7 @@ begin
       ImgH := Doc.Images[LogoImgIdx].Height;
       ImgAspect := ImgW / ImgH;
       MaxW := 50;
-      MaxH := 40;
+      MaxH := 35;
 
       if ImgW / MaxW > ImgH / MaxH then
       begin
