@@ -289,7 +289,7 @@ begin
  
 
     Y := Y + 3;
-    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
+    Page.DrawLineStyle(XIzq, Y, XDer + 51, Y, dashEstilo);
 
     // ═══════════ 2 COLUMNAS: DATOS ═══════════
     Y := Y + 5;
@@ -336,42 +336,42 @@ begin
     Page.WriteText(XColDerVal, Y, IntToStr(Datos.FleteBs) + ' Bs');
 
     Y := Y + 3;
-    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
+    Page.DrawLineStyle(XIzq, Y, XDer + 51, Y, dashEstilo);
 
-    // ═══════════ BLOQUE DE PESOS ═══════════
-    Y := Y + 5;
-    Page.SetFont(FontHBold, 12);
-    Page.WriteText(XColIzq, Y, 'PESO BRUTO:');
-    Page.WriteText(XColDer - 10, Y, 'PESO TARA:');
-    Page.WriteText(XDer - 10, Y, 'PESO NETO:');
-
-    Y := Y + 6;
-    Page.SetFont(FontHBold, 18);
-    Page.WriteText(XColIzq, Y, FormatFloat('#,##0', Datos.PesoBruto) + ' kg');
-    Page.WriteText(XColDer - 10, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
-    Page.WriteText(XDer - 10, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
-
-    Y := Y + 4;
-    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
-
-    // ═══════════ FECHA/HORA ═══════════
+     // ═══════════ FECHA/HORA ═══════════
     Y := Y + 5;
     Page.SetFont(FontH, 11);
     Page.WriteText(XIzq, Y, 'Fecha/Hora (Pes): ' + Datos.Fecha + ' ' + Datos.Hora);
     Page.WriteText(XColDer, Y, 'Fecha/Hora (Imp): ' + Datos.Fecha + ' ' + Datos.Hora);
 
     Y := Y + 4;
-    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
+    Page.DrawLineStyle(XIzq, Y, XDer + 51, Y, dashEstilo);
+
+    // ═══════════ BLOQUE DE PESOS ═══════════
+    Y := Y + 5;
+    Page.SetFont(FontHBold, 12);
+    Page.WriteText(XColIzq, Y, 'PESO BRUTO:');
+    Page.WriteText(XColDer - 40, Y, 'PESO TARA:');
+    Page.WriteText(XDer - 10, Y, 'PESO NETO:');
+
+    Y := Y + 6;
+    Page.SetFont(FontHBold, 18);
+    Page.WriteText(XColIzq, Y, FormatFloat('#,##0', Datos.PesoBruto) + ' kg');
+    Page.WriteText(XColDer - 40, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
+    Page.WriteText(XDer - 10, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
+
+    Y := Y + 4;
+    Page.DrawLineStyle(XIzq, Y, XDer + 51, Y, dashEstilo);
 
     // ═══════════ FIRMAS ═══════════
-    Y := Y + 12;
+    Y := Y + 30;
     Page.DrawLine(XIzq + 10, Y, XIzq + 110, Y, 0.3);
     Page.DrawLine(XColDer, Y, XDer + 35, Y, 0.3);
 
     Y := Y + 4;
     Page.SetFont(FontH, 10);
-    Page.WriteText(XIzq + 35, Y, '(Operador)');
-    Page.WriteText(XColDer + 25, Y, '(Chofer/Productor)');
+    Page.WriteText(XIzq + 45, Y, 'Chofer o Productor');
+    Page.WriteText(XColDer + 32, Y, 'Operador de balanza');
 
     Stream := TMemoryStream.Create;
     Doc.SaveToStream(Stream);
