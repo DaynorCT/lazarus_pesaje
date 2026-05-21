@@ -150,7 +150,7 @@ var
   LogoDecoded: string;
    LogoStream: TMemoryStream;
    dashEstilo: Integer;
-   ImgW, ImgH, ImgAspect, MaxW, MaxH, DrawW, DrawH, OffX, OffY: Double;
+   ImgW, ImgH, ImgAspect, MaxW, MaxH, DrawW, DrawH: Double;
 begin
   Result := False;
   if not CargarDatosBoleta(PesajeID, Datos) then Exit;
@@ -231,7 +231,6 @@ begin
     Page.WriteText(XDer, Y, 'ACREDITADO POR:');
     if LogoImgIdx >= 0 then
     begin
-      // Ajustar logo proporcionalmente sin deformar
       ImgW := Doc.Images[LogoImgIdx].Width;
       ImgH := Doc.Images[LogoImgIdx].Height;
       ImgAspect := ImgW / ImgH;
@@ -249,10 +248,12 @@ begin
         DrawW := MaxH * ImgAspect;
       end;
 
-      OffX := (MaxW - DrawW) / 2;
-      OffY := (MaxH - DrawH) / 2;
+      Page.DrawLine(XDer, Y + 4, XDer + DrawW, Y + 4, 0.2);
+      Page.DrawLine(XDer, Y + 4, XDer, Y + 4 + DrawH, 0.2);
+      Page.DrawLine(XDer + DrawW, Y + 4, XDer + DrawW, Y + 4 + DrawH, 0.2);
+      Page.DrawLine(XDer, Y + 4 + DrawH, XDer + DrawW, Y + 4 + DrawH, 0.2);
 
-      Page.DrawImage(XDer + 3 + OffX, Y + 33 - OffY, DrawW, DrawH, LogoImgIdx);
+      Page.DrawImage(XDer, Y + 4 + DrawH, DrawW, DrawH, LogoImgIdx);
     end;
 
     // --- FILA 2 ---
