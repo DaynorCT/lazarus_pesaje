@@ -144,6 +144,7 @@ var
   XCol1, XCol2: Double;
   XIzq, XCentro, XDer: Double;
   XTit, XMar, XDoc: Double;
+  XColIzq, XColIzqVal, XColDer, XColDerVal: Double;
   LogoImgIdx: Integer;
   LogoB64Pos: Integer;
   LogoDecoded: string;
@@ -155,7 +156,7 @@ begin
 
   Doc := TPDFDocument.Create(nil);
   try
-    Doc.DefaultOrientation := ppoPortrait;
+    Doc.DefaultOrientation := ppoLandscape;
     Doc.DefaultPaperType := ptLetter; 
     Doc.Options := [poPageOriginAtTop];
     Doc.StartDocument;
@@ -170,23 +171,25 @@ begin
 
     Page.UnitOfMeasure := uomMillimeters;
     Page.PaperType := ptLetter;
+    Page.Orientation := ppoLandscape;
 
-    // Las 3 coordenadas solicitadas para el encabezado
-    XIzq := 20;
-    XCentro := 80;
-    XDer := 165;
-    XTit := 77;
-    XMar := 89;
-    XDoc := 85;
-    YCSup := 15;
-    YCMar := 24;
-    YCDoc := 35;
+    // Posiciones horizontal (Landscape: 279mm)
+    XIzq := 15;
+    XDer := 250;
+    XTit := 80;
+    XMar := 100;
+    XDoc := 95;
+    YCSup := 12;
+    YCMar := 22;
+    YCDoc := 32;
 
-    EscalaY := (279 - 15 - 15) / 153;
+    // Columnas de datos (2 columnas lado a lado)
+    XColIzq := 15;
+    XColIzqVal := 80;
+    XColDer := 155;
+    XColDerVal := 220;
 
-    // Alineación para centrar el cuerpo de datos de forma equilibrada
-    XCol1 := 30;
-    XCol2 := 80;
+    EscalaY := 1.0;
 
     // Cargar logo de la empresa
     LogoImgIdx := -1;
@@ -216,155 +219,141 @@ begin
     // ═══════════ ENCABEZADO 3 COLUMNAS ═══════════
 
     // --- FILA 1 ---
-    Y := 15;
-    Page.SetFont(FontHBold, 10);
-    Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Salida));
-    
+    Y := 12;
     Page.SetFont(FontHBold, 11);
+    Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Salida));
+
+    Page.SetFont(FontHBold, 13);
     Page.WriteText(XTit, YCSup, Datos.TituloSuperior);
-    
+
     Page.SetFont(FontHBold, 9);
     Page.WriteText(XDer, Y, 'ACREDITADO POR:');
     if LogoImgIdx >= 0 then
     begin
-      Page.DrawLine(XDer, Y + 4, XDer + 30, Y + 4, 0.2);
-      Page.DrawLine(XDer, Y + 4, XDer, Y + 26, 0.2);
-      Page.DrawLine(XDer + 30, Y + 4, XDer + 30, Y + 26, 0.2);
-      Page.DrawLine(XDer, Y + 26, XDer + 30, Y + 26, 0.2);
-      Page.DrawImage(XDer + 3, Y + 24, 24, 18, LogoImgIdx);
+      Page.DrawLine(XDer, Y + 4, XDer + 35, Y + 4, 0.2);
+      Page.DrawLine(XDer, Y + 4, XDer, Y + 35, 0.2);
+      Page.DrawLine(XDer + 35, Y + 4, XDer + 35, Y + 35, 0.2);
+      Page.DrawLine(XDer, Y + 35, XDer + 35, Y + 35, 0.2);
+      Page.DrawImage(XDer + 3, Y + 33, 29, 27, LogoImgIdx);
     end;
 
     // --- FILA 2 ---
-    Y := Y + 5 * EscalaY;
-    Page.SetFont(FontH, 9);
+    Y := Y + 5;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Direccion));
-    
-    Page.SetFont(FontHBold, 18);
+
+    Page.SetFont(FontHBold, 22);
     Page.WriteText(XMar, YCMar, Datos.Marca);
 
     // --- FILA 3 ---
-    Y := Y + 5 * EscalaY;
-    Page.SetFont(FontH, 9);
+    Y := Y + 5;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XIzq, Y, 'Cel: ' + Datos.Celular1);
-    
-    Page.SetFont(FontHBold, 13);
+
+    Page.SetFont(FontHBold, 15);
     Page.WriteText(XDoc, YCDoc, Datos.TituloDocumento);
 
     // --- FILA 4 ---
-    Y := Y + 4.5 * EscalaY;
-    Page.SetFont(FontH, 9);
+    Y := Y + 4;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XIzq + 7, Y, Datos.Celular2);
 
     // --- FILA 5 ---
-    Y := Y + 4.5 * EscalaY;
-    Page.SetFont(FontH, 9);
+    Y := Y + 4;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Ciudad));
 
     // --- FILA 6 ---
-    Y := Y + 12 * EscalaY;
-    Page.SetFont(FontH, 9);
+    Y := Y + 8;
+    Page.SetFont(FontH, 10);
     Page.WriteText(XIzq, Y, 'Guia: ' + Datos.Guia);
+    Page.WriteText(XTit, Y, 'Fecha: ' + Datos.Fecha);
+    Page.WriteText(XDer - 10, Y, 'Hora: ' + Datos.Hora);
 
-    Y := Y + 3 * EscalaY;
+    Y := Y + 3;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
-    // ═══════════ DATOS DEL VEHÍCULO ═══════════
-    Y := Y + 5 * EscalaY;
-    Page.SetFont(FontHBold, 11);
-    Page.WriteText(XCentro - 5, Y, 'DATOS DEL VEHICULO');
+    // ═══════════ 2 COLUMNAS: DATOS ═══════════
+    Y := Y + 5;
 
-    Y := Y + 5 * EscalaY;
+    // Títulos de sección
+    Page.SetFont(FontHBold, 12);
+    Page.WriteText(XColIzq, Y, 'DATOS DEL VEHICULO:');
+    Page.WriteText(XColDer, Y, 'DATOS DEL PESAJE:');
+
+    // Row 1
+    Y := Y + 5;
     Page.SetFont(FontH, 10);
-    Page.WriteText(XCol1, Y, 'Placa:');
-    Page.WriteText(XCol2, Y, Datos.VehiculoPlaca);
+    Page.WriteText(XColIzq, Y, 'Placa:');
+    Page.WriteText(XColIzqVal, Y, Datos.VehiculoPlaca);
+    Page.WriteText(XColDer, Y, 'Producto:');
+    Page.WriteText(XColDerVal, Y, WinCPToUTF8(Datos.ProductoNombre));
 
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Chofer:');
-    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.ChoferNombre));
+    // Row 2
+    Y := Y + 5;
+    Page.WriteText(XColIzq, Y, 'Chofer:');
+    Page.WriteText(XColIzqVal, Y, WinCPToUTF8(Datos.ChoferNombre));
+    Page.WriteText(XColDer, Y, 'Costo Bs.:');
+    Page.WriteText(XColDerVal, Y, IntToStr(Datos.CostoBs) + ' Bs');
 
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Licencia:');
-    Page.WriteText(XCol2, Y, Datos.ChoferLicencia);
+    // Row 3
+    Y := Y + 5;
+    Page.WriteText(XColIzq, Y, 'Licencia:');
+    Page.WriteText(XColIzqVal, Y, Datos.ChoferLicencia);
+    Page.WriteText(XColDer, Y, 'Origen:');
+    Page.WriteText(XColDerVal, Y, WinCPToUTF8(Datos.OrigenNombre));
 
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Proveedor:');
-    Page.WriteText(XCol2, Y, Datos.ProveedorNombre);
+    // Row 4
+    Y := Y + 5;
+    Page.WriteText(XColIzq, Y, 'Proveedor:');
+    Page.WriteText(XColIzqVal, Y, Datos.ProveedorNombre);
+    Page.WriteText(XColDer, Y, 'Destino:');
+    Page.WriteText(XColDerVal, Y, WinCPToUTF8(Datos.DestinoNombre));
 
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Tipo Vehiculo:');
-    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.VehiculoTipo));
+    // Row 5
+    Y := Y + 5;
+    Page.WriteText(XColIzq, Y, 'Tipo Vehiculo:');
+    Page.WriteText(XColIzqVal, Y, WinCPToUTF8(Datos.VehiculoTipo));
+    Page.WriteText(XColDer, Y, 'Flete Bs.:');
+    Page.WriteText(XColDerVal, Y, IntToStr(Datos.FleteBs) + ' Bs');
 
-    Y := Y + 3 * EscalaY;
+    Y := Y + 3;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
-    // ═══════════ DATOS DE CARGA ═══════════
-    Y := Y + 5 * EscalaY;
-    Page.SetFont(FontHBold, 11);
-    Page.WriteText(XCentro - 3, Y, 'DATOS DE CARGA');
+    // ═══════════ BLOQUE DE PESOS ═══════════
+    Y := Y + 5;
+    Page.SetFont(FontHBold, 12);
+    Page.WriteText(XColIzq, Y, 'PESO BRUTO:');
+    Page.WriteText(XColDer - 10, Y, 'PESO TARA:');
+    Page.WriteText(XDer - 10, Y, 'PESO NETO:');
 
-    Y := Y + 5 * EscalaY;
-    Page.SetFont(FontH, 10);
-    Page.WriteText(XCol1, Y, 'Producto:');
-    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.ProductoNombre));
+    Y := Y + 6;
+    Page.SetFont(FontHBold, 18);
+    Page.WriteText(XColIzq, Y, FormatFloat('#,##0', Datos.PesoBruto) + ' kg');
+    Page.WriteText(XColDer - 10, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
+    Page.WriteText(XDer - 10, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
 
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Costo Bs.:');
-    Page.WriteText(XCol2, Y, IntToStr(Datos.CostoBs) + ' Bs');
-
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Origen:');
-    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.OrigenNombre));
-
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Destino:');
-    Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.DestinoNombre));
-
-    Y := Y + 5 * EscalaY;
-    Page.WriteText(XCol1, Y, 'Flete Bs.:');
-    Page.WriteText(XCol2, Y, IntToStr(Datos.FleteBs) + ' Bs');
-
-
-    Y := Y + 3 * EscalaY;
+    Y := Y + 4;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
 
-    // ═══════════ BLOQUE DE PESOS EN 3 COLUMNAS COORDINADAS ═══════════
-    Y := Y + 5 * EscalaY;
-    Page.SetFont(FontHBold, 10);
-    Page.WriteText(XCol1, Y, '[PESO BRUTO:');
-    Page.WriteText(XCentro + 20, Y, '[PESO TARA:');
-    Page.WriteText(XDer, Y, '[PESO NETO:');
-
-    Y := Y + 6 * EscalaY;
-    Page.SetFont(FontHBold, 16); // Pesos grandes y en negrita
-    Page.WriteText(XCol1, Y, FormatFloat('#,##0', Datos.PesoBruto) + ' kg');
-    Page.WriteText(XCentro + 20, Y, FormatFloat('#,##0', Datos.Tara) + ' kg');
-    Page.WriteText(XDer, Y, FormatFloat('#,##0', Datos.PesoNeto) + ' kg');
-
-    Y := Y + 4 * EscalaY;
-    Page.SetFont(FontH, 9);
-    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
-
-    // ═══════════ PIE CON FECHA DE PESAJE ═══════════
-    Y := Y + 5 * EscalaY;
+    // ═══════════ FECHA/HORA ═══════════
+    Y := Y + 5;
     Page.SetFont(FontH, 11);
     Page.WriteText(XIzq, Y, 'Fecha/Hora (Pes): ' + Datos.Fecha + ' ' + Datos.Hora);
-   
-    Page.SetFont(FontH, 11);
-    Page.WriteText(XCentro + 63, Y, 'Fecha/Hora (Imp): ' + Datos.Fecha + ' ' + Datos.Hora);
+    Page.WriteText(XColDer, Y, 'Fecha/Hora (Imp): ' + Datos.Fecha + ' ' + Datos.Hora);
 
-    Y := Y + 4 * EscalaY;
+    Y := Y + 4;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
-    
 
-    // ═══════════ SECCIÓN DE FIRMAS ═══════════
-    Y := Y + 25 * EscalaY;
+    // ═══════════ FIRMAS ═══════════
+    Y := Y + 12;
+    Page.DrawLine(XIzq + 10, Y, XIzq + 110, Y, 0.3);
+    Page.DrawLine(XColDer, Y, XDer + 35, Y, 0.3);
+
+    Y := Y + 4;
     Page.SetFont(FontH, 10);
-    Page.WriteText(XIzq + 10, Y, '-----------------------------------------------');
-    Page.WriteText(XCentro + 20, Y, '-----------------------------------------------');
-
-    Y := Y + 4 * EscalaY;
-    Page.WriteText(XIzq + 25, Y, '(Operador)');
-    Page.WriteText(XCentro + 35, Y, '(Chofer/Productor)');
+    Page.WriteText(XIzq + 35, Y, '(Operador)');
+    Page.WriteText(XColDer + 25, Y, '(Chofer/Productor)');
 
     Stream := TMemoryStream.Create;
     Doc.SaveToStream(Stream);
