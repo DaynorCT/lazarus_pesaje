@@ -139,8 +139,10 @@ var
   Datos: TBoletaData;
   FontH, FontHBold: Integer;
   Y: Double;
+  YCSup, YCMar, YCDoc: Double;
   XCol1, XCol2: Double;
-  XIzq, XCentro, XDer, XMid: Double;
+  XIzq, XCentro, XDer: Double;
+  XTit, XMar, XDoc: Double;
   LogoImgIdx: Integer;
   LogoB64Pos: Integer;
   LogoDecoded: string;
@@ -171,8 +173,13 @@ begin
     // Las 3 coordenadas solicitadas para el encabezado
     XIzq := 20;
     XCentro := 80;
-    XDer := 163;
-    XMid := XCentro + (XDer - XCentro) / 2;
+    XDer := 165;
+    XTit := 77;
+    XMar := 89;
+    XDoc := 85;
+    YCSup := 15;
+    YCMar := 24;
+    YCDoc := 35;
 
     // Alineación para centrar el cuerpo de datos de forma equilibrada
     XCol1 := 30;
@@ -210,8 +217,8 @@ begin
     Page.SetFont(FontHBold, 10);
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Salida));
     
-    Page.SetFont(FontHBold, 9);
-    Page.WriteText(XMid - MedirTexto(Datos.TituloSuperior, 'Helvetica-Bold', 9) / 2, Y, Datos.TituloSuperior);
+    Page.SetFont(FontHBold, 11);
+    Page.WriteText(XTit, YCSup, Datos.TituloSuperior);
     
     Page.SetFont(FontHBold, 9);
     Page.WriteText(XDer, Y, 'ACREDITADO POR:');
@@ -230,7 +237,7 @@ begin
     Page.WriteText(XIzq, Y, WinCPToUTF8(Datos.Direccion));
     
     Page.SetFont(FontHBold, 14);
-    Page.WriteText(XMid - MedirTexto(Datos.Marca, 'Helvetica-Bold', 14) / 2, Y, Datos.Marca);
+    Page.WriteText(XMar, YCMar, Datos.Marca);
 
     // --- FILA 3 ---
     Y := Y + 5;
@@ -238,7 +245,7 @@ begin
     Page.WriteText(XIzq, Y, 'Cel: ' + Datos.Celular1);
     
     Page.SetFont(FontHBold, 11);
-    Page.WriteText(XMid - MedirTexto(Datos.TituloDocumento, 'Helvetica-Bold', 11) / 2, Y, Datos.TituloDocumento);
+    Page.WriteText(XDoc, YCDoc, Datos.TituloDocumento);
 
     // --- FILA 4 ---
     Y := Y + 4.5;
@@ -277,6 +284,10 @@ begin
     Page.WriteText(XCol2, Y, Datos.ChoferLicencia);
 
     Y := Y + 5;
+    Page.WriteText(XCol1, Y, 'Proveedor:');
+    Page.WriteText(XCol2, Y, Datos.ProveedorNombre);
+
+    Y := Y + 5;
     Page.WriteText(XCol1, Y, 'Tipo Vehiculo:');
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.VehiculoTipo));
 
@@ -294,6 +305,10 @@ begin
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.ProductoNombre));
 
     Y := Y + 5;
+    Page.WriteText(XCol1, Y, 'Costo Bs.:');
+    Page.WriteText(XCol2, Y, IntToStr(Datos.CostoBs) + ' Bs');
+
+    Y := Y + 5;
     Page.WriteText(XCol1, Y, 'Origen:');
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.OrigenNombre));
 
@@ -302,8 +317,9 @@ begin
     Page.WriteText(XCol2, Y, WinCPToUTF8(Datos.DestinoNombre));
 
     Y := Y + 5;
-    Page.WriteText(XCol1, Y, 'Costo:');
-    Page.WriteText(XCol2, Y, IntToStr(Datos.CostoBs) + ' Bs');
+    Page.WriteText(XCol1, Y, 'Flete Bs.:');
+    Page.WriteText(XCol2, Y, IntToStr(Datos.FleteBs) + ' Bs');
+
 
     Y := Y + 3;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
@@ -328,10 +344,14 @@ begin
     // ═══════════ PIE CON FECHA DE PESAJE ═══════════
     Y := Y + 5;
     Page.SetFont(FontH, 10);
-    Page.WriteText(XCentro - 8, Y, 'Fecha Pesaje: ' + Datos.Fecha + ' ' + Datos.Hora);
+    Page.WriteText(XIzq, Y, 'Fecha/Hora (Pes): ' + Datos.Fecha + ' ' + Datos.Hora);
+  
+    Page.SetFont(FontH, 10);
+    Page.WriteText(XCentro + 63, Y, 'Fecha/Hora (Imp): ' + Datos.Fecha + ' ' + Datos.Hora);
 
     Y := Y + 4;
     Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
+    
 
     // ═══════════ SECCIÓN DE FIRMAS ═══════════
     Y := Y + 25;
