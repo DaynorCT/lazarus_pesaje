@@ -290,7 +290,7 @@ begin
     'COALESCE(pe.apellido_paterno,'''') as chofer_ap, ' +
     'COALESCE(pe.apellido_materno,'''') as chofer_am, ' +
     'COALESCE(v.placa,'''') as vehiculo_placa, ' +
-    'COALESCE(pr.nombre||'' ''||pr.apellido_paterno,'''') as proveedor_nombre, ' +
+    'COALESCE(pr.nombre||'' ''||pr.apellido_paterno||'' ''||pr.apellido_materno,'''') as proveedor_nombre, ' +
     'COALESCE(prod.nombre,'''') as producto_nombre, ' +
     'COALESCE(o.nombre,'''') as origen_nombre, ' +
     'COALESCE(d.nombre,'''') as destino_nombre, ' +

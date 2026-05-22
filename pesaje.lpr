@@ -18,7 +18,8 @@ uses
   Utils in 'src/utils/Utils.pas',
   BoletaPesaje in 'src/reports/BoletaPesaje.pas',
   ReportePesaje in 'src/reports/ReportePesaje.pas',
-  ReportesFrame in 'src/forms/ReportesFrame.pas' {FrameReportes: TFrameReportes};
+  ReportesFrame in 'src/forms/ReportesFrame.pas' {FrameReportes: TFrameReportes},
+  BoletaConfigFrame in 'src/forms/BoletaConfigFrame.pas' {FrameBoletaConfig: TFrameBoletaConfig};
 
 {$IFDEF DARWIN}
 {$linkframework UserNotifications}

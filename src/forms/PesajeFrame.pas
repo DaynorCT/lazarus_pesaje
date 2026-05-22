@@ -848,9 +848,9 @@ begin
   if (DM = nil) or (not DM.Conexion.Connected) then Exit;
   Q := DM.AbrirQuery(
     'SELECT p.id, ' +
-    'COALESCE(pe.nombre||'' ''||pe.apellido_paterno,'''') as chofer, v.placa, ' +
+    'COALESCE(pe.nombre||'' ''||pe.apellido_paterno||'' ''||pe.apellido_materno,'''') as chofer, v.placa, ' +
     'COALESCE(c.licencia,'''') as licencia, COALESCE(v.tipo_vehiculo,'''') as tipo, ' +
-    'COALESCE(pp.nombre||'' ''||pp.apellido_paterno,'''') as proveedor, ' +
+    'COALESCE(pp.nombre||'' ''||pp.apellido_paterno||'' ''||pp.apellido_materno,'''') as proveedor, ' +
     'COALESCE(pr.nombre,'''') as producto, COALESCE(o.nombre,'''') as origen, ' +
     'COALESCE(d.nombre,'''') as destino, p.costo_bs, p.flete_bs_pendiente, ' +
     'p.fecha_creacion, p.peso_bruto, p.tara, p.peso_neto, ' +
