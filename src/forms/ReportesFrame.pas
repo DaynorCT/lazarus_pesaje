@@ -20,6 +20,7 @@ type
     edtFechaDesde, edtFechaHasta, edtPlaca: TEdit;
     FHoverRow: Integer;
     procedure Refrescar(Sender: TObject);
+    procedure FechaExit(Sender: TObject);
     procedure btnPDFClick(Sender: TObject);
     procedure GridDrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState);
     procedure GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -72,7 +73,7 @@ begin
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
   Lbl.SetBounds(240, 28, 50, 16);
-  Lbl.Caption := 'Desde';
+  Lbl.Caption := 'Desde (dia-mes-año)';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_MUTED;
 
@@ -97,12 +98,13 @@ begin
   edtFechaDesde.Font.Color := CLR_TEXT;
   edtFechaDesde.Color := CLR_WHITE;
   edtFechaDesde.OnChange := @Refrescar;
+  edtFechaDesde.OnExit := @FechaExit;
 
   // Fecha Hasta
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
   Lbl.SetBounds(434, 28, 50, 16);
-  Lbl.Caption := 'Hasta';
+  Lbl.Caption := 'Hasta (dia-mes-año)';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_MUTED;
 
@@ -127,6 +129,7 @@ begin
   edtFechaHasta.Font.Color := CLR_TEXT;
   edtFechaHasta.Color := CLR_WHITE;
   edtFechaHasta.OnChange := @Refrescar;
+  edtFechaHasta.OnExit := @FechaExit;
 
   // Placa
   Lbl := TLabel.Create(Self);
@@ -277,8 +280,8 @@ var
 begin
   if (DM = nil) or (not DM.Conexion.Connected) then Exit;
 
-  FechaDesde := Trim(edtFechaDesde.Text);
-  FechaHasta := Trim(edtFechaHasta.Text);
+  FechaDesde := ConvertirFechaISO(Trim(edtFechaDesde.Text));
+  FechaHasta := ConvertirFechaISO(Trim(edtFechaHasta.Text));
   Placa := Trim(edtPlaca.Text);
 
   SQL :=
@@ -355,6 +358,18 @@ begin
     end;
   finally
     Q.Close;
+  end;
+end;
+
+procedure TFrameReportes.FechaExit(Sender: TObject);
+var
+  Ed: TEdit;
+begin
+  Ed := TEdit(Sender);
+  if Trim(Ed.Text) <> '' then
+  begin
+    Ed.Text := ConvertirFechaISO(Ed.Text);
+    Refrescar(nil);
   end;
 end;
 
