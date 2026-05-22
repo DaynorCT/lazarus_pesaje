@@ -84,15 +84,22 @@ begin
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
   // Busqueda por nombre
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(240, 28, 70, 16);
+  Lbl.Caption := 'Nombre';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_MUTED;
+
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(240, 19, 300, 40);
+  pnlOuter.SetBounds(310, 19, 230, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
   pnlInner := TPanel.Create(pnlOuter);
   pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 298, 38);
+  pnlInner.SetBounds(1, 1, 228, 38);
   pnlInner.BevelOuter := bvNone;
   pnlInner.Color := CLR_WHITE;
   pnlInner.BorderWidth := 8;
@@ -104,7 +111,6 @@ begin
   edtBuscarNombre.Font.Size := 11;
   edtBuscarNombre.Font.Color := CLR_TEXT;
   edtBuscarNombre.Color := CLR_WHITE;
-  edtBuscarNombre.TextHint := 'Buscar por nombre...';
   edtBuscarNombre.OnChange := @Refrescar;
 
   // Boton + AGREGAR (panel azul + label blanco)

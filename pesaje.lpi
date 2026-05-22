@@ -68,7 +68,6 @@
         <ComponentName Value="frmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="167"/>
         <Loaded Value="True"/>
@@ -167,8 +166,9 @@
         <ComponentName Value="FrameEmpresas"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="677"/>
+        <TopLine Value="678"/>
         <CursorPos X="30" Y="685"/>
         <UsageCount Value="99"/>
         <Loaded Value="True"/>

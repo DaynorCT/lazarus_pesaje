@@ -156,11 +156,19 @@ begin
   
   FLblTitulo.Font.Color := $333333;
 
+  with TLabel.Create(PnlTop) do
+  begin
+    Parent := PnlTop;
+    SetBounds(320, 18, 60, 16);
+    Caption := 'Buscar';
+    Font.Size := 12;
+    Font.Color := CLR_TEXT_MUTED;
+  end;
+
   FEditBuscar := TEdit.Create(Self);
   FEditBuscar.Parent := PnlTop;
-  FEditBuscar.SetBounds(350, 14, 220, 28);
+  FEditBuscar.SetBounds(380, 14, 220, 28);
   FEditBuscar.Font.Size := 12;
-  FEditBuscar.TextHint := 'Buscar...';
   FEditBuscar.OnChange := @RefrescarGrid;
 
   FBtnNuevo := TButton.Create(Self);

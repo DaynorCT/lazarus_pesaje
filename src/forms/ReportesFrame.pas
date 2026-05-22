@@ -69,15 +69,22 @@ begin
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
   // Fecha Desde
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(240, 28, 50, 16);
+  Lbl.Caption := 'Desde';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_MUTED;
+
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(240, 19, 180, 40);
+  pnlOuter.SetBounds(290, 19, 130, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
   pnlInner := TPanel.Create(pnlOuter);
   pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 178, 38);
+  pnlInner.SetBounds(1, 1, 128, 38);
   pnlInner.BevelOuter := bvNone;
   pnlInner.Color := CLR_WHITE;
   pnlInner.BorderWidth := 8;
@@ -89,19 +96,25 @@ begin
   edtFechaDesde.Font.Size := 11;
   edtFechaDesde.Font.Color := CLR_TEXT;
   edtFechaDesde.Color := CLR_WHITE;
-  edtFechaDesde.TextHint := 'Fecha desde (yyyy-mm-dd)';
   edtFechaDesde.OnChange := @Refrescar;
 
   // Fecha Hasta
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(434, 28, 50, 16);
+  Lbl.Caption := 'Hasta';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_MUTED;
+
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(434, 19, 180, 40);
+  pnlOuter.SetBounds(484, 19, 130, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
   pnlInner := TPanel.Create(pnlOuter);
   pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 178, 38);
+  pnlInner.SetBounds(1, 1, 128, 38);
   pnlInner.BevelOuter := bvNone;
   pnlInner.Color := CLR_WHITE;
   pnlInner.BorderWidth := 8;
@@ -113,19 +126,25 @@ begin
   edtFechaHasta.Font.Size := 11;
   edtFechaHasta.Font.Color := CLR_TEXT;
   edtFechaHasta.Color := CLR_WHITE;
-  edtFechaHasta.TextHint := 'Fecha hasta (yyyy-mm-dd)';
   edtFechaHasta.OnChange := @Refrescar;
 
   // Placa
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(628, 28, 50, 16);
+  Lbl.Caption := 'Placa';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_MUTED;
+
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(628, 19, 180, 40);
+  pnlOuter.SetBounds(678, 19, 130, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
   pnlInner := TPanel.Create(pnlOuter);
   pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 178, 38);
+  pnlInner.SetBounds(1, 1, 128, 38);
   pnlInner.BevelOuter := bvNone;
   pnlInner.Color := CLR_WHITE;
   pnlInner.BorderWidth := 8;
@@ -137,7 +156,6 @@ begin
   edtPlaca.Font.Size := 11;
   edtPlaca.Font.Color := CLR_TEXT;
   edtPlaca.Color := CLR_WHITE;
-  edtPlaca.TextHint := 'Buscar por placa...';
   edtPlaca.OnChange := @Refrescar;
 
   // Boton GENERAR PDF

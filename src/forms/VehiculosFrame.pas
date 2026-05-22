@@ -74,15 +74,22 @@ begin
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
   // Búsqueda por placa
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := Pnl;
+  Lbl.SetBounds(240, 28, 60, 16);
+  Lbl.Caption := 'Placa';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_MUTED;
+
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(240, 19, 300, 40);
+  pnlOuter.SetBounds(300, 19, 240, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
   pnlInner := TPanel.Create(pnlOuter);
   pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 298, 38);
+  pnlInner.SetBounds(1, 1, 238, 38);
   pnlInner.BevelOuter := bvNone;
   pnlInner.Color := CLR_WHITE;
   pnlInner.BorderWidth := 8;
@@ -95,7 +102,6 @@ begin
   edtBuscar.Font.Color := CLR_TEXT;
   edtBuscar.Color := CLR_WHITE;
   edtBuscar.CharCase := ecUpperCase;
-  edtBuscar.TextHint := 'Buscar por placa...';
   edtBuscar.OnChange := @Refrescar;
 
   // Botón + AGREGAR (panel azul + label blanco)
