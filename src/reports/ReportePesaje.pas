@@ -146,6 +146,8 @@ var
   FontH, FontHBold: Integer;
   Y: Double;
   XIzq, XDer: Double;
+  XMar: Double;
+  YCMar: Double;
   XColIzq, XColIzqVal, XColDer, XColDerVal: Double;
   LogoImgIdx: Integer;
   LogoB64Pos: Integer;
@@ -156,15 +158,13 @@ var
   i: Integer;
   FechaReporte: string;
   RowY: Double;
-  NRowIdx: Integer;
-  RowSpacing: Double;
 begin
   Result := False;
   if not CargarDatosReporte(FechaDesde, FechaHasta, Placa, Datos, NombreEmpresa, LogoBase64) then Exit;
 
   Doc := TPDFDocument.Create(nil);
   try
-    Doc.DefaultOrientation := ppoLandscape;
+    Doc.DefaultOrientation := ppoPortrait;
     Doc.DefaultPaperType := ptLetter;
     Doc.Options := [poPageOriginAtTop];
     Doc.StartDocument;
@@ -179,15 +179,17 @@ begin
 
     Page.UnitOfMeasure := uomMillimeters;
     Page.PaperType := ptLetter;
-    Page.Orientation := ppoLandscape;
+    Page.Orientation := ppoPortrait;
 
     XIzq := 15;
-    XDer := 215;
+    XDer := 155;
+    XMar := 90;
+    YCMar := 28;
 
     XColIzq := 15;
-    XColIzqVal := 80;
-    XColDer := 145;
-    XColDerVal := 210;
+    XColIzqVal := 40;
+    XColDer := 110;
+    XColDerVal := 138;
 
     FechaReporte := 'Fecha: ' + FormatDateTime('dd/mm/yyyy hh:nn', Now);
 
@@ -216,34 +218,25 @@ begin
       end;
     end;
 
-    // ═══════════ ENCABEZADO SIMPLE ═══════════
+    // ═══════════ ENCABEZADO 3 COLUMNAS ═══════════
     Y := 20;
 
-    // Centro: REPORTE DE PESAJE + Nombre Empresa
-    Page.SetFont(FontHBold, 16);
-    Page.WriteText(90, Y, 'REPORTE DE PESAJE');
+    // --- FILA 1 ---
+    Page.SetFont(FontHBold, 13);
+    Page.WriteText(XIzq, Y, 'REPORTE DE PESAJE');
 
-    Y := Y + 8;
     if NombreEmpresa <> '' then
-    begin
-      Page.SetFont(FontHBold, 12);
-      Page.WriteText(100, Y, WinCPToUTF8(NombreEmpresa));
-      Y := Y + 6;
-    end;
+      Page.WriteText(XMar, YCMar, WinCPToUTF8(NombreEmpresa));
 
-    Page.SetFont(FontH, 10);
-    Page.WriteText(105, Y, FechaReporte);
-
-    // Logo (derecha)
-    Page.SetFont(FontHBold, 8);
-    Page.WriteText(215, 20, 'ACREDITADO POR:');
+    Page.SetFont(FontHBold, 9);
+    Page.WriteText(XDer, Y, 'ACREDITADO POR:');
     if LogoImgIdx >= 0 then
     begin
       ImgW := Doc.Images[LogoImgIdx].Width;
       ImgH := Doc.Images[LogoImgIdx].Height;
       ImgAspect := ImgW / ImgH;
-      MaxW := 50;
-      MaxH := 35;
+      MaxW := 45;
+      MaxH := 32;
 
       if ImgW / MaxW > ImgH / MaxH then
       begin
@@ -256,121 +249,128 @@ begin
         DrawW := MaxH * ImgAspect;
       end;
 
-      Page.DrawLine(XDer, 24, XDer + DrawW, 24, 0.2);
-      Page.DrawLine(XDer, 24, XDer, 24 + DrawH, 0.2);
-      Page.DrawLine(XDer + DrawW, 24, XDer + DrawW, 24 + DrawH, 0.2);
-      Page.DrawLine(XDer, 24 + DrawH, XDer + DrawW, 24 + DrawH, 0.2);
+      Page.DrawLine(XDer, Y + 4, XDer + DrawW, Y + 4, 0.2);
+      Page.DrawLine(XDer, Y + 4, XDer, Y + 4 + DrawH, 0.2);
+      Page.DrawLine(XDer + DrawW, Y + 4, XDer + DrawW, Y + 4 + DrawH, 0.2);
+      Page.DrawLine(XDer, Y + 4 + DrawH, XDer + DrawW, Y + 4 + DrawH, 0.2);
 
-      Page.DrawImage(XDer, 24 + DrawH, DrawW, DrawH, LogoImgIdx);
+      Page.DrawImage(XDer, Y + 4 + DrawH, DrawW, DrawH, LogoImgIdx);
     end;
 
-    Y := Y + 8;
-    Page.DrawLineStyle(XIzq, Y, XDer + 51, Y, dashEstilo);
+    // --- FILA 2 ---
+    Y := Y + 5;
+    Page.SetFont(FontH, 10);
+    Page.WriteText(XIzq, Y, FechaReporte);
+
+    Y := Y + 3;
+    Page.DrawLineStyle(XIzq, Y, XDer + 35, Y, dashEstilo);
+
+    // ═══════════ DATOS ═══════════
     Y := Y + 5;
 
-    RowSpacing := 6;
-
-    // ═══════════ BLOQUE POR CADA PESAJE ═══════════
     for i := 0 to High(Datos) do
     begin
       RowY := Y;
 
-      NRowIdx := i + 1;
-      Page.SetFont(FontHBold, 11);
-      Page.WriteText(XColIzq, RowY, 'Nro. ' + IntToStr(NRowIdx));
-      Page.WriteText(XColIzq + 30, RowY, 'GUIA: ' + Datos[i].Guia);
+      // Cabecera del registro
+      Page.DrawLineStyle(XIzq, RowY - 1, XDer + 35, RowY - 1, dashEstilo);
 
-      RowY := RowY + RowSpacing;
-      Page.DrawLineStyle(XIzq, RowY, XDer + 51, RowY, dashEstilo);
+      Page.SetFont(FontHBold, 11);
+      Page.WriteText(XColIzq, RowY, 'Nro. ' + IntToStr(i + 1));
+      Page.WriteText(XColDer, RowY, 'GUIA: ' + Datos[i].Guia);
+
+      RowY := RowY + 4;
+      Page.DrawLineStyle(XIzq, RowY, XDer + 35, RowY, dashEstilo);
       RowY := RowY + 2;
 
       // Row 1: Chofer | Vehiculo
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColIzq, RowY, 'Chofer:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColIzq, RowY, 'CHOFER');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColIzqVal, RowY, WinCPToUTF8(Datos[i].ChoferNombre));
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColDer, RowY, 'Vehiculo:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColDer, RowY, 'VEHICULO');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColDerVal, RowY, Datos[i].VehiculoTipo + ' - ' + Datos[i].VehiculoPlaca);
 
-      RowY := RowY + RowSpacing;
+      RowY := RowY + 4;
 
       // Row 2: N° Documento | Licencia
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColIzq, RowY, 'Nro. Documento:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColIzq, RowY, 'NRO. DOC.');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColIzqVal, RowY, Datos[i].ChoferCI);
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColDer, RowY, 'Licencia:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColDer, RowY, 'LICENCIA');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColDerVal, RowY, Datos[i].ChoferLicencia);
 
-      RowY := RowY + RowSpacing;
+      RowY := RowY + 4;
 
       // Row 3: Proveedor | Producto
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColIzq, RowY, 'Proveedor:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColIzq, RowY, 'PROVEEDOR');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColIzqVal, RowY, Datos[i].ProveedorNombre);
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColDer, RowY, 'Producto:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColDer, RowY, 'PRODUCTO');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColDerVal, RowY, WinCPToUTF8(Datos[i].ProductoNombre));
 
-      RowY := RowY + RowSpacing;
+      RowY := RowY + 4;
 
       // Row 4: Origen | Destino
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColIzq, RowY, 'Origen:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColIzq, RowY, 'ORIGEN');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColIzqVal, RowY, WinCPToUTF8(Datos[i].OrigenNombre));
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColDer, RowY, 'Destino:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColDer, RowY, 'DESTINO');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColDerVal, RowY, WinCPToUTF8(Datos[i].DestinoNombre));
 
-      RowY := RowY + RowSpacing;
+      RowY := RowY + 4;
 
       // Row 5: P. Bruto | Costo
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColIzq, RowY, 'P. Bruto:');
-      Page.SetFont(FontHBold, 9);
-      Page.WriteText(XColIzqVal, RowY, FormatFloat('#,##0', Datos[i].PesoBruto) + ' kg');
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColDer, RowY, 'Costo:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColIzq, RowY, 'P. BRUTO');
+      Page.SetFont(FontHBold, 8);
+      Page.WriteText(XColIzqVal, RowY, FormatFloat('#,##0.00', Datos[i].PesoBruto) + ' kg');
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColDer, RowY, 'COSTO');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColDerVal, RowY, 'Bs ' + FormatFloat('#,##0', Datos[i].CostoBs));
 
-      RowY := RowY + RowSpacing;
+      RowY := RowY + 4;
 
       // Row 6: Tara | Flete
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColIzq, RowY, 'Tara:');
-      Page.SetFont(FontHBold, 9);
-      Page.WriteText(XColIzqVal, RowY, FormatFloat('#,##0', Datos[i].Tara) + ' kg');
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColDer, RowY, 'Flete:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColIzq, RowY, 'TARA');
+      Page.SetFont(FontHBold, 8);
+      Page.WriteText(XColIzqVal, RowY, FormatFloat('#,##0.00', Datos[i].Tara) + ' kg');
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColDer, RowY, 'FLETE');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColDerVal, RowY, 'Bs ' + FormatFloat('#,##0', Datos[i].FleteBs));
 
-      RowY := RowY + RowSpacing;
+      RowY := RowY + 4;
 
       // Row 7: P. Neto | Fecha/Hora
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColIzq, RowY, 'P. Neto:');
-      Page.SetFont(FontHBold, 9);
-      Page.WriteText(XColIzqVal, RowY, FormatFloat('#,##0', Datos[i].PesoNeto) + ' kg');
-      Page.SetFont(FontH, 9);
-      Page.WriteText(XColDer, RowY, 'Fecha/Hora:');
-      Page.SetFont(FontHBold, 9);
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColIzq, RowY, 'PESO NETO');
+      Page.SetFont(FontHBold, 8);
+      Page.WriteText(XColIzqVal, RowY, FormatFloat('#,##0.00', Datos[i].PesoNeto) + ' kg');
+      Page.SetFont(FontH, 8);
+      Page.WriteText(XColDer, RowY, 'FECHA/HORA');
+      Page.SetFont(FontHBold, 8);
       Page.WriteText(XColDerVal, RowY, Datos[i].FechaStr + ' ' + Datos[i].HoraStr);
 
-      RowY := RowY + 2;
-      Page.DrawLineStyle(XIzq, RowY, XDer + 51, RowY, dashEstilo);
-
-      Y := RowY + 5;
+      Y := RowY + 7;
     end;
+
+    Y := Y + 3;
+    Page.SetFont(FontH, 10);
+    Page.WriteText(XIzq, Y, 'Total registros: ' + IntToStr(Length(Datos)));
 
     Stream := TMemoryStream.Create;
     Doc.SaveToStream(Stream);
