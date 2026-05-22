@@ -2,7 +2,7 @@ object DM: TDM
   OldCreateOrder = False
   Height = 240
   HorizontalOffset = 231
-  VerticalOffset = 63
+  VerticalOffset = 235
   Width = 380
   object Conexion: TSQLite3Connection
     Connected = False

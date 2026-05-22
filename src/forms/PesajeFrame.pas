@@ -1210,8 +1210,13 @@ var Q: TSQLQuery;
 begin
   if ID = 0 then Exit;
   Q := DM.AbrirQuery(
-    'SELECT vehiculo_id, chofer_id, proveedor_id, producto_id, id_origen, id_destino, ' +
-    'peso_bruto, tara, costo_bs, flete_bs_pendiente FROM pesajes WHERE id=' + IntToStr(ID));
+    'SELECT p.vehiculo_id, p.chofer_id, p.proveedor_id, p.producto_id, p.id_origen, p.id_destino, ' +
+    'p.peso_bruto, p.tara, p.costo_bs, p.flete_bs_pendiente, ' +
+    'v.tipo_vehiculo, c.licencia ' +
+    'FROM pesajes p ' +
+    'LEFT JOIN vehiculos v ON v.id = p.vehiculo_id ' +
+    'LEFT JOIN choferes c ON c.id = p.chofer_id ' +
+    'WHERE p.id=' + IntToStr(ID));
   try
     if Q.EOF then Exit;
     FEditMode := True; FEditID := ID;
@@ -1223,10 +1228,14 @@ begin
     cmbDestino.ItemIndex := BuscarComboIndex(cmbDestino, Q.Fields[5].AsInteger);
     FPesoBruto := Q.Fields[6].AsInteger; FTara := Q.Fields[7].AsInteger;
     FPesoNeto := FPesoBruto - FTara;
+    edtTaraManual.Text := IntToStr(FTara);
+    FTaraManual := IntToStr(FTara);
     lblPesoDisplay.Caption := IntToStr(FPesoBruto) + ' kg';
     ActualizarResumenPesos;
     edtCosto.Text := Q.Fields[8].AsString;
     edtFlete.Text := Q.Fields[9].AsString;
+    edtTipo.Text := UpperCase(Q.Fields[10].AsString);
+    edtLicencia.Text := UpperCase(Q.Fields[11].AsString);
     lblFormTitle.Caption := 'Editar Pesaje #' + IntToStr(ID);
     TLabel(pnlGuardar.Controls[0]).Caption := 'Actualizar Pesaje';
     pnlCancelEdit.Visible := True;
