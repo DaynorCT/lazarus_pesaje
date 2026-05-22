@@ -72,20 +72,20 @@ begin
   // Fecha Desde
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
-  Lbl.SetBounds(240, 28, 50, 16);
+  Lbl.SetBounds(240, 28, 150, 16);
   Lbl.Caption := 'Desde (dia-mes-año)';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_MUTED;
 
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(290, 19, 130, 40);
+  pnlOuter.SetBounds(395, 19, 150, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
   pnlInner := TPanel.Create(pnlOuter);
   pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 128, 38);
+  pnlInner.SetBounds(1, 1, 148, 38);
   pnlInner.BevelOuter := bvNone;
   pnlInner.Color := CLR_WHITE;
   pnlInner.BorderWidth := 8;
@@ -103,20 +103,20 @@ begin
   // Fecha Hasta
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
-  Lbl.SetBounds(434, 28, 50, 16);
+  Lbl.SetBounds(550, 28, 150, 16);
   Lbl.Caption := 'Hasta (dia-mes-año)';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_MUTED;
 
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(484, 19, 130, 40);
+  pnlOuter.SetBounds(705, 19, 150, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
   pnlInner := TPanel.Create(pnlOuter);
   pnlInner.Parent := pnlOuter;
-  pnlInner.SetBounds(1, 1, 128, 38);
+  pnlInner.SetBounds(1, 1, 148, 38);
   pnlInner.BevelOuter := bvNone;
   pnlInner.Color := CLR_WHITE;
   pnlInner.BorderWidth := 8;
@@ -134,14 +134,14 @@ begin
   // Placa
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
-  Lbl.SetBounds(628, 28, 50, 16);
+  Lbl.SetBounds(860, 28, 50, 16);
   Lbl.Caption := 'Placa';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_MUTED;
 
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(678, 19, 130, 40);
+  pnlOuter.SetBounds(915, 19, 130, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
