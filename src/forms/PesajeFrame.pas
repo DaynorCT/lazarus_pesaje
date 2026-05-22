@@ -1141,14 +1141,23 @@ begin
          Texto := 'Editar pesaje'
        else
          Texto := 'Imprimir boleta';
-    3: Texto := 'Finalizar';
+    3: Texto := 'Finalizar pesaje';
   else Exit;
   end;
 
   P := Mouse.CursorPos;
   MostrarHintAccion(Texto);
-  FHintWindow.Top := P.Y + 20;
-  FHintWindow.Left := P.X + 12;
+  case FHoverZone of
+    2, 3: begin
+      FHintWindow.Top := P.Y + 20;
+      FHintWindow.Left := P.X - FHintWindow.Width - 12;
+    end;
+  else
+    begin
+      FHintWindow.Top := P.Y + 20;
+      FHintWindow.Left := P.X + 12;
+    end;
+  end;
   FHintWindow.Show;
   FHintActive := True;
 end;

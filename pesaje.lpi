@@ -77,12 +77,12 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
-        <TopLine Value="268"/>
+        <TopLine Value="269"/>
         <CursorPos X="31" Y="276"/>
         <UsageCount Value="169"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/DashboardFrame.pas"/>
@@ -165,12 +165,12 @@
         <ComponentName Value="FrameEmpresas"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="678"/>
+        <TopLine Value="679"/>
         <CursorPos X="30" Y="685"/>
         <UsageCount Value="101"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/auth/LoginForm.lfm"/>
