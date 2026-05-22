@@ -103,14 +103,14 @@ begin
   // Fecha Hasta
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
-  Lbl.SetBounds(550, 28, 150, 16);
+  Lbl.SetBounds(565, 28, 150, 16);
   Lbl.Caption := 'Hasta (dia-mes-año)';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_MUTED;
 
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(705, 19, 150, 40);
+  pnlOuter.SetBounds(720, 19, 150, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
@@ -134,14 +134,14 @@ begin
   // Placa
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
-  Lbl.SetBounds(860, 28, 50, 16);
+  Lbl.SetBounds(890, 28, 50, 16);
   Lbl.Caption := 'Placa';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_MUTED;
 
   pnlOuter := TPanel.Create(Pnl);
   pnlOuter.Parent := Pnl;
-  pnlOuter.SetBounds(915, 19, 130, 40);
+  pnlOuter.SetBounds(945, 19, 130, 40);
   pnlOuter.BevelOuter := bvNone;
   pnlOuter.Color := CLR_BORDER;
 
