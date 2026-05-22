@@ -256,6 +256,20 @@ begin
       'acreditacion TEXT, ' +
       'usuario_modificacion INTEGER, fecha_modificacion TEXT)');
 
+    EjecutarSQL('CREATE TABLE IF NOT EXISTS config_balanza (' +
+      'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ' +
+      'puerto_com TEXT NOT NULL DEFAULT ''COM1'', ' +
+      'baudrate INTEGER NOT NULL DEFAULT 9600, ' +
+      'databits INTEGER NOT NULL DEFAULT 8, ' +
+      'paridad TEXT NOT NULL DEFAULT ''N'', ' +
+      'stopbits INTEGER NOT NULL DEFAULT 1, ' +
+      'flowcontrol TEXT NOT NULL DEFAULT ''None'', ' +
+      'timeout_ms INTEGER NOT NULL DEFAULT 1000, ' +
+      'metodo_lectura TEXT NOT NULL DEFAULT ''AUTO'', ' +
+      'posicion_inicio INTEGER NOT NULL DEFAULT 8, ' +
+      'posicion_longitud INTEGER NOT NULL DEFAULT 5, ' +
+      'usuario_modificacion INTEGER, fecha_modificacion TEXT)');
+
     Transaccion.Commit;
   except
     on E: Exception do

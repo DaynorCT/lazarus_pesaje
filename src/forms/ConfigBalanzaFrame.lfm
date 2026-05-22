@@ -1,0 +1,10 @@
+object FrameConfigBalanza: TFrameConfigBalanza
+  Left = 0
+  Height = 600
+  Top = 0
+  Width = 850
+  LCLVersion = '4.7.0.0'
+  TabOrder = 0
+  DesignLeft = 48
+  DesignTop = 131
+end

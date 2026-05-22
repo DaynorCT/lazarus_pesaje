@@ -10,7 +10,7 @@ uses
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
   ProveedoresFrame, UsuariosFrame, EmpresasFrame, ProductosFrame,
   OrigenesFrame, DestinosFrame, AbmSimpleFrame, ReportesFrame,
-  BoletaConfigFrame, Theme, base64, SQLDB;
+  BoletaConfigFrame, Theme, base64, SQLDB, ConfigBalanzaFrame;
 
 type
   TFrameClass = class of TFrame;
@@ -142,9 +142,10 @@ begin
   FSubConfig.BevelOuter := bvNone;
   FSubConfig.BorderStyle := bsSingle;
   FSubConfig.Width := 180;
-  FSubConfig.Height := 40;
+  FSubConfig.Height := 80;
 
   CrearSubItem(FSubConfig, '📋 Boleta', 12, 0);
+  CrearSubItem(FSubConfig, '⚖️ Balanza', 13, 40);
 
   // Botón usuario (TPanel, igual que nav modules)
   // Botón usuario
@@ -477,6 +478,7 @@ begin
     10: LoadFrame(TFrameUsuarios, 'Usuarios');
     11: LoadFrame(TFrameReportes, 'Reportes');
     12: LoadFrame(TFrameBoletaConfig, 'Configuracion Boleta');
+    13: LoadFrame(TFrameConfigBalanza, 'Configuracion Balanza');
     else ShowMessage('Modulo en desarrollo');
   end;
 end;
