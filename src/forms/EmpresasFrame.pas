@@ -294,23 +294,23 @@ begin
     begin
       Grid.Canvas.Font.Color := CLR_SUCCESS;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
-        aRect.Left + 45, aRect.Top + 2, '● ──', Ts);
+      Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
     end
     else
     begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
-        aRect.Left + 45, aRect.Top + 2, '○ ──', Ts);
+      Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, FAIconoStr(FA_TIMES, '○') + ' ──', Ts);
     end;
 
     Grid.Canvas.Font.Height := -13;
     Grid.Canvas.Font.Color := CLR_PRIMARY;
     Grid.Canvas.Font.Style := [fsBold];
     Ts.Alignment := taCenter;
-    Grid.Canvas.TextRect(Rect(aRect.Left + 105, aRect.Top, aRect.Left + 155, aRect.Bottom),
-      aRect.Left + 105, aRect.Top + 2, '✏️', Ts);
+    Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 105, aRect.Top, aRect.Left + 155, aRect.Bottom),
+      aRect.Left + 105, aRect.Top + 2, FAIconoStr(FA_EDIT, '✎'), Ts);
     Exit;
   end;
 

@@ -33,6 +33,15 @@ Luego:
 
 Genera `pesaje.exe` de 64 bits — compatible con Windows 7, 8, 10, 11 (64-bit).
 
+### Compatibilidad con Windows 7
+
+Para garantizar que los íconos de interfaz se vean correctamente en todas las versiones de Windows (7, 8, 10, 11):
+
+- **Font Awesome 6 Free Solid:** fuente de íconos incluida en el ZIP (`fa-solid-900.ttf`). Se carga al arrancar con `AddFontResourceExW` (modo privado, no modifica el sistema).
+- **Sidebar y submenús:** usan íconos Font Awesome en vez de emojis (casa, usuarios, edificio, persona, industria, balanza, lista, gráfico, engranaje).
+- **Acciones de grilla:** lápiz de edición, toggle activo/inactivo reemplazados por íconos Font Awesome (``, ``, ``).
+- **Fallback automático:** si la fuente no se carga, se usan caracteres estándar (`✎`, `●`, `○`).
+
 ## Distribuir para Windows
 
 ### Método recomendado: ZIP con script automático
@@ -47,9 +56,10 @@ Genera en `dist/` un archivo `Sistema_Pesaje_v1.0.zip` con todo lo necesario:
 
 ```
 Sistema_Pesaje_v1.0/
-├── pesaje.exe       # Aplicación compilada
-├── sqlite3.dll      # SQLite 64-bit (descargado automáticamente)
-└── config.json      # Configuración (opcional)
+├── pesaje.exe           # Aplicación compilada
+├── sqlite3.dll          # SQLite 64-bit (descargado automáticamente)
+├── config.json          # Configuración (opcional)
+└── fa-solid-900.ttf     # Fuente de íconos Font Awesome
 ```
 
 El cliente solo descomprime el ZIP en cualquier carpeta de Windows y hace doble clic en `pesaje.exe`. Sin instalador, sin dependencias.

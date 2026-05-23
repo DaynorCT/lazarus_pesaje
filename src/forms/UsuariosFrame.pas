@@ -271,7 +271,7 @@ begin
     Grid.Cells[3, Row] := UpperCase(Q.Fields[5].AsString);
     Grid.Cells[4, Row] := UpperCase(Q.Fields[7].AsString);
     Grid.Cells[5, Row] := UpperCase(Q.Fields[8].AsString);
-    Grid.Cells[6, Row] := '✏️';
+    Grid.Cells[6, Row] := FAIconoStr(FA_EDIT, '✎');
     Grid.Cells[7, Row] := IntToStr(ID);
     Q.Next;
     Inc(Row);
@@ -344,15 +344,15 @@ begin
     begin
       Grid.Canvas.Font.Color := CLR_SUCCESS;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
-        aRect.Left + 45, aRect.Top + 2, '● ──', Ts);
+      Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
     end
     else
     begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
-        aRect.Left + 45, aRect.Top + 2, '○ ──', Ts);
+      Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
+        aRect.Left + 45, aRect.Top + 2, FAIconoStr(FA_TIMES, '○') + ' ──', Ts);
     end;
 
     // Lápiz editar (derecha del grupo centrado)
@@ -360,8 +360,8 @@ begin
     Grid.Canvas.Font.Color := CLR_PRIMARY;
     Grid.Canvas.Font.Style := [fsBold];
     Ts.Alignment := taCenter;
-    Grid.Canvas.TextRect(Rect(aRect.Left + 105, aRect.Top, aRect.Left + 155, aRect.Bottom),
-      aRect.Left + 105, aRect.Top + 2, '✏️', Ts);
+    Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 105, aRect.Top, aRect.Left + 155, aRect.Bottom),
+      aRect.Left + 105, aRect.Top + 2, FAIconoStr(FA_EDIT, '✎'), Ts);
     Exit;
   end;
 

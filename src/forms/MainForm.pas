@@ -38,7 +38,7 @@ type
 
     procedure LogoClick(Sender: TObject);
     procedure NavPaint(Sender: TObject);
-    function CrearNavItem(const ACaption: string; ATag: Integer; X: Integer): TPanel;
+    function CrearNavItem(AIconCode: Word; const ATitle: string; ATag: Integer; X: Integer): TPanel;
     procedure NavClick(Sender: TObject);
     procedure NavMouseEnter(Sender: TObject);
     procedure NavMouseLeave(Sender: TObject);
@@ -46,7 +46,7 @@ type
     procedure SubMouseEnter(Sender: TObject);
     procedure SubMouseLeave(Sender: TObject);
     procedure UserBtnClick(Sender: TObject);
-    procedure CrearSubItem(AParent: TPanel; const ACaption: string; ATag, Y: Integer);
+    procedure CrearSubItem(AParent: TPanel; AIconCode: Word; const ACaption: string; ATag, Y: Integer);
     procedure ResetNavItems(KeepActive: TPanel);
     procedure CerrarSubmenus;
     procedure ToggleSubmenu(Btn: TSpeedButton; SubPanel: TPanel);
@@ -70,7 +70,7 @@ implementation
 procedure TfrmMain.FormCreate(Sender: TObject);
 var
   I, XPos: Integer;
-  Items: array[0..8] of record Emoji, Title: string; Tag: Integer; HasSub: Boolean; end;
+  Items: array[0..8] of record IconCode: Word; Title: string; Tag: Integer; HasSub: Boolean; end;
   Pnl: TPanel;
 begin
   FActiveFrame := nil;
@@ -99,22 +99,22 @@ begin
   CargarLogo;
 
   // Orden exacto del sistema web
-  Items[0].Emoji := '📊'; Items[0].Title := 'Inicio';       Items[0].Tag := 0;
-  Items[1].Emoji := '👥'; Items[1].Title := 'Usuarios';     Items[1].Tag := 10;
-  Items[2].Emoji := '🏢'; Items[2].Title := 'Empresas';     Items[2].Tag := 2;
-  Items[3].Emoji := '👤'; Items[3].Title := 'Choferes';     Items[3].Tag := 3;
-  Items[4].Emoji := '🏭'; Items[4].Title := 'Proveedores';  Items[4].Tag := 4;
-  Items[5].Emoji := '⚖️';  Items[5].Title := 'Pesaje';      Items[5].Tag := 1;
-  Items[6].Emoji := '📦'; Items[6].Title := 'Catalogo ▼';   Items[6].Tag := 100; Items[6].HasSub := True;
-  Items[7].Emoji := '📄'; Items[7].Title := 'Reportes';     Items[7].Tag := 11;
-  Items[8].Emoji := '⚙️';  Items[8].Title := 'Config ▼';     Items[8].Tag := 200; Items[8].HasSub := True;
+  Items[0].IconCode := FA_HOME;      Items[0].Title := 'Inicio';      Items[0].Tag := 0;
+  Items[1].IconCode := FA_USERS;     Items[1].Title := 'Usuarios';    Items[1].Tag := 10;
+  Items[2].IconCode := FA_BUILDING;  Items[2].Title := 'Empresas';    Items[2].Tag := 2;
+  Items[3].IconCode := FA_USER;      Items[3].Title := 'Choferes';    Items[3].Tag := 3;
+  Items[4].IconCode := FA_INDUSTRY;  Items[4].Title := 'Proveedores'; Items[4].Tag := 4;
+  Items[5].IconCode := FA_SCALE;     Items[5].Title := 'Pesaje';      Items[5].Tag := 1;
+  Items[6].IconCode := FA_LIST;      Items[6].Title := 'Catalogo ▼';  Items[6].Tag := 100; Items[6].HasSub := True;
+  Items[7].IconCode := FA_CHART_BAR; Items[7].Title := 'Reportes';    Items[7].Tag := 11;
+  Items[8].IconCode := FA_COG;       Items[8].Title := 'Config ▼';    Items[8].Tag := 200; Items[8].HasSub := True;
 
   SetLength(FNavItems, 9);
   XPos := 230;
 
   for I := 0 to 8 do
   begin
-    Pnl := CrearNavItem(Items[I].Emoji + '  ' + Items[I].Title, Items[I].Tag, XPos);
+    Pnl := CrearNavItem(Items[I].IconCode, Items[I].Title, Items[I].Tag, XPos);
     FNavItems[I] := Pnl;
     XPos := XPos + Pnl.Width + 16;
   end;
@@ -129,10 +129,10 @@ begin
   FSubCatalogo.Width := 180;
   FSubCatalogo.Height := 152;
 
-  CrearSubItem(FSubCatalogo, '🚛 Vehiculos', 6, 0);
-  CrearSubItem(FSubCatalogo, '📦 Productos', 5, 38);
-  CrearSubItem(FSubCatalogo, '📍 Origenes', 7, 76);
-  CrearSubItem(FSubCatalogo, '🎯 Destinos', 8, 114);
+  CrearSubItem(FSubCatalogo, FA_TRUCK,     'Vehiculos',  6, 0);
+  CrearSubItem(FSubCatalogo, FA_BOX,       'Productos',  5, 38);
+  CrearSubItem(FSubCatalogo, FA_MAP_PIN,   'Origenes',   7, 76);
+  CrearSubItem(FSubCatalogo, FA_BULLSEYE,  'Destinos',   8, 114);
 
   // Submenu Configuración
   FSubConfig := TPanel.Create(Self);
@@ -144,8 +144,8 @@ begin
   FSubConfig.Width := 180;
   FSubConfig.Height := 80;
 
-  CrearSubItem(FSubConfig, '📋 Boleta', 12, 0);
-  CrearSubItem(FSubConfig, '⚖️ Balanza', 13, 40);
+  CrearSubItem(FSubConfig, FA_FILE,  'Boleta',  12, 0);
+  CrearSubItem(FSubConfig, FA_SCALE, 'Balanza', 13, 40);
 
   // Botón usuario (TPanel, igual que nav modules)
   // Botón usuario
@@ -154,9 +154,10 @@ begin
   FUserBtn.Align := alRight;
   FUserBtn.Width := 40; FUserBtn.Height := 40;
   FUserBtn.Top := 20;
-  FUserBtn.Caption := '👤';
+  FUserBtn.Caption := FAChar(FA_USER);
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;
+  FUserBtn.Font.Name := FA_FONT_NAME;
   FUserBtn.BorderSpacing.Right := 12;
   FUserBtn.OnClick := @UserBtnClick;
 
@@ -171,15 +172,23 @@ begin
   FUserMenu.Height := 130;
 end;
 
-function TfrmMain.CrearNavItem(const ACaption: string; ATag: Integer; X: Integer): TPanel;
+function TfrmMain.CrearNavItem(AIconCode: Word; const ATitle: string; ATag: Integer; X: Integer): TPanel;
 var
-  Lbl: TLabel;
-  W: Integer;
+  IconLbl, TitleLbl: TLabel;
+  W, IconW: Integer;
+  IconStr: string;
 begin
   Result := TPanel.Create(pnlTop);
   Result.Parent := pnlTop;
   Result.Tag := ATag;
-  W := Result.Canvas.TextWidth(ACaption) + 24;
+
+  IconStr := FAChar(AIconCode);
+  if IconStr <> '' then
+    IconW := 28
+  else
+    IconW := 0;
+
+  W := Result.Canvas.TextWidth(ATitle) + 24 + IconW;
   Result.SetBounds(X, 20, W, 40);
   Result.BevelOuter := bvNone;
   Result.Color := CLR_CARD;
@@ -189,17 +198,37 @@ begin
   Result.OnMouseEnter := @NavMouseEnter;
   Result.OnMouseLeave := @NavMouseLeave;
 
-  Lbl := TLabel.Create(Result);
-  Lbl.Parent := Result;
-  Lbl.Align := alClient;
-  Lbl.Alignment := taCenter;
-  Lbl.Layout := tlCenter;
-  Lbl.Caption := ACaption;
-  Lbl.Font.Size := 12;
-  Lbl.Font.Color := CLR_TEXT;
-  Lbl.Font.Style := [];
-  Lbl.ControlStyle := Lbl.ControlStyle + [csNoStdEvents];
-  Lbl.OnClick := @NavClick;
+  if IconStr <> '' then
+  begin
+    IconLbl := TLabel.Create(Result);
+    IconLbl.Parent := Result;
+    IconLbl.Align := alLeft;
+    IconLbl.Alignment := taCenter;
+    IconLbl.Layout := tlCenter;
+    IconLbl.Caption := IconStr;
+    IconLbl.Font.Size := 12;
+    IconLbl.Font.Name := FA_FONT_NAME;
+    IconLbl.AutoSize := False;
+    IconLbl.Width := IconW;
+    IconLbl.ControlStyle := IconLbl.ControlStyle + [csNoStdEvents];
+    IconLbl.OnClick := @NavClick;
+    IconLbl.BorderSpacing.Left := 6;
+  end;
+
+  TitleLbl := TLabel.Create(Result);
+  TitleLbl.Parent := Result;
+  TitleLbl.Align := alLeft;
+  TitleLbl.Alignment := taCenter;
+  TitleLbl.Layout := tlCenter;
+  TitleLbl.Caption := ATitle;
+  TitleLbl.Font.Size := 12;
+  TitleLbl.Font.Color := CLR_TEXT;
+  TitleLbl.Font.Style := [];
+  TitleLbl.AutoSize := False;
+  TitleLbl.Width := Result.Canvas.TextWidth(ATitle) + 12;
+  TitleLbl.ControlStyle := TitleLbl.ControlStyle + [csNoStdEvents];
+  TitleLbl.OnClick := @NavClick;
+  TitleLbl.BorderSpacing.Right := 6;
 end;
 
 procedure TfrmMain.NavClick(Sender: TObject);
@@ -347,10 +376,12 @@ begin
   Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
 end;
 
-procedure TfrmMain.CrearSubItem(AParent: TPanel; const ACaption: string; ATag, Y: Integer);
+procedure TfrmMain.CrearSubItem(AParent: TPanel; AIconCode: Word; const ACaption: string; ATag, Y: Integer);
 var
   Pnl: TPanel;
-  Lbl: TLabel;
+  IconLbl, TitleLbl: TLabel;
+  IconStr: string;
+  TitleX: Integer;
 begin
   Pnl := TPanel.Create(AParent);
   Pnl.Parent := AParent;
@@ -363,17 +394,35 @@ begin
   Pnl.OnMouseEnter := @SubMouseEnter;
   Pnl.OnMouseLeave := @SubMouseLeave;
 
-  Lbl := TLabel.Create(Pnl);
-  Lbl.Parent := Pnl;
-  Lbl.SetBounds(12, 0, 168, 36);
-  Lbl.Alignment := taLeftJustify;
-  Lbl.Layout := tlCenter;
-  Lbl.Caption := ACaption;
-  Lbl.Font.Size := 12;
-  Lbl.Font.Color := CLR_TEXT;
-  Lbl.Font.Style := [];
-  Lbl.ControlStyle := Lbl.ControlStyle + [csNoStdEvents];
-  Lbl.OnClick := @SubItemClick;
+  IconStr := FAChar(AIconCode);
+  if IconStr <> '' then
+  begin
+    IconLbl := TLabel.Create(Pnl);
+    IconLbl.Parent := Pnl;
+    IconLbl.SetBounds(12, 0, 24, 36);
+    IconLbl.Alignment := taCenter;
+    IconLbl.Layout := tlCenter;
+    IconLbl.Caption := IconStr;
+    IconLbl.Font.Size := 11;
+    IconLbl.Font.Name := FA_FONT_NAME;
+    IconLbl.ControlStyle := IconLbl.ControlStyle + [csNoStdEvents];
+    IconLbl.OnClick := @SubItemClick;
+    TitleX := 36;
+  end
+  else
+    TitleX := 12;
+
+  TitleLbl := TLabel.Create(Pnl);
+  TitleLbl.Parent := Pnl;
+  TitleLbl.SetBounds(TitleX, 0, 180 - TitleX, 36);
+  TitleLbl.Alignment := taLeftJustify;
+  TitleLbl.Layout := tlCenter;
+  TitleLbl.Caption := ACaption;
+  TitleLbl.Font.Size := 12;
+  TitleLbl.Font.Color := CLR_TEXT;
+  TitleLbl.Font.Style := [];
+  TitleLbl.ControlStyle := TitleLbl.ControlStyle + [csNoStdEvents];
+  TitleLbl.OnClick := @SubItemClick;
 end;
 
 procedure TfrmMain.UserBtnClick(Sender: TObject);

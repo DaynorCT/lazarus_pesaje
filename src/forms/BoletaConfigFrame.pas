@@ -159,7 +159,7 @@ begin
     Grid.Cells[3, Row] := UpperCase(Q.FieldByName('salida').AsString);
     Grid.Cells[4, Row] := UpperCase(Q.FieldByName('ciudad').AsString);
     Grid.Cells[5, Row] := UpperCase(Q.FieldByName('celular1').AsString);
-    Grid.Cells[6, Row] := '✏️';
+    Grid.Cells[6, Row] := FAIconoStr(FA_EDIT, '✎');
     Grid.Cells[7, Row] := IntToStr(ID);
     Q.Next;
     Inc(Row);
@@ -210,7 +210,7 @@ begin
     Ts := Grid.Canvas.TextStyle;
     Ts.Alignment := taCenter;
     Ts.Layout := tlCenter;
-    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, '✏️', Ts);
+    Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, FAIconoStr(FA_EDIT, '✎'), Ts);
     Exit;
   end;
 

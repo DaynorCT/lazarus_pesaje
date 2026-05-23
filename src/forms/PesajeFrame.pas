@@ -720,12 +720,12 @@ begin
   if FConectado then
   begin
     Pnl.Canvas.Font.Color := CLR_SUCCESS;
-    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '● ──', Ts);
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
   end
   else
   begin
     Pnl.Canvas.Font.Color := CLR_DESTRUCTIVE;
-    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '○ ──', Ts);
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, FAIconoStr(FA_TIMES, '○') + ' ──', Ts);
   end;
 end;
 
@@ -984,36 +984,36 @@ begin
         // Toggle ●/○
         Grid.Canvas.Font.Color := CLR_SUCCESS;
         Ts.Alignment := taCenter;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
-          aRect.Left + 20, aRect.Top + 2, '● ──', Ts);
+        Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
+          aRect.Left + 20, aRect.Top + 2, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
         // Edit
         Grid.Canvas.Font.Color := CLR_PRIMARY;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 55, aRect.Top, aRect.Left + 110, aRect.Bottom),
-          aRect.Left + 55, aRect.Top + 2, '✏️', Ts);
+        Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 55, aRect.Top, aRect.Left + 110, aRect.Bottom),
+          aRect.Left + 55, aRect.Top + 2, FAIconoStr(FA_EDIT, '✎'), Ts);
         // Finalizar
         Grid.Canvas.Font.Color := CLR_INFO;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 110, aRect.Top, aRect.Left + 160, aRect.Bottom),
-          aRect.Left + 110, aRect.Top + 2, '✅', Ts);
+        Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 110, aRect.Top, aRect.Left + 160, aRect.Bottom),
+          aRect.Left + 110, aRect.Top + 2, FAIconoStr(FA_CHECK, '✅'), Ts);
       end
       else // FINALIZADO
       begin
         // Toggle ●/○
         Grid.Canvas.Font.Color := CLR_SUCCESS;
         Ts.Alignment := taCenter;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 90, aRect.Bottom),
-          aRect.Left + 20, aRect.Top + 2, '● ──', Ts);
+        Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 90, aRect.Bottom),
+          aRect.Left + 20, aRect.Top + 2, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
         // Boleta
         Grid.Canvas.Font.Color := CLR_PRIMARY;
-        Grid.Canvas.TextRect(Rect(aRect.Left + 90, aRect.Top, aRect.Left + 160, aRect.Bottom),
-          aRect.Left + 90, aRect.Top + 2, '📄', Ts);
+        Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 90, aRect.Top, aRect.Left + 160, aRect.Bottom),
+          aRect.Left + 90, aRect.Top + 2, FAIconoStr(FA_FILE, '📄'), Ts);
       end;
     end
     else // INACTIVO
     begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
       Ts.Alignment := taCenter;
-      Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
-        aRect.Left + 20, aRect.Top + 2, '○ ──', Ts);
+      Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left + 20, aRect.Top, aRect.Left + 55, aRect.Bottom),
+        aRect.Left + 20, aRect.Top + 2, FAIconoStr(FA_TIMES, '○') + ' ──', Ts);
     end;
     Exit;
   end;
@@ -1397,12 +1397,12 @@ begin
   if FUsarTaraManual then
   begin
     Pnl.Canvas.Font.Color := CLR_SUCCESS;
-    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '● ──', Ts);
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
   end
   else
   begin
     Pnl.Canvas.Font.Color := CLR_DESTRUCTIVE;
-    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, '○ ──', Ts);
+    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, FAIconoStr(FA_TIMES, '○') + ' ──', Ts);
   end;
 end;
 

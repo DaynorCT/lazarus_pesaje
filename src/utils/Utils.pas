@@ -12,8 +12,13 @@ function FechaHoraActual: string;
 function FormatearPeso(const PesoKg: Integer): string;
 function FormatearMoneda(const MontoBs: Integer): string;
 function ConvertirFechaISO(const Input: string): string;
+function RegistrarFAFuente: Boolean;
 
 implementation
+
+uses
+  Theme
+  {$IFDEF WINDOWS}, Windows{$ENDIF};
 
 function FormatearFechaHora(const Fecha: TDateTime): string;
 begin
@@ -41,6 +46,33 @@ begin
   if Length(Input) = 10 then
     if Input[3] in ['-', '/'] then
       Result := Copy(Input, 7, 4) + '-' + Copy(Input, 4, 2) + '-' + Copy(Input, 1, 2);
+end;
+
+function RegistrarFAFuente: Boolean;
+var
+  FontPath: string;
+  {$IFDEF WINDOWS}
+  NumFonts: Integer;
+  FontPathW: UnicodeString;
+  {$ENDIF}
+begin
+  FontPath := ExtractFilePath(ParamStr(0)) + 'fa-solid-900.ttf';
+
+  if not FileExists(FontPath) then
+  begin
+    FA_FONT_LOADED := False;
+    Exit(False);
+  end;
+
+  {$IFDEF WINDOWS}
+  FontPathW := UnicodeString(FontPath);
+  NumFonts := AddFontResourceW(PWideChar(FontPathW));
+  Result := NumFonts > 0;
+  {$ELSE}
+  Result := True;
+  {$ENDIF}
+
+  FA_FONT_LOADED := Result;
 end;
 
 end.

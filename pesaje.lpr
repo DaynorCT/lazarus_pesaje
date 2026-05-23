@@ -31,6 +31,7 @@ begin
   Application.Scaled := True;
   Application.Title := 'Sistema de Pesaje';
   Application.Initialize;
+  Utils.RegistrarFAFuente;
 
   DM := TDM.Create(nil);
   DM.InicializarBaseDatos;

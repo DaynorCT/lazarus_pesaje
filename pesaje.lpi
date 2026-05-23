@@ -5,9 +5,6 @@
     <General>
       <Title Value="Sistema de Pesaje"/>
       <ResourceType Value="res"/>
-      <Icon Value="0">
-        <Icon Value="assets/logo_pesaje.ico"/>
-      </Icon>
     </General>
     <BuildModes>
       <Item Name="default" Default="True"/>
@@ -32,8 +29,8 @@
         <Filename Value="pesaje.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Pesaje"/>
-        <EditorIndex Value="6"/>
-        <UsageCount Value="169"/>
+        <EditorIndex Value="7"/>
+        <UsageCount Value="175"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -42,17 +39,17 @@
         <ComponentName Value="DM"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="92"/>
         <CursorPos Y="104"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/auth/AuthService.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
       </Unit>
       <Unit>
         <Filename Value="src/auth/LoginForm.pas"/>
@@ -60,8 +57,8 @@
         <ComponentName Value="frmLogin"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="169"/>
+        <EditorIndex Value="5"/>
+        <UsageCount Value="175"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -71,7 +68,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -80,10 +77,10 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="272"/>
         <CursorPos X="31" Y="276"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -91,28 +88,28 @@
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FrameDashboard"/>
         <HasResources Value="True"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/VehiculosFrame.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FrameVehiculos"/>
         <HasResources Value="True"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/ChoferesFrame.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FrameChoferes"/>
         <HasResources Value="True"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/ProveedoresFrame.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FrameProveedores"/>
         <HasResources Value="True"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/UsuariosFrame.pas"/>
@@ -120,10 +117,10 @@
         <ComponentName Value="FrameUsuarios"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="79"/>
         <CursorPos X="7" Y="87"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -131,33 +128,38 @@
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FrameAbmSimple"/>
         <HasResources Value="True"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="175"/>
       </Unit>
       <Unit>
         <Filename Value="src/utils/Utils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="169"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="24"/>
+        <CursorPos Y="36"/>
+        <UsageCount Value="175"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/interfaces/cocoa/cocoaapplication.pas"/>
         <UnitName Value="CocoaApplication"/>
         <TopLine Value="475"/>
         <CursorPos Y="486"/>
-        <UsageCount Value="82"/>
+        <UsageCount Value="85"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="4010"/>
         <CursorPos Y="4010"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="79"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/PesajeFrame.lfm"/>
-        <EditorIndex Value="11"/>
-        <UsageCount Value="68"/>
+        <EditorIndex Value="12"/>
+        <UsageCount Value="71"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
@@ -168,25 +170,25 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="679"/>
+        <TopLine Value="680"/>
         <CursorPos X="30" Y="685"/>
-        <UsageCount Value="101"/>
+        <UsageCount Value="107"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/auth/LoginForm.lfm"/>
-        <EditorIndex Value="5"/>
-        <UsageCount Value="50"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="53"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
       <Unit>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="231"/>
         <CursorPos X="20" Y="251"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="60"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -196,7 +198,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="32"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/ReportesFrame.pas"/>
@@ -206,13 +208,13 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="32"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/BoletaConfigFrame.pas"/>
         <IsPartOfProject Value="True"/>
         <HasResources Value="True"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="32"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/ConfigBalanzaFrame.pas"/>
@@ -220,20 +222,15 @@
         <ComponentName Value="FrameConfigBalanza"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="9"/>
-        <TopLine Value="383"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="384"/>
         <CursorPos Y="394"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="32"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="src/auth/LoginForm.pas"/>
-        <Caret Line="67" Column="22" TopLine="47"/>
-      </Position>
       <Position>
         <Filename Value="pesaje.lpr"/>
         <Caret Line="57" Column="3" TopLine="37"/>
@@ -343,6 +340,10 @@
       <Position>
         <Filename Value="src/forms/PesajeFrame.pas"/>
         <Caret Line="276" Column="31" TopLine="272"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/EmpresasFrame.pas"/>
+        <Caret Line="685" Column="30" TopLine="680"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>

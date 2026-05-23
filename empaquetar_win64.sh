@@ -55,6 +55,9 @@ cp "$SQLITE_DLL" "$DIST_DIR/"
 if [ -f config.json ]; then
     cp config.json "$DIST_DIR/"
 fi
+if [ -f assets/fa-solid-900.ttf ]; then
+    cp assets/fa-solid-900.ttf "$DIST_DIR/"
+fi
 echo "  Archivos copiados a dist/Sistema_Pesaje_v${VERSION}/"
 echo ""
 
