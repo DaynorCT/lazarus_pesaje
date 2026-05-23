@@ -7,7 +7,7 @@ FPCUP_CONFIG="/Users/jaru/fpcupdeluxe/config_lazarus"
 
 cd "$PROJECT_DIR"
 
-PPCROSS="/Users/jaru/fpcupdeluxe/fpc/bin/aarch64-darwin/ppcrossx64"
+PPCROSS="/Users/jaru/fpcupdeluxe/fpc/bin/aarch64-darwin/ppcx64"
 if [ ! -f "$PPCROSS" ]; then
   echo "ERROR: Cross-compiler x86_64-win64 no encontrado."
   echo ""

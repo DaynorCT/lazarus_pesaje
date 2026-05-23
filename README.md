@@ -33,10 +33,30 @@ Luego:
 
 Genera `pesaje.exe` de 64 bits — compatible con Windows 7, 8, 10, 11 (64-bit).
 
-Para distribuir en Windows solo se necesita:
-- `pesaje.exe`
-- `sqlite3.dll` (descargar de sqlite.org, misma carpeta que el .exe)
-- `config.json` (opcional, se crea automáticamente al primer arranque)
+## Distribuir para Windows
+
+### Método recomendado: ZIP con script automático
+
+Un solo comando desde macOS compila, descarga `sqlite3.dll` y empaqueta todo:
+
+```bash
+./empaquetar_win64.sh
+```
+
+Genera en `dist/` un archivo `Sistema_Pesaje_v1.0.zip` con todo lo necesario:
+
+```
+Sistema_Pesaje_v1.0/
+├── pesaje.exe       # Aplicación compilada
+├── sqlite3.dll      # SQLite 64-bit (descargado automáticamente)
+└── config.json      # Configuración (opcional)
+```
+
+El cliente solo descomprime el ZIP en cualquier carpeta de Windows y hace doble clic en `pesaje.exe`. Sin instalador, sin dependencias.
+
+### Alternativa: Inno Setup (instalador profesional)
+
+Para crear un instalador `.exe` con acceso directo en escritorio, menú inicio y desinstalador, ver la sección [Instalador Windows (Inno Setup)](#instalador-windows-inno-setup). Requiere una PC con Windows para generar el instalador.
 
 ## Ícono de la Aplicación
 
@@ -61,14 +81,14 @@ El `.lpi` (`pesaje.lpi`) está configurado para embeber este ícono en el `.exe`
 </Icon>
 ```
 
-## Instalador Windows (Inno Setup)
+## Instalador Windows (Inno Setup) {#instalador-windows-inno-setup}
 
 Para crear un instalador `.exe` profesional con acceso directo en escritorio, menú inicio y desinstalador.
 
 ### Requisitos en Windows
 
 - [Inno Setup](https://jrsoftware.org/isinfo.php) (gratuito, instalar con extensión ISPP)
-- [sqlite3.dll](https://www.sqlite.org/download.html) (sección "Precompiled Binaries for Windows", archivo `sqlite-dll-win-x86-*.zip`)
+- [sqlite3.dll 64 bits](https://www.sqlite.org/download.html) (sección "Precompiled Binaries for Windows", archivo `sqlite-dll-win-x64-*.zip`)
 
 ### Script del instalador (`instalador.iss`)
 
@@ -191,6 +211,7 @@ File > Open Database > /Users/jaru/dev/lazarus-pesaje/pesaje.db
 lazarus-pesaje/
 ├── compilar.sh               # Script de compilación macOS
 ├── compilar_win32.sh         # Script de compilación Windows (cross)
+├── empaquetar_win64.sh       # Script de empaquetado ZIP (compila + sqlite + ZIP)
 ├── instalador.iss            # Script de Inno Setup para instalador Windows
 ├── reset_bd.sh               # Resetear base de datos
 ├── pesaje.lpr                # Entry point
