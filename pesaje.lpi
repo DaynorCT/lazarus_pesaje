@@ -5,6 +5,9 @@
     <General>
       <Title Value="Sistema de Pesaje"/>
       <ResourceType Value="res"/>
+      <Icon Value="0">
+        <Icon Value="assets/logo_pesaje.ico"/>
+      </Icon>
     </General>
     <BuildModes>
       <Item Name="default" Default="True"/>

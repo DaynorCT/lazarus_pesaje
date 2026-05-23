@@ -36,6 +36,104 @@ Genera `pesaje.exe` — compatible con Windows XP, 7, 8, 10, 11.
 Para distribuir en Windows solo se necesita:
 - `pesaje.exe`
 - `sqlite3.dll` (descargar de sqlite.org, misma carpeta que el .exe)
+- `config.json` (opcional, se crea automáticamente al primer arranque)
+
+## Ícono de la Aplicación
+
+El ícono está en `assets/logo_pesaje.png` (fuente 500x500 RGBA con transparencia).
+
+### Convertir PNG a ICO (multirresolución)
+
+```bash
+# Requiere ImageMagick: brew install imagemagick
+convert assets/logo_pesaje.png \
+    -define icon:auto-resize=256,48,32,24,16 \
+    assets/logo_pesaje.ico
+```
+
+Esto genera un `.ico` con 5 resoluciones incrustadas (256, 48, 32, 24, 16 px). El archivo `assets/logo_pesaje.ico` ya está generado en el repositorio.
+
+El `.lpi` (`pesaje.lpi`) está configurado para embeber este ícono en el `.exe` compilado. Se agregó dentro de `<ProjectOptions><General>`:
+
+```xml
+<Icon Value="0">
+  <Icon Value="assets/logo_pesaje.ico"/>
+</Icon>
+```
+
+## Instalador Windows (Inno Setup)
+
+Para crear un instalador `.exe` profesional con acceso directo en escritorio, menú inicio y desinstalador.
+
+### Requisitos en Windows
+
+- [Inno Setup](https://jrsoftware.org/isinfo.php) (gratuito, instalar con extensión ISPP)
+- [sqlite3.dll](https://www.sqlite.org/download.html) (sección "Precompiled Binaries for Windows", archivo `sqlite-dll-win-x86-*.zip`)
+
+### Script del instalador (`instalador.iss`)
+
+```pascal
+[Setup]
+AppName=Sistema de Pesaje
+AppVersion=1.0
+AppPublisher=Lazarus Pesaje
+DefaultDirName={pf}\SistemaPesaje
+DefaultGroupName=Sistema de Pesaje
+OutputDir=.\dist
+OutputBaseFilename=Instalador_Sistema_Pesaje
+Compression=lzma
+SolidCompression=yes
+SetupIconFile=assets\logo_pesaje.ico
+UninstallDisplayIcon={app}\pesaje.exe
+PrivilegesRequired=admin
+
+[Languages]
+Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "Crear acceso directo en el escritorio"
+
+[Files]
+Source: "pesaje.exe"; DestDir: "{app}"
+Source: "sqlite3.dll"; DestDir: "{app}"
+Source: "config.json"; DestDir: "{app}"; Flags: onlyifdoesntexist
+
+[Icons]
+Name: "{commondesktop}\Sistema de Pesaje"; Filename: "{app}\pesaje.exe"; Tasks: desktopicon
+Name: "{group}\Sistema de Pesaje"; Filename: "{app}\pesaje.exe"
+Name: "{group}\Desinstalar Sistema de Pesaje"; Filename: "{uninstallexe}"
+
+[Run]
+Filename: "{app}\pesaje.exe"; Description: "Iniciar Sistema de Pesaje"; Flags: nowait postinstall skipifsilent
+```
+
+### Generar el instalador
+
+1. Compilá el `.exe` desde macOS:
+   ```bash
+   ./compilar_win32.sh
+   ```
+
+2. Copiá a una máquina Windows los siguientes archivos:
+   ```
+   pesaje.exe
+   sqlite3.dll
+   config.json
+   assets/logo_pesaje.ico
+   instalador.iss
+   ```
+
+3. En Windows, abrí `instalador.iss` con Inno Setup Compiler y presioná `Ctrl+F9`.
+
+4. El instalador se genera en la carpeta `dist/Instalador_Sistema_Pesaje.exe`.
+
+El instalador resultante:
+- Instala en `C:\Archivos de Programa\SistemaPesaje`
+- Crea acceso directo en el escritorio
+- Crea acceso directo en el menú inicio con desinstalador
+- Requiere permisos de administrador
+- Usa español como idioma del instalador
+- No sobrescribe `config.json` si ya existe
 
 ## Ejecución
 
@@ -91,15 +189,22 @@ File > Open Database > /Users/jaru/dev/lazarus-pesaje/pesaje.db
 
 ```
 lazarus-pesaje/
-├── compilar.sh               # Script de compilación
+├── compilar.sh               # Script de compilación macOS
+├── compilar_win32.sh         # Script de compilación Windows (cross)
+├── instalador.iss            # Script de Inno Setup para instalador Windows
 ├── reset_bd.sh               # Resetear base de datos
 ├── pesaje.lpr                # Entry point
 ├── pesaje.lpi                # Proyecto Lazarus
-├── pesaje                    # Ejecutable compilado
+├── pesaje                    # Ejecutable compilado (macOS)
+├── pesaje.exe                # Ejecutable compilado (Windows)
 ├── pesaje.app/               # App bundle macOS
 ├── pesaje.db                 # Base de datos SQLite
-├── libsqlite3.dylib          # Librería SQLite
-├── config.json               # Configuración
+├── libsqlite3.dylib          # Librería SQLite para macOS
+├── config.json               # Configuración (puerto, baudrate, etc.)
+├── assets/
+│   ├── logo_pesaje.png       # Ícono fuente (500x500 RGBA)
+│   └── logo_pesaje.ico       # Ícono Windows multirresolución
+├── dist/                     # Salida del instalador (.gitignored)
 ├── src/
 │   ├── auth/
 │   │   ├── AuthService.pas    # Autenticación (login, hash, seed admin)

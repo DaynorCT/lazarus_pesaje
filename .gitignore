@@ -18,3 +18,5 @@ pesaje
 pesaje.app/
 *.db
 *.dylib
+dist/
+pesaje.exe
