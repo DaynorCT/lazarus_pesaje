@@ -7,25 +7,24 @@ FPCUP_CONFIG="/Users/jaru/fpcupdeluxe/config_lazarus"
 
 cd "$PROJECT_DIR"
 
-# Detectar si el cross-compiler Win32 esta instalado
-PPCROSS="/Users/jaru/fpcupdeluxe/fpc/bin/aarch64-darwin/ppcross386"
+PPCROSS="/Users/jaru/fpcupdeluxe/fpc/bin/aarch64-darwin/ppcrossx64"
 if [ ! -f "$PPCROSS" ]; then
-  echo "ERROR: Cross-compiler i386-win32 no encontrado."
+  echo "ERROR: Cross-compiler x86_64-win64 no encontrado."
   echo ""
   echo "Abre fpcupdeluxe y haz clic en:"
-  echo "  Cross > OS: Windows > CPU: i386 > Install"
+  echo "  Cross > OS: Windows > CPU: x86_64 > Install"
   echo ""
   echo "O usa la GUI:"
-  echo "  Setup+ tab > selecciona 'i386-win32' > Install cross compiler"
+  echo "  Setup+ tab > selecciona 'x86_64-win64' > Install cross compiler"
   exit 1
 fi
 
-echo "Compilando para Windows 32-bit..."
+echo "Compilando para Windows 64-bit..."
 "$LAZARUS_DIR/lazbuild" \
     --pcp="$FPCUP_CONFIG" \
     --lazarusdir="$LAZARUS_DIR" \
-    --os=win32 \
-    --cpu=i386 \
+    --os=win64 \
+    --cpu=x86_64 \
     --ws=win32 \
     pesaje.lpi
 
@@ -39,8 +38,8 @@ if [ -f "pesaje.exe" ]; then
     echo "  3. Abre instalador.iss y presiona Compilar (Ctrl+F9)"
     echo "  El instalador se generara en la carpeta dist/"
     echo ""
-    echo "NOTA: sqlite3.dll se descarga de https://www.sqlite.org/download.html"
-    echo "      (Precompiled Binaries for Windows > sqlite-dll-win-x86-*.zip)"
+    echo "NOTA: sqlite3.dll de 64 bits se descarga de https://www.sqlite.org/download.html"
+    echo "      (Precompiled Binaries for Windows > sqlite-dll-win-x64-*.zip)"
 else
     echo "ERROR: La compilacion no genero pesaje.exe"
     exit 1

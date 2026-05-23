@@ -12,6 +12,7 @@ SetupIconFile=assets\logo_pesaje.ico
 UninstallDisplayIcon={app}\pesaje.exe
 PrivilegesRequired=admin
 DisableProgramGroupPage=no
+ArchitecturesInstallIn64BitMode=x64
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"

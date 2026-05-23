@@ -18,11 +18,11 @@ Sistema de escritorio para gestión de pesaje con básculas RS232, desarrollado 
 
 ### Windows (cross-compilación desde macOS)
 
-Requiere instalar el cross-compiler **i386-win32** una sola vez desde fpcupdeluxe:
+Requiere instalar el cross-compiler **x86_64-win64** una sola vez desde fpcupdeluxe:
 
 1. Abrir fpcupdeluxe
 2. Pestaña **Cross** (o **Setup+**)
-3. Seleccionar OS: **Windows**, CPU: **i386**
+3. Seleccionar OS: **Windows**, CPU: **x86_64**
 4. Clic en **Install cross compiler**
 
 Luego:
@@ -31,7 +31,7 @@ Luego:
 ./compilar_win32.sh
 ```
 
-Genera `pesaje.exe` — compatible con Windows XP, 7, 8, 10, 11.
+Genera `pesaje.exe` de 64 bits — compatible con Windows 7, 8, 10, 11 (64-bit).
 
 Para distribuir en Windows solo se necesita:
 - `pesaje.exe`
