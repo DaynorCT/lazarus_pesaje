@@ -17,14 +17,12 @@ type
   private
     pnlMain: TPanel;
     cbPuerto, cbBaudRate, cbDataBits, cbParidad, cbStopBits, cbFlow: TComboBox;
-    edtTimeout: TEdit;
+    edtTimeout, edtInicio, edtLongitud: TEdit;
     MemoDatos: TMemo;
     rbAuto, rbPosicion: TRadioButton;
-    edtInicio, edtLongitud: TEdit;
     pnlPeso: TPanel;
     lblPeso: TLabel;
     btnConectar, btnLeer, btnGuardar: TPanel;
-    lblBtnConectar, lblBtnLeer, lblBtnGuardar: TLabel;
     TimerLectura: TTimer;
     FConectado: Boolean;
     FPesoDetectado: string;
@@ -37,6 +35,12 @@ type
     procedure TimerLecturaTimer(Sender: TObject);
     procedure MetodoLecturaChange(Sender: TObject);
     procedure PosicionChange(Sender: TObject);
+    procedure PaintRounded(Sender: TObject);
+    procedure PaintPesoDisplay(Sender: TObject);
+
+    function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer; const ACaption: string;
+      AColor: TColor; AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
+    function BtnLabel(ABtn: TPanel): TLabel;
 
     function ExtraerPesoAuto(const Trama: string): string;
     function ExtraerPesoPosicion(const Trama: string): string;
@@ -50,11 +54,21 @@ implementation
 
 {$R *.lfm}
 
+function TFrameConfigBalanza.BtnLabel(ABtn: TPanel): TLabel;
+begin
+  if (ABtn <> nil) and (ABtn.ControlCount > 0) and (ABtn.Controls[0] is TLabel) then
+    Result := TLabel(ABtn.Controls[0])
+  else
+    Result := nil;
+end;
+
 constructor TFrameConfigBalanza.Create(AOwner: TComponent);
 var
   Lbl: TLabel;
-  Sep: TPanel;
+  Sep, poOuter, poInner: TPanel;
+  YPos: Integer;
 const
+  PAD = 24;
   COL1 = 24;
   COL2 = 210;
   COL3 = 396;
@@ -67,52 +81,72 @@ begin
   FConectado := False;
   FPesoDetectado := '0';
 
-  // =====================================================
-  // SCROLLBOX
-  // =====================================================
-
   pnlMain := TPanel.Create(Self);
   pnlMain.Parent := Self;
   pnlMain.Align := alClient;
-  pnlMain.BorderSpacing.Left := 24;
-  pnlMain.BorderSpacing.Right := 24;
-  pnlMain.BorderSpacing.Top := 24;
-  pnlMain.BorderSpacing.Bottom := 24;
-  pnlMain.BevelOuter := bvNone;
-  pnlMain.Color := clWhite;
+  pnlMain.BorderSpacing.Left := PAD;
+  pnlMain.BorderSpacing.Right := PAD;
+  pnlMain.BorderSpacing.Top := PAD;
+  pnlMain.BorderSpacing.Bottom := PAD;
+  pnlMain.BevelOuter := bvLowered;
+  pnlMain.BevelInner := bvNone;
+  pnlMain.BevelWidth := 1;
+  pnlMain.Color := CLR_CARD;
 
-  // =====================================================
-  // TITULO
-  // =====================================================
-
+  // ── Título ──
   Lbl := TLabel.Create(Self);
   Lbl.Parent := pnlMain;
   Lbl.Caption := 'Configuración balanza RS232';
   Lbl.Font.Size := 16;
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(24, 20, 350, 30);
+  Lbl.SetBounds(PAD, 20, 400, 30);
 
   Sep := TPanel.Create(Self);
   Sep.Parent := pnlMain;
-  Sep.SetBounds(24, 58, 740, 1);
+  Sep.SetBounds(PAD, 58, 740, 1);
   Sep.BevelOuter := bvNone;
   Sep.Color := CLR_BORDER;
 
-  // =====================================================
-  // CONFIG SERIAL
-  // =====================================================
+  // ── Config serial ──
+  YPos := 80;
 
-  // PUERTO COM
   Lbl := TLabel.Create(Self);
   Lbl.Parent := pnlMain;
   Lbl.Caption := 'Puerto COM';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL1, 80, 120, 18);
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL1, YPos, 120, 16);
+
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := pnlMain;
+  Lbl.Caption := 'BaudRate';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL2, YPos, 120, 16);
+
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := pnlMain;
+  Lbl.Caption := 'DataBits';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL3, YPos, 120, 16);
+
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := pnlMain;
+  Lbl.Caption := 'Paridad';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL4, YPos, 120, 16);
+  YPos := YPos + 22;
 
   cbPuerto := TComboBox.Create(Self);
   cbPuerto.Parent := pnlMain;
-  cbPuerto.SetBounds(COL1, 102, COMBO_W, 36);
+  cbPuerto.SetBounds(COL1, YPos, COMBO_W, 40);
+  cbPuerto.AutoSize := False;
+  cbPuerto.Style := csDropDownList;
+  cbPuerto.Font.Size := 12;
+  cbPuerto.Color := CLR_WHITE;
   cbPuerto.Items.Add('COM1');
   cbPuerto.Items.Add('COM2');
   cbPuerto.Items.Add('COM3');
@@ -121,16 +155,13 @@ begin
   cbPuerto.Items.Add('COM6');
   cbPuerto.Text := 'COM3';
 
-  // BAUDRATE
-  Lbl := TLabel.Create(Self);
-  Lbl.Parent := pnlMain;
-  Lbl.Caption := 'BaudRate';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL2, 80, 120, 18);
-
   cbBaudRate := TComboBox.Create(Self);
   cbBaudRate.Parent := pnlMain;
-  cbBaudRate.SetBounds(COL2, 102, COMBO_W, 36);
+  cbBaudRate.SetBounds(COL2, YPos, COMBO_W, 40);
+  cbBaudRate.AutoSize := False;
+  cbBaudRate.Style := csDropDownList;
+  cbBaudRate.Font.Size := 12;
+  cbBaudRate.Color := CLR_WHITE;
   cbBaudRate.Items.Add('1200');
   cbBaudRate.Items.Add('2400');
   cbBaudRate.Items.Add('4800');
@@ -139,172 +170,235 @@ begin
   cbBaudRate.Items.Add('38400');
   cbBaudRate.Text := '9600';
 
-  // DATABITS
-  Lbl := TLabel.Create(Self);
-  Lbl.Parent := pnlMain;
-  Lbl.Caption := 'DataBits';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL3, 80, 120, 18);
-
   cbDataBits := TComboBox.Create(Self);
   cbDataBits.Parent := pnlMain;
-  cbDataBits.SetBounds(COL3, 102, 120, 36);
+  cbDataBits.SetBounds(COL3, YPos, 120, 40);
+  cbDataBits.AutoSize := False;
+  cbDataBits.Style := csDropDownList;
+  cbDataBits.Font.Size := 12;
+  cbDataBits.Color := CLR_WHITE;
   cbDataBits.Items.Add('5');
   cbDataBits.Items.Add('6');
   cbDataBits.Items.Add('7');
   cbDataBits.Items.Add('8');
   cbDataBits.Text := '8';
 
-  // PARIDAD
-  Lbl := TLabel.Create(Self);
-  Lbl.Parent := pnlMain;
-  Lbl.Caption := 'Paridad';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL4, 80, 120, 18);
-
   cbParidad := TComboBox.Create(Self);
   cbParidad.Parent := pnlMain;
-  cbParidad.SetBounds(COL4, 102, 140, 36);
+  cbParidad.SetBounds(COL4, YPos, 140, 40);
+  cbParidad.AutoSize := False;
+  cbParidad.Style := csDropDownList;
+  cbParidad.Font.Size := 12;
+  cbParidad.Color := CLR_WHITE;
   cbParidad.Items.Add('None (N)');
   cbParidad.Items.Add('Even (E)');
   cbParidad.Items.Add('Odd (O)');
   cbParidad.Text := 'None (N)';
+  YPos := YPos + 58;
 
-  // STOPBITS
   Lbl := TLabel.Create(Self);
   Lbl.Parent := pnlMain;
   Lbl.Caption := 'StopBits';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL1, 160, 120, 18);
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL1, YPos, 120, 16);
+
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := pnlMain;
+  Lbl.Caption := 'FlowControl';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL2, YPos, 120, 16);
+
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := pnlMain;
+  Lbl.Caption := 'Timeout (ms)';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL3, YPos, 120, 16);
+  YPos := YPos + 22;
 
   cbStopBits := TComboBox.Create(Self);
   cbStopBits.Parent := pnlMain;
-  cbStopBits.SetBounds(COL1, 182, COMBO_W, 36);
+  cbStopBits.SetBounds(COL1, YPos, COMBO_W, 40);
+  cbStopBits.AutoSize := False;
+  cbStopBits.Style := csDropDownList;
+  cbStopBits.Font.Size := 12;
+  cbStopBits.Color := CLR_WHITE;
   cbStopBits.Items.Add('1');
   cbStopBits.Items.Add('1.5');
   cbStopBits.Items.Add('2');
   cbStopBits.Text := '1';
 
-  // FLOWCONTROL
-  Lbl := TLabel.Create(Self);
-  Lbl.Parent := pnlMain;
-  Lbl.Caption := 'FlowControl';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL2, 160, 120, 18);
-
   cbFlow := TComboBox.Create(Self);
   cbFlow.Parent := pnlMain;
-  cbFlow.SetBounds(COL2, 182, COMBO_W, 36);
+  cbFlow.SetBounds(COL2, YPos, COMBO_W, 40);
+  cbFlow.AutoSize := False;
+  cbFlow.Style := csDropDownList;
+  cbFlow.Font.Size := 12;
+  cbFlow.Color := CLR_WHITE;
   cbFlow.Items.Add('None');
   cbFlow.Items.Add('RTS/CTS');
   cbFlow.Items.Add('XON/XOFF');
   cbFlow.Text := 'None';
 
-  // TIMEOUT
-  Lbl := TLabel.Create(Self);
-  Lbl.Parent := pnlMain;
-  Lbl.Caption := 'Timeout (ms)';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL3, 160, 120, 18);
-
-  edtTimeout := TEdit.Create(Self);
-  edtTimeout.Parent := pnlMain;
-  edtTimeout.SetBounds(COL3, 182, 120, 36);
+  poOuter := TPanel.Create(Self);
+  poOuter.Parent := pnlMain;
+  poOuter.SetBounds(COL3, YPos, 120, 40);
+  poOuter.BevelOuter := bvNone;
+  poOuter.Color := CLR_BORDER;
+  poInner := TPanel.Create(poOuter);
+  poInner.Parent := poOuter;
+  poInner.SetBounds(1, 1, 118, 38);
+  poInner.BevelOuter := bvNone;
+  poInner.Color := CLR_WHITE;
+  poInner.BorderWidth := 6;
+  edtTimeout := TEdit.Create(poInner);
+  edtTimeout.Parent := poInner;
+  edtTimeout.Align := alClient;
+  edtTimeout.BorderStyle := bsNone;
+  edtTimeout.Font.Size := 11;
+  edtTimeout.Color := CLR_WHITE;
   edtTimeout.Text := '1000';
-
-  // =====================================================
-  // LINEA DIVISORA
-  // =====================================================
+  YPos := YPos + 58;
 
   Sep := TPanel.Create(Self);
   Sep.Parent := pnlMain;
-  Sep.SetBounds(24, 250, 740, 1);
+  Sep.SetBounds(PAD, YPos, 740, 1);
   Sep.BevelOuter := bvNone;
   Sep.Color := CLR_BORDER;
+  YPos := YPos + 20;
 
-  // =====================================================
-  // DATOS RECIBIDOS
-  // =====================================================
-
+  // ── Datos recibidos ──
   Lbl := TLabel.Create(Self);
   Lbl.Parent := pnlMain;
   Lbl.Caption := 'Datos recibidos desde balanza';
   Lbl.Font.Size := 11;
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(24, 270, 300, 24);
+  Lbl.SetBounds(PAD, YPos, 320, 20);
+  YPos := YPos + 28;
 
-  MemoDatos := TMemo.Create(Self);
-  MemoDatos.Parent := pnlMain;
-  MemoDatos.SetBounds(24, 300, 360, 120);
+  poOuter := TPanel.Create(Self);
+  poOuter.Parent := pnlMain;
+  poOuter.SetBounds(PAD, YPos, 360, 120);
+  poOuter.BevelOuter := bvNone;
+  poOuter.Color := CLR_BORDER;
+  poInner := TPanel.Create(poOuter);
+  poInner.Parent := poOuter;
+  poInner.SetBounds(1, 1, 358, 118);
+  poInner.BevelOuter := bvNone;
+  poInner.Color := CLR_WHITE;
+  poInner.BorderWidth := 4;
+  MemoDatos := TMemo.Create(poInner);
+  MemoDatos.Parent := poInner;
+  MemoDatos.Align := alClient;
+  MemoDatos.BorderStyle := bsNone;
   MemoDatos.ScrollBars := ssVertical;
   MemoDatos.ReadOnly := True;
   MemoDatos.Font.Name := 'Monaco';
   MemoDatos.Font.Size := 10;
   MemoDatos.Font.Color := CLR_TEXT;
+  MemoDatos.Color := CLR_WHITE;
 
-  // =====================================================
-  // METODO LECTURA
-  // =====================================================
-
+  // ── Método de lectura ──
   Lbl := TLabel.Create(Self);
   Lbl.Parent := pnlMain;
   Lbl.Caption := 'Método de lectura';
   Lbl.Font.Size := 11;
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(420, 270, 220, 24);
+  Lbl.SetBounds(420, YPos - 28, 220, 20);
 
   rbAuto := TRadioButton.Create(Self);
   rbAuto.Parent := pnlMain;
   rbAuto.Caption := 'Extraer números automáticamente';
-  rbAuto.SetBounds(420, 305, 300, 24);
+  rbAuto.SetBounds(420, YPos + 5, 300, 24);
   rbAuto.Checked := True;
+  rbAuto.Font.Size := 11;
   rbAuto.Font.Color := CLR_TEXT;
   rbAuto.OnClick := @MetodoLecturaChange;
 
   rbPosicion := TRadioButton.Create(Self);
   rbPosicion.Parent := pnlMain;
   rbPosicion.Caption := 'Usar posición fija';
-  rbPosicion.SetBounds(420, 335, 200, 24);
+  rbPosicion.SetBounds(420, YPos + 35, 200, 24);
+  rbPosicion.Font.Size := 11;
   rbPosicion.Font.Color := CLR_TEXT;
   rbPosicion.OnClick := @MetodoLecturaChange;
 
-  // INICIO
   Lbl := TLabel.Create(Self);
   Lbl.Parent := pnlMain;
   Lbl.Caption := 'Inicio';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(COL5, 370, 60, 18);
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(COL5, YPos + 70, 60, 16);
 
-  edtInicio := TEdit.Create(Self);
-  edtInicio.Parent := pnlMain;
-  edtInicio.SetBounds(COL5, 392, 80, 34);
-  edtInicio.Text := '8';
-  edtInicio.OnChange := @PosicionChange;
-
-  // LONGITUD
   Lbl := TLabel.Create(Self);
   Lbl.Parent := pnlMain;
   Lbl.Caption := 'Longitud';
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.SetBounds(540, 370, 80, 18);
+  Lbl.Font.Size := 11;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.SetBounds(540, YPos + 70, 80, 16);
 
-  edtLongitud := TEdit.Create(Self);
-  edtLongitud.Parent := pnlMain;
-  edtLongitud.SetBounds(540, 392, 80, 34);
+  poOuter := TPanel.Create(Self);
+  poOuter.Parent := pnlMain;
+  poOuter.SetBounds(COL5, YPos + 92, 80, 40);
+  poOuter.BevelOuter := bvNone;
+  poOuter.Color := CLR_BORDER;
+  poInner := TPanel.Create(poOuter);
+  poInner.Parent := poOuter;
+  poInner.SetBounds(1, 1, 78, 38);
+  poInner.BevelOuter := bvNone;
+  poInner.Color := CLR_WHITE;
+  poInner.BorderWidth := 6;
+  edtInicio := TEdit.Create(poInner);
+  edtInicio.Parent := poInner;
+  edtInicio.Align := alClient;
+  edtInicio.BorderStyle := bsNone;
+  edtInicio.Font.Size := 11;
+  edtInicio.Color := CLR_WHITE;
+  edtInicio.Text := '8';
+  edtInicio.OnChange := @PosicionChange;
+
+  poOuter := TPanel.Create(Self);
+  poOuter.Parent := pnlMain;
+  poOuter.SetBounds(540, YPos + 92, 80, 40);
+  poOuter.BevelOuter := bvNone;
+  poOuter.Color := CLR_BORDER;
+  poInner := TPanel.Create(poOuter);
+  poInner.Parent := poOuter;
+  poInner.SetBounds(1, 1, 78, 38);
+  poInner.BevelOuter := bvNone;
+  poInner.Color := CLR_WHITE;
+  poInner.BorderWidth := 6;
+  edtLongitud := TEdit.Create(poInner);
+  edtLongitud.Parent := poInner;
+  edtLongitud.Align := alClient;
+  edtLongitud.BorderStyle := bsNone;
+  edtLongitud.Font.Size := 11;
+  edtLongitud.Color := CLR_WHITE;
   edtLongitud.Text := '5';
   edtLongitud.OnChange := @PosicionChange;
 
-  // =====================================================
-  // PESO DETECTADO
-  // =====================================================
+  YPos := YPos + 150;
+
+  // ── Peso detectado ──
+  Lbl := TLabel.Create(Self);
+  Lbl.Parent := pnlMain;
+  Lbl.Caption := 'Peso detectado';
+  Lbl.Font.Size := 11;
+  Lbl.Font.Style := [fsBold];
+  Lbl.Font.Color := CLR_TEXT_HEADING;
+  Lbl.SetBounds(PAD, YPos, 200, 20);
+  YPos := YPos + 28;
 
   pnlPeso := TPanel.Create(Self);
   pnlPeso.Parent := pnlMain;
-  pnlPeso.SetBounds(24, 455, 300, 74);
+  pnlPeso.SetBounds(PAD, YPos, 300, 60);
   pnlPeso.BevelOuter := bvNone;
   pnlPeso.Color := CLR_PRIMARY;
+  pnlPeso.OnPaint := @PaintPesoDisplay;
 
   lblPeso := TLabel.Create(Self);
   lblPeso.Parent := pnlPeso;
@@ -314,78 +408,19 @@ begin
   lblPeso.Caption := '0 kg';
   lblPeso.Font.Size := 22;
   lblPeso.Font.Style := [fsBold];
-  lblPeso.Font.Color := clWhite;
+  lblPeso.Font.Color := CLR_WHITE;
+  lblPeso.Transparent := True;
 
-  // =====================================================
-  // BOTON CONECTAR
-  // =====================================================
-
-  btnConectar := TPanel.Create(Self);
-  btnConectar.Parent := pnlMain;
-  btnConectar.SetBounds(420, 460, 120, 44);
-  btnConectar.BevelOuter := bvNone;
-  btnConectar.Color := CLR_SUCCESS;
-  btnConectar.Cursor := crHandPoint;
-  btnConectar.OnClick := @ConectarClick;
-
-  lblBtnConectar := TLabel.Create(Self);
-  lblBtnConectar.Parent := btnConectar;
-  lblBtnConectar.Align := alClient;
-  lblBtnConectar.Alignment := taCenter;
-  lblBtnConectar.Layout := tlCenter;
-  lblBtnConectar.Caption := 'Conectar';
-  lblBtnConectar.Font.Color := clWhite;
-  lblBtnConectar.Font.Style := [fsBold];
-  lblBtnConectar.Font.Size := 11;
-
-  // BOTON LEER
-  btnLeer := TPanel.Create(Self);
-  btnLeer.Parent := pnlMain;
-  btnLeer.SetBounds(560, 460, 120, 44);
-  btnLeer.BevelOuter := bvNone;
-  btnLeer.Color := CLR_PRIMARY;
-  btnLeer.Cursor := crHandPoint;
-  btnLeer.OnClick := @LeerClick;
-
-  lblBtnLeer := TLabel.Create(Self);
-  lblBtnLeer.Parent := btnLeer;
-  lblBtnLeer.Align := alClient;
-  lblBtnLeer.Alignment := taCenter;
-  lblBtnLeer.Layout := tlCenter;
-  lblBtnLeer.Caption := 'Leer peso';
-  lblBtnLeer.Font.Color := clWhite;
-  lblBtnLeer.Font.Style := [fsBold];
-  lblBtnLeer.Font.Size := 11;
-
-  // BOTON GUARDAR
-  btnGuardar := TPanel.Create(Self);
-  btnGuardar.Parent := pnlMain;
-  btnGuardar.SetBounds(690, 460, 80, 44);
-  btnGuardar.BevelOuter := bvNone;
-  btnGuardar.Color := CLR_PRIMARY_DARK;
-  btnGuardar.Cursor := crHandPoint;
-  btnGuardar.OnClick := @GuardarClick;
-
-  lblBtnGuardar := TLabel.Create(Self);
-  lblBtnGuardar.Parent := btnGuardar;
-  lblBtnGuardar.Align := alClient;
-  lblBtnGuardar.Alignment := taCenter;
-  lblBtnGuardar.Layout := tlCenter;
-  lblBtnGuardar.Caption := 'Guardar';
-  lblBtnGuardar.Font.Color := clWhite;
-  lblBtnGuardar.Font.Style := [fsBold];
-  lblBtnGuardar.Font.Size := 11;
-
-  // =====================================================
-  // TIMER LECTURA
-  // =====================================================
+  // ── Botones ──
+  btnConectar := CrearBoton(pnlMain, YPos, 420, 120, 40, 'Conectar', CLR_PRIMARY, CLR_WHITE, 0, @ConectarClick);
+  btnLeer := CrearBoton(pnlMain, YPos, 550, 120, 40, 'Leer peso', CLR_PRIMARY, CLR_WHITE, 0, @LeerClick);
+  btnGuardar := CrearBoton(pnlMain, YPos, 680, 100, 40, 'Guardar', CLR_PRIMARY_DARK, CLR_WHITE, 0, @GuardarClick);
 
   TimerLectura := TTimer.Create(Self);
   TimerLectura.Interval := 500;
   TimerLectura.Enabled := False;
   TimerLectura.OnTimer := @TimerLecturaTimer;
 
-  // Cargar config guardada
   CargarConfiguracion;
 end;
 
@@ -394,6 +429,70 @@ begin
   if FConectado and (DM <> nil) then
     DM.DesconectarSerial;
   inherited Destroy;
+end;
+
+function TFrameConfigBalanza.CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer;
+  const ACaption: string; AColor: TColor; AFontColor: TColor; ATag: Integer;
+  AClick: TNotifyEvent): TPanel;
+var
+  Lbl: TLabel;
+begin
+  Result := TPanel.Create(AParent);
+  Result.Parent := AParent;
+  Result.SetBounds(ALeft, ATop, AW, AH);
+  Result.BevelOuter := bvNone;
+  Result.Color := AColor;
+  Result.Tag := ATag;
+  Result.Cursor := crHandPoint;
+  Result.OnClick := AClick;
+  Result.OnPaint := @PaintRounded;
+  Result.ParentBackground := False;
+  Result.ParentColor := False;
+
+  Lbl := TLabel.Create(Result);
+  Lbl.Parent := Result;
+  Lbl.Align := alClient;
+  Lbl.Alignment := taCenter;
+  Lbl.Layout := tlCenter;
+  Lbl.Caption := ACaption;
+  Lbl.Font.Size := 12;
+  Lbl.Font.Style := [];
+  Lbl.Font.Color := AFontColor;
+  Lbl.Transparent := True;
+  Lbl.OnClick := AClick;
+end;
+
+procedure TFrameConfigBalanza.PaintRounded(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  if Pnl.Tag = 1 then
+  begin
+    Pnl.Canvas.Pen.Color := CLR_INFO;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end
+  else
+  begin
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  end;
+end;
+
+procedure TFrameConfigBalanza.PaintPesoDisplay(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := CLR_PRIMARY;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
 end;
 
 // ═══════════════════════════════════════════════
@@ -483,14 +582,17 @@ var
   Baud, Bits: Integer;
   SB: Integer;
   SBStr: string;
+  LblBtn: TLabel;
 begin
+  LblBtn := BtnLabel(btnConectar);
   if FConectado then
   begin
     TimerLectura.Enabled := False;
     DM.DesconectarSerial;
     FConectado := False;
-    lblBtnConectar.Caption := 'Conectar';
-    btnConectar.Color := CLR_SUCCESS;
+    if LblBtn <> nil then LblBtn.Caption := 'Conectar';
+    btnConectar.Color := CLR_PRIMARY;
+    btnConectar.Invalidate;
     LogDato('Desconectado del puerto ' + cbPuerto.Text);
     Exit;
   end;
@@ -510,8 +612,9 @@ begin
   if DM.ConectarSerial(cbPuerto.Text, Baud, Bits, ParidadChar, SB) then
   begin
     FConectado := True;
-    lblBtnConectar.Caption := 'Desconectar';
+    if LblBtn <> nil then LblBtn.Caption := 'Desconectar';
     btnConectar.Color := CLR_DESTRUCTIVE;
+    btnConectar.Invalidate;
     TimerLectura.Enabled := True;
     LogDato('Conectado a ' + cbPuerto.Text + ' ' + IntToStr(Baud) + '-' +
       IntToStr(Bits) + ParidadChar + '-' + SBStr);
@@ -548,14 +651,17 @@ end;
 procedure TFrameConfigBalanza.TimerLecturaTimer(Sender: TObject);
 var
   Trama: string;
+  LblBtn: TLabel;
 begin
   if not FConectado then Exit;
   if not DM.PuertoConectado then
   begin
     FConectado := False;
     TimerLectura.Enabled := False;
-    lblBtnConectar.Caption := 'Conectar';
-    btnConectar.Color := CLR_SUCCESS;
+    LblBtn := BtnLabel(btnConectar);
+    if LblBtn <> nil then LblBtn.Caption := 'Conectar';
+    btnConectar.Color := CLR_PRIMARY;
+    btnConectar.Invalidate;
     LogDato('Puerto desconectado inesperadamente');
     Exit;
   end;
