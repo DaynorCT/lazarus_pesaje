@@ -153,7 +153,7 @@ begin
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
   FUserBtn.Width := 40; FUserBtn.Height := 40;
-  FUserBtn.Top := 20;
+  FUserBtn.Top := 30;
   FUserBtn.Caption := FAChar(FA_USER);
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;
@@ -190,7 +190,7 @@ begin
     IconW := 0;
 
   W := Result.Canvas.TextWidth(ATitle) + 24 + IconW;
-  Result.SetBounds(X, 20, W, 40);
+  Result.SetBounds(X, 30, W, 40);
   Result.BevelOuter := bvNone;
   Result.Color := CLR_CARD;
   Result.Cursor := crHandPoint;
