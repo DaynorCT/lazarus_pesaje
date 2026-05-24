@@ -1,24 +1,26 @@
 object frmLogin: TfrmLogin
   Left = 341
-  Height = 700
+  Height = 768
   Top = 119
-  Width = 1020
+  Width = 1366
+  BorderStyle = bsSizeable
   Caption = 'Sistema de Pesaje'
-  ClientHeight = 700
-  ClientWidth = 1020
+  ClientHeight = 768
+  ClientWidth = 1366
+  Constraints.MinHeight = 720
+  Constraints.MinWidth = 1280
   Position = poScreenCenter
   LCLVersion = '4.7.0.0'
-  WindowState = wsMaximized
   OnResize = FormResize
   object pnlBG: TPanel
     Left = 0
-    Height = 700
+    Height = 768
     Top = 0
-    Width = 1020
+    Width = 1366
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 700
-    ClientWidth = 1020
+    ClientHeight = 768
+    ClientWidth = 1366
     Color = 15788258
     ParentBackground = False
     ParentColor = False

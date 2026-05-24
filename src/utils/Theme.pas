@@ -95,6 +95,28 @@ const
   // Nombre de la fuente — debe coincidir con el nombre interno del TTF
   FA_FONT_NAME  = 'Font Awesome 6 Free Solid';
 
+  // ============================================================
+  // Layout ventana y cards (desktop)
+  // ============================================================
+  APP_WIDTH         = 1366;
+  APP_HEIGHT        = 768;
+  APP_MIN_WIDTH     = 1280;
+  APP_MIN_HEIGHT    = 720;
+
+  FRAME_MARGIN      = 24;
+  FRAME_TOP         = 80;
+  FRAME_BOTTOM      = 330;   // espacio inferior (grid + margenes)
+  FRAME_HEADER_H    = 64;
+  FRAME_GAP         = 16;
+
+  CARD_REG_X        = FRAME_MARGIN;
+  CARD_REG_W        = 360;
+  CARD_REG_PAD      = FRAME_MARGIN;
+  CARD_FORM_GAP     = 36;
+  CARD_FORM_X       = CARD_REG_X + CARD_REG_W + CARD_FORM_GAP;
+  CARD_FORM_RIGHT   = CARD_FORM_X + FRAME_MARGIN;
+  CARD_GRID_H       = 210;
+
 var
   FA_FONT_LOADED: Boolean = False;   // se activa al registrar la fuente
 

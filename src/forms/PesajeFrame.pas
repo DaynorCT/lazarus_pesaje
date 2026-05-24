@@ -25,7 +25,7 @@ type
     FTaraManual: string;
     FTaraCapturada: Integer;
     TimerLectura: TTimer;
-    pnlRegistroCard, pnlDisplay, pnlCard: TPanel;
+    pnlRegistroCard, pnlForm, pnlDisplay, pnlCard: TPanel;
     lblPesoDisplay, lblRegistroTitle: TLabel;
     lblValBruto, lblValTara, lblValNeto: TLabel;
     lblFormTitle: TLabel;
@@ -81,6 +81,8 @@ type
     procedure AnularPesaje(ID: Integer);
     procedure ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
     procedure PaintRounded(Sender: TObject);
+    procedure FrameResize(Sender: TObject);
+    procedure AjustarLayoutCards;
     procedure DialogFinalizarOk(Sender: TObject);
     function MostrarDialogFinalizar(PesajeID, Bruto, Tara, Neto: Integer): Boolean;
     function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer; const ACaption: string;
@@ -104,15 +106,15 @@ end;
 
 constructor TFramePesaje.Create(AOwner: TComponent);
 const
-  COL1 = 24;
+  COL1 = FRAME_MARGIN;
   COL2 = 310;
   COL3 = 600;
   FIELD_W = 180;
   COMBO_W = 148;
 var
-  Pnl, pnlForm, pnlRegistro: TPanel;
+  Pnl, pnlRegistro: TPanel;
   Lbl: TLabel;
-  YPos, CardW, InnerW: Integer;
+  YPos, InnerW: Integer;
   po, pi: TPanel;
 
   function MakeLabel(ATop, ALeft: Integer; const ACaption: string): TLabel;
@@ -177,30 +179,23 @@ begin
   Pnl := TPanel.Create(Self);
   Pnl.Parent := Self;
   Pnl.Align := alTop;
-  Pnl.Height := 64;
+  Pnl.Height := FRAME_HEADER_H;
   Pnl.BevelOuter := bvNone;
   Pnl.Color := CLR_BG;
   Pnl.BorderSpacing.Top := 15;
 
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
-  Lbl.SetBounds(24, 18, 200, 28);
+  Lbl.SetBounds(FRAME_MARGIN, 18, 200, 28);
   Lbl.Caption := 'Pesaje';
   Lbl.Font.Height := -24;
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  // ── CARD: Registro de peso left ──
-  CardW := 550;
-  InnerW := CardW - 48;
+  // ── CARD: Registro de peso (izquierdo) ──
+  InnerW := CARD_REG_W - CARD_REG_PAD * 2;
   pnlRegistroCard := TPanel.Create(Self);
   pnlRegistroCard.Parent := Self;
-  pnlRegistroCard.SetBounds(
-    24, 
-    80, 
-    CardW, 
-    Self.ClientHeight - 330
-    );
   pnlRegistroCard.Anchors := [akTop, akLeft, akBottom];
   pnlRegistroCard.BevelOuter := bvLowered;
   pnlRegistroCard.BevelInner := bvNone;
@@ -212,7 +207,7 @@ begin
 
   lblRegistroTitle := TLabel.Create(pnlRegistro);
   lblRegistroTitle.Parent := pnlRegistro;
-  lblRegistroTitle.SetBounds(24, YPos, InnerW, 20);
+  lblRegistroTitle.SetBounds(CARD_REG_PAD, YPos, InnerW, 20);
   lblRegistroTitle.Caption := 'Registro de peso';
   lblRegistroTitle.Font.Size := 13;
   lblRegistroTitle.Font.Color := CLR_TEXT_HEADING;
@@ -221,7 +216,7 @@ begin
   with TPanel.Create(pnlRegistro) do
   begin
     Parent := pnlRegistro;
-    SetBounds(24, YPos, InnerW, 1);
+    SetBounds(CARD_REG_PAD, YPos, InnerW, 1);
     BevelOuter := bvNone;
     Color := CLR_BORDER;
   end;
@@ -229,7 +224,7 @@ begin
 
   pnlDisplay := TPanel.Create(pnlRegistro);
   pnlDisplay.Parent := pnlRegistro;
-  pnlDisplay.SetBounds(24, YPos, InnerW, 160);
+  pnlDisplay.SetBounds(CARD_REG_PAD, YPos, InnerW, 160);
   
   pnlDisplay.BevelOuter := bvNone;
   pnlDisplay.Color := CLR_PRIMARY; // borde azul
@@ -255,7 +250,7 @@ begin
   with TPanel.Create(pnlRegistro) do
   begin
     Parent := pnlRegistro;
-    SetBounds(24, YPos, InnerW, 1);
+    SetBounds(CARD_REG_PAD, YPos, InnerW, 1);
     BevelOuter := bvNone;
     Color := CLR_BORDER;
   end;
@@ -264,7 +259,7 @@ begin
   // Switch conectar | Capturar peso | Capturar tara
   pnlSwitchConectar := TPanel.Create(pnlRegistro);
   pnlSwitchConectar.Parent := pnlRegistro;
-  pnlSwitchConectar.SetBounds(24, YPos, 90, 40);
+  pnlSwitchConectar.SetBounds(CARD_REG_PAD, YPos, 90, 40);
   pnlSwitchConectar.BevelOuter := bvNone;
   pnlSwitchConectar.Color := CLR_CARD;
   pnlSwitchConectar.Cursor := crHandPoint;
@@ -273,7 +268,7 @@ begin
 
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(24, YPos + 42, 90, 14);
+  Lbl.SetBounds(CARD_REG_PAD, YPos + 42, 90, 14);
   Lbl.Caption := 'Conexion';
   Lbl.Font.Size := 10;
   Lbl.Font.Color := CLR_TEXT_SLATE;
@@ -284,12 +279,7 @@ begin
   // ─────────────────────────────
   pnlCapturarPeso := TPanel.Create(pnlRegistro);
   pnlCapturarPeso.Parent := pnlRegistro;
-  pnlCapturarPeso.SetBounds(
-    130,
-    YPos,
-    150,
-    36
-  );
+  pnlCapturarPeso.SetBounds(CARD_REG_PAD + 96, YPos, 96, 36);
   pnlCapturarPeso.BevelOuter := bvNone;
   pnlCapturarPeso.Color := CLR_PRIMARY;
   pnlCapturarPeso.ParentBackground := False;
@@ -319,12 +309,7 @@ begin
   // ─────────────────────────────
   pnlCapturarTara := TPanel.Create(pnlRegistro);
   pnlCapturarTara.Parent := pnlRegistro;
-  pnlCapturarTara.SetBounds(
-    295,
-    YPos,
-    150,
-    36
-  );
+  pnlCapturarTara.SetBounds(CARD_REG_PAD + 200, YPos, InnerW - 200, 36);
   pnlCapturarTara.BevelOuter := bvNone;
   pnlCapturarTara.Color := CLR_INFO;
   pnlCapturarTara.ParentBackground := False;
@@ -351,21 +336,21 @@ begin
   // Peso Bruto | Peso tara | Peso Neto
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(60, YPos, 140, 16);
+  Lbl.SetBounds(CARD_REG_PAD + 8, YPos, 88, 16);
   Lbl.Caption := 'Peso Bruto';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
   
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(240, YPos, 140, 16);
+  Lbl.SetBounds(CARD_REG_PAD + 108, YPos, 88, 16);
   Lbl.Caption := 'Peso tara';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
   
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(416, YPos, 140, 16);
+  Lbl.SetBounds(CARD_REG_PAD + 208, YPos, 88, 16);
   Lbl.Caption := 'Peso Neto';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
@@ -375,13 +360,13 @@ begin
   // ───── Peso Bruto ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(24, YPos, 150, 40);
+  po.SetBounds(CARD_REG_PAD, YPos, 96, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
   
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 148, 38);
+  pi.SetBounds(1, 1, 94, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
@@ -399,13 +384,13 @@ begin
   // ───── Peso Tara ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(200, YPos, 150, 40);
+  po.SetBounds(CARD_REG_PAD + 104, YPos, 96, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
   
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 148, 38);
+  pi.SetBounds(1, 1, 94, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
@@ -423,13 +408,13 @@ begin
   // ───── Peso Neto ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(376, YPos, 150, 40);
+  po.SetBounds(CARD_REG_PAD + 208, YPos, InnerW - 208, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
   
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 148, 38);
+  pi.SetBounds(1, 1, InnerW - 210, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
@@ -444,15 +429,9 @@ begin
   lblValNeto.Font.Style := [fsBold];
   lblValNeto.Font.Color := CLR_TEXT_HEADING;
 
-  // ── RIGHT PANEL ──
+  // ── CARD: Datos del pesaje (derecho) ──
   pnlForm := TPanel.Create(Self);
   pnlForm.Parent := Self;
-  pnlForm.SetBounds(
-    CardW + 60, 
-    80, 
-    Self.ClientWidth - 635, 
-    Self.ClientHeight - 330
-    );
   pnlForm.Anchors := [akTop, akLeft, akRight, akBottom];
   pnlForm.BevelOuter := bvLowered;
   pnlForm.BevelInner := bvNone;
@@ -605,10 +584,10 @@ begin
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
   pnlCard.Align := alBottom;
-  pnlCard.Height := 210;
-  pnlCard.BorderSpacing.Left := 24;
-  pnlCard.BorderSpacing.Right := 24;
-  pnlCard.BorderSpacing.Bottom := 24;
+  pnlCard.Height := CARD_GRID_H;
+  pnlCard.BorderSpacing.Left := FRAME_MARGIN;
+  pnlCard.BorderSpacing.Right := FRAME_MARGIN;
+  pnlCard.BorderSpacing.Bottom := FRAME_MARGIN;
   pnlCard.BevelOuter := bvLowered; pnlCard.BevelInner := bvNone;
   pnlCard.BevelWidth := 1; pnlCard.Color := CLR_CARD;
 
@@ -651,8 +630,30 @@ begin
   FHintTimer.Interval := 400; FHintTimer.OnTimer := @HintTimerTick;
   FHintTimer.Enabled := False;
   FHintActive := False;
+  OnResize := @FrameResize;
+  AjustarLayoutCards;
   CargarCombos;
   RefrescarPesajes(nil);
+end;
+
+procedure TFramePesaje.AjustarLayoutCards;
+var
+  H, FormW: Integer;
+begin
+  if (pnlRegistroCard = nil) or (pnlForm = nil) then Exit;
+  H := ClientHeight - FRAME_BOTTOM;
+  if H < 200 then
+    H := 200;
+  pnlRegistroCard.SetBounds(CARD_REG_X, FRAME_TOP, CARD_REG_W, H);
+  FormW := ClientWidth - CARD_FORM_X - FRAME_MARGIN;
+  if FormW < 400 then
+    FormW := 400;
+  pnlForm.SetBounds(CARD_FORM_X, FRAME_TOP, FormW, H);
+end;
+
+procedure TFramePesaje.FrameResize(Sender: TObject);
+begin
+  AjustarLayoutCards;
 end;
 
 destructor TFramePesaje.Destroy;

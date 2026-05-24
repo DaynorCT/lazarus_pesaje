@@ -78,7 +78,9 @@ begin
   FActiveSub := nil;
   Caption := 'Sistema de Pesaje';
 
-  pnlTop.Height := 80;
+  pnlTop.Height := FRAME_HEADER_H;
+  Constraints.MinWidth := APP_MIN_WIDTH;
+  Constraints.MinHeight := APP_MIN_HEIGHT;
   pnlTop.Color := CLR_CARD;
 
   // Borde inferior (border-bottom: 1px #E2E8F0)

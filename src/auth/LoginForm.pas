@@ -56,6 +56,8 @@ implementation
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
+  Constraints.MinWidth := APP_MIN_WIDTH;
+  Constraints.MinHeight := APP_MIN_HEIGHT;
   FillChar(FUser, SizeOf(FUser), 0);
   lblError.Caption := '';
   pnlError.Visible := False;

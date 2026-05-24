@@ -1,14 +1,16 @@
 object frmMain: TfrmMain
   Left = 89
-  Height = 700
+  Height = 768
   Top = 119
-  Width = 1100
+  Width = 1366
+  BorderStyle = bsSizeable
   Caption = 'Sistema de Pesaje'
-  ClientHeight = 700
-  ClientWidth = 1100
+  ClientHeight = 768
+  ClientWidth = 1366
+  Constraints.MinHeight = 720
+  Constraints.MinWidth = 1280
   Position = poScreenCenter
   LCLVersion = '4.7.0.0'
-  WindowState = wsMaximized
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -16,11 +18,11 @@ object frmMain: TfrmMain
     Left = 0
     Height = 48
     Top = 0
-    Width = 1100
+    Width = 1366
     Align = alTop
     BevelOuter = bvNone
     ClientHeight = 48
-    ClientWidth = 1100
+    ClientWidth = 1366
     TabOrder = 0
     object lblLogo: TLabel
       Left = 16
@@ -36,9 +38,9 @@ object frmMain: TfrmMain
   end
   object pnlContent: TPanel
     Left = 0
-    Height = 652
+    Height = 720
     Top = 48
-    Width = 1100
+    Width = 1366
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
