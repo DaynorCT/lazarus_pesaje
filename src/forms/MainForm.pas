@@ -203,34 +203,28 @@ begin
   begin
     IconLbl := TLabel.Create(Result);
     IconLbl.Parent := Result;
-    IconLbl.Align := alLeft;
+    IconLbl.SetBounds(6, 0, IconW, 40);
     IconLbl.Alignment := taCenter;
     IconLbl.Layout := tlCenter;
     IconLbl.Caption := IconStr;
     IconLbl.Font.Size := 12;
     IconLbl.Font.Name := FA_FONT_NAME;
     IconLbl.Font.Color := CLR_PRIMARY;
-    IconLbl.AutoSize := False;
-    IconLbl.Width := IconW;
     IconLbl.ControlStyle := IconLbl.ControlStyle + [csNoStdEvents];
     IconLbl.OnClick := @NavClick;
-    IconLbl.BorderSpacing.Left := 6;
   end;
 
   TitleLbl := TLabel.Create(Result);
   TitleLbl.Parent := Result;
-  TitleLbl.Align := alLeft;
-  TitleLbl.Alignment := taCenter;
+  TitleLbl.SetBounds(6 + IconW, 0, Result.Canvas.TextWidth(ATitle) + 6, 40);
+  TitleLbl.Alignment := taLeftJustify;
   TitleLbl.Layout := tlCenter;
   TitleLbl.Caption := ATitle;
   TitleLbl.Font.Size := 12;
   TitleLbl.Font.Color := CLR_TEXT;
   TitleLbl.Font.Style := [];
-  TitleLbl.AutoSize := False;
-  TitleLbl.Width := Result.Canvas.TextWidth(ATitle) + 12;
   TitleLbl.ControlStyle := TitleLbl.ControlStyle + [csNoStdEvents];
   TitleLbl.OnClick := @NavClick;
-  TitleLbl.BorderSpacing.Right := 6;
 end;
 
 procedure TfrmMain.NavClick(Sender: TObject);
