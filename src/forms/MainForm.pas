@@ -110,13 +110,13 @@ begin
   Items[8].IconCode := FA_COG;       Items[8].Title := 'Config ▼';    Items[8].Tag := 200; Items[8].HasSub := True;
 
   SetLength(FNavItems, 9);
-  XPos := 230;
+  XPos := 100;
 
   for I := 0 to 8 do
   begin
     Pnl := CrearNavItem(Items[I].IconCode, Items[I].Title, Items[I].Tag, XPos);
     FNavItems[I] := Pnl;
-    XPos := XPos + Pnl.Width + 16;
+    XPos := XPos + Pnl.Width + 12;
   end;
 
   // Submenu Catálogo
@@ -158,6 +158,7 @@ begin
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;
   FUserBtn.Font.Name := FA_FONT_NAME;
+  FUserBtn.Font.Color := CLR_PRIMARY;
   FUserBtn.BorderSpacing.Right := 12;
   FUserBtn.OnClick := @UserBtnClick;
 
@@ -208,6 +209,7 @@ begin
     IconLbl.Caption := IconStr;
     IconLbl.Font.Size := 12;
     IconLbl.Font.Name := FA_FONT_NAME;
+    IconLbl.Font.Color := CLR_PRIMARY;
     IconLbl.AutoSize := False;
     IconLbl.Width := IconW;
     IconLbl.ControlStyle := IconLbl.ControlStyle + [csNoStdEvents];
@@ -405,6 +407,7 @@ begin
     IconLbl.Caption := IconStr;
     IconLbl.Font.Size := 11;
     IconLbl.Font.Name := FA_FONT_NAME;
+    IconLbl.Font.Color := CLR_PRIMARY;
     IconLbl.ControlStyle := IconLbl.ControlStyle + [csNoStdEvents];
     IconLbl.OnClick := @SubItemClick;
     TitleX := 36;
