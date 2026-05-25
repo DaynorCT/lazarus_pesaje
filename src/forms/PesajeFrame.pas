@@ -13,7 +13,6 @@ type
 
   TFramePesaje = class(TFrame)
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
   private
     FTara: Integer;
     FPesoBruto: Integer;
@@ -26,6 +25,7 @@ type
     FTaraCapturada: Integer;
     TimerLectura: TTimer;
     pnlRegistroCard, pnlForm, pnlDisplay, pnlCard: TPanel;
+    pnlSepFormTop, pnlSepFormBot: TPanel;
     lblPesoDisplay, lblRegistroTitle: TLabel;
     lblValBruto, lblValTara, lblValNeto: TLabel;
     lblFormTitle: TLabel;
@@ -44,6 +44,7 @@ type
     FHintWindow: THintWindow;
     FHintTimer: TTimer;
     FHintActive: Boolean;
+    scrollRegistro: TScrollBox;
     procedure RefrescarPesajes(Sender: TObject);
     procedure CargarCombos;
     procedure VehiculoChange(Sender: TObject);
@@ -82,12 +83,15 @@ type
     procedure ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
     procedure PaintRounded(Sender: TObject);
     procedure FrameResize(Sender: TObject);
-    procedure AjustarLayoutCards;
     procedure DialogFinalizarOk(Sender: TObject);
     function MostrarDialogFinalizar(PesajeID, Bruto, Tara, Neto: Integer): Boolean;
     function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer; const ACaption: string;
       AColor: TColor; AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
     function BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
+    function AlturaCards: Integer;
+  public
+    destructor Destroy; override;
+    procedure AjustarLayoutCards;
   end;
 
 implementation
@@ -116,6 +120,8 @@ var
   Lbl: TLabel;
   YPos, InnerW: Integer;
   po, pi: TPanel;
+  // FIX: usar TScrollBox en lugar de TPanel para el contenedor del scroll
+  pnlRegScroll: TScrollBox;
 
   function MakeLabel(ATop, ALeft: Integer; const ACaption: string): TLabel;
   begin
@@ -202,7 +208,21 @@ begin
   pnlRegistroCard.BevelWidth := 1;
   pnlRegistroCard.Color := CLR_CARD;
 
-  pnlRegistro := pnlRegistroCard;
+  // FIX: crear TScrollBox correctamente y asignarlo al campo de clase
+  scrollRegistro := TScrollBox.Create(pnlRegistroCard);
+  scrollRegistro.Parent := pnlRegistroCard;
+  scrollRegistro.Align := alClient;
+  scrollRegistro.BorderStyle := bsNone;
+  scrollRegistro.Color := CLR_CARD;
+
+  // FIX: usar TPanel local para los hijos, parented en scrollRegistro
+  pnlRegistro := TPanel.Create(scrollRegistro);
+  pnlRegistro.Parent := scrollRegistro;
+  pnlRegistro.Align := alTop;
+  pnlRegistro.AutoSize := True;
+  pnlRegistro.BevelOuter := bvNone;
+  pnlRegistro.Color := CLR_CARD;
+
   YPos := 20;
 
   lblRegistroTitle := TLabel.Create(pnlRegistro);
@@ -224,18 +244,17 @@ begin
 
   pnlDisplay := TPanel.Create(pnlRegistro);
   pnlDisplay.Parent := pnlRegistro;
-  pnlDisplay.SetBounds(CARD_REG_PAD, YPos, InnerW, 160);
-  
+  pnlDisplay.SetBounds(CARD_REG_PAD, YPos, InnerW, 130);
   pnlDisplay.BevelOuter := bvNone;
   pnlDisplay.Color := CLR_PRIMARY; // borde azul
-  
+
   // panel interno blanco
   pi := TPanel.Create(pnlDisplay);
   pi.Parent := pnlDisplay;
-  pi.SetBounds(2, 2, InnerW - 4, 156);
+  pi.SetBounds(2, 2, InnerW - 4, 126);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
-  
+
   lblPesoDisplay := TLabel.Create(pi);
   lblPesoDisplay.Parent := pi;
   lblPesoDisplay.Align := alClient;
@@ -245,7 +264,7 @@ begin
   lblPesoDisplay.Font.Height := -36;
   lblPesoDisplay.Font.Style := [fsBold];
   lblPesoDisplay.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 176;
+  YPos := YPos + 150;
 
   with TPanel.Create(pnlRegistro) do
   begin
@@ -287,8 +306,7 @@ begin
   pnlCapturarPeso.Cursor := crHandPoint;
   pnlCapturarPeso.OnPaint := @PaintRounded;
   pnlCapturarPeso.OnClick := @CapturarPesoClick;
-  //pnlCapturarPeso.Enabled := False;
-  
+
   // TEXTO BOTON PESO
   Lbl := TLabel.Create(pnlCapturarPeso);
   Lbl.Parent := pnlCapturarPeso;
@@ -303,7 +321,7 @@ begin
   Lbl.ParentColor := False;
   Lbl.Cursor := crHandPoint;
   Lbl.OnClick := @CapturarPesoClick;
-  
+
   // ─────────────────────────────
   // BOTON CAPTURAR TARA
   // ─────────────────────────────
@@ -317,8 +335,7 @@ begin
   pnlCapturarTara.Cursor := crHandPoint;
   pnlCapturarTara.OnPaint := @PaintRounded;
   pnlCapturarTara.OnClick := @TaraClick;
-  //pnlCapturarTara.Enabled := False;
-  
+
   // TEXTO BOTON TARA
   Lbl := TLabel.Create(pnlCapturarTara);
   Lbl.Parent := pnlCapturarTara;
@@ -331,7 +348,7 @@ begin
   Lbl.Transparent := True;
   Lbl.Cursor := crHandPoint;
   Lbl.OnClick := @TaraClick;
-  YPos := YPos + 90;
+  YPos := YPos + 72;
 
   // Peso Bruto | Peso tara | Peso Neto
   Lbl := TLabel.Create(pnlRegistro);
@@ -340,37 +357,37 @@ begin
   Lbl.Caption := 'Peso Bruto';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
-  
+
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
   Lbl.SetBounds(CARD_REG_PAD + 108, YPos, 88, 16);
   Lbl.Caption := 'Peso tara';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
-  
+
   Lbl := TLabel.Create(pnlRegistro);
   Lbl.Parent := pnlRegistro;
   Lbl.SetBounds(CARD_REG_PAD + 208, YPos, 88, 16);
   Lbl.Caption := 'Peso Neto';
   Lbl.Font.Size := 11;
   Lbl.Font.Color := CLR_TEXT_SLATE;
-  
+
   YPos := YPos + 24;
-  
+
   // ───── Peso Bruto ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
   po.SetBounds(CARD_REG_PAD, YPos, 96, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
-  
+
   pi := TPanel.Create(po);
   pi.Parent := po;
   pi.SetBounds(1, 1, 94, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
-  
+
   lblValBruto := TLabel.Create(pi);
   lblValBruto.Parent := pi;
   lblValBruto.Align := alClient;
@@ -380,21 +397,21 @@ begin
   lblValBruto.Font.Size := 12;
   lblValBruto.Font.Style := [fsBold];
   lblValBruto.Font.Color := CLR_TEXT_HEADING;
-  
+
   // ───── Peso Tara ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
   po.SetBounds(CARD_REG_PAD + 104, YPos, 96, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
-  
+
   pi := TPanel.Create(po);
   pi.Parent := po;
   pi.SetBounds(1, 1, 94, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
-  
+
   lblValTara := TLabel.Create(pi);
   lblValTara.Parent := pi;
   lblValTara.Align := alClient;
@@ -404,21 +421,21 @@ begin
   lblValTara.Font.Size := 12;
   lblValTara.Font.Style := [fsBold];
   lblValTara.Font.Color := CLR_TEXT_HEADING;
-  
+
   // ───── Peso Neto ─────
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
   po.SetBounds(CARD_REG_PAD + 208, YPos, InnerW - 208, 40);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
-  
+
   pi := TPanel.Create(po);
   pi.Parent := po;
   pi.SetBounds(1, 1, InnerW - 210, 38);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 6;
-  
+
   lblValNeto := TLabel.Create(pi);
   lblValNeto.Parent := pi;
   lblValNeto.Align := alClient;
@@ -449,15 +466,12 @@ begin
   lblFormTitle.Font.Color := CLR_TEXT_HEADING;
   YPos := YPos + 38;
 
-    // LINEA AQUI
-  with TPanel.Create(pnlForm) do
-  begin
-    Parent := pnlForm;
-    SetBounds(COL1, YPos, COL3 + FIELD_W - COL1, 1);
-    BevelOuter := bvNone;
-    Color := CLR_BORDER;
-  end;
-  
+  pnlSepFormTop := TPanel.Create(pnlForm);
+  pnlSepFormTop.Parent := pnlForm;
+  pnlSepFormTop.SetBounds(COL1, YPos, COL3 + FIELD_W - COL1, 1);
+  pnlSepFormTop.BevelOuter := bvNone;
+  pnlSepFormTop.Color := CLR_BORDER;
+
   YPos := YPos + 28;
 
   // ════ Fila 1: Chofer | Placa * | Licencia ════
@@ -567,13 +581,11 @@ begin
 
   YPos := YPos + 56;
 
-  with TPanel.Create(pnlForm) do
-  begin
-    Parent := pnlForm;
-    SetBounds(COL1, YPos, COL3 + FIELD_W - COL1, 1);
-    BevelOuter := bvNone;
-    Color := CLR_BORDER;
-  end;
+  pnlSepFormBot := TPanel.Create(pnlForm);
+  pnlSepFormBot.Parent := pnlForm;
+  pnlSepFormBot.SetBounds(COL1, YPos, COL3 + FIELD_W - COL1, 1);
+  pnlSepFormBot.BevelOuter := bvNone;
+  pnlSepFormBot.Color := CLR_BORDER;
   YPos := YPos + 16;
 
   pnlCancelEdit := CrearBoton(pnlForm, YPos, COL1, 140, 36, 'Cancelar', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
@@ -636,19 +648,40 @@ begin
   RefrescarPesajes(nil);
 end;
 
+function TFramePesaje.AlturaCards: Integer;
+var
+  GridReserva: Integer;
+begin
+  GridReserva := CARD_GRID_H + FRAME_MARGIN;
+  if pnlCard <> nil then
+    GridReserva := pnlCard.Height + pnlCard.BorderSpacing.Bottom;
+  Result := ClientHeight - FRAME_TOP - GridReserva;
+  if Result < 200 then
+    Result := 200;
+end;
+
 procedure TFramePesaje.AjustarLayoutCards;
 var
-  H, FormW: Integer;
+  H, FormW, AnchoForm: Integer;
 begin
   if (pnlRegistroCard = nil) or (pnlForm = nil) then Exit;
-  H := ClientHeight - FRAME_BOTTOM;
-  if H < 200 then
-    H := 200;
+  if ClientWidth < 100 then Exit;
+
+  H := AlturaCards;
   pnlRegistroCard.SetBounds(CARD_REG_X, FRAME_TOP, CARD_REG_W, H);
+
   FormW := ClientWidth - CARD_FORM_X - FRAME_MARGIN;
   if FormW < 400 then
     FormW := 400;
   pnlForm.SetBounds(CARD_FORM_X, FRAME_TOP, FormW, H);
+
+  AnchoForm := pnlForm.ClientWidth - FRAME_MARGIN * 2;
+  if AnchoForm < 200 then
+    AnchoForm := 200;
+  if pnlSepFormTop <> nil then
+    pnlSepFormTop.Width := AnchoForm;
+  if pnlSepFormBot <> nil then
+    pnlSepFormBot.Width := AnchoForm;
 end;
 
 procedure TFramePesaje.FrameResize(Sender: TObject);
@@ -1511,8 +1544,8 @@ begin
       end;
     finally
       Q.Close;
+    end;
   end;
-end;
 
   if not FEditMode then
   begin
@@ -1630,7 +1663,6 @@ begin
     LblSection.Caption:='Datos del Vehículo'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
     YPos:=YPos+33;
 
-    // Fila 1: Placa * (izquierda) | Tipo (derecha)
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Placa *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
@@ -1647,7 +1679,6 @@ begin
     eTipo.Font.Size:=11; eTipo.Font.Color:=CLR_TEXT; eTipo.Color:=CLR_WHITE; eTipo.CharCase:=ecUpperCase;
     YPos:=YPos+48;
 
-    // Fila 2: Tara (kg)
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Tara (kg)'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
@@ -1713,7 +1744,6 @@ begin
     LblSection.Caption:='Datos del Chofer'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
     YPos:=YPos+33;
 
-    // Fila 1: Nombre * | Apellido paterno | Apellido materno
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
     Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
@@ -1738,7 +1768,6 @@ begin
     eMat.Font.Size:=11; eMat.Font.Color:=CLR_TEXT; eMat.Color:=CLR_WHITE; eMat.CharCase:=ecUpperCase;
     YPos:=YPos+48;
 
-    // Fila 2: Nro. Documento | Teléfono | Licencia
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,200,16);
     Lbl.Caption:='Nro. Documento'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,200,16);
@@ -1817,7 +1846,6 @@ begin
     LblSection.Caption:='Datos del Proveedor'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
     YPos:=YPos+33;
 
-    // Fila 1: Nombre * (izquierda) | Empresa (derecha)
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
@@ -1834,7 +1862,6 @@ begin
     eEmp.Font.Size:=11; eEmp.Font.Color:=CLR_TEXT; eEmp.Color:=CLR_WHITE; eEmp.CharCase:=ecUpperCase;
     YPos:=YPos+48;
 
-    // Fila 2: Teléfono (izquierda)
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Teléfono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
 
@@ -1900,7 +1927,6 @@ begin
     LblSection.Caption:='Datos del registro'; LblSection.Font.Size:=11; LblSection.Font.Style:=[]; LblSection.Font.Color:=CLR_TEXT_HEADING;
     YPos:=YPos+33;
 
-    // Fila 1: Nombre * (izquierda) | Descripción (derecha)
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,300,16);
     Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,300,16);
@@ -2017,27 +2043,22 @@ begin
     F.Constraints.MinWidth := DIALOG_W; F.Constraints.MaxWidth := DIALOG_W;
     F.Constraints.MinHeight := 320; F.Constraints.MaxHeight := 320;
 
-    // Card panel (blanco, centrado)
     pnlWrap := TPanel.Create(F);
     pnlWrap.Parent := F; pnlWrap.Align := alClient; pnlWrap.BevelOuter := bvNone;
     pnlWrap.Color := CLR_CARD; pnlWrap.BorderSpacing.Around := 16;
-    // Title
     with TLabel.Create(F) do begin Parent := pnlWrap;
       SetBounds(24, 24, DIALOG_W - 48, 28);
       Caption := 'Finalizar Pesaje #' + IntToStr(PesajeID);
       Font.Size := 15; Font.Style := [fsBold]; Font.Color := CLR_TEXT_HEADING;
     end;
-    // Subtitle
     with TLabel.Create(F) do begin Parent := pnlWrap;
       SetBounds(24, 54, DIALOG_W - 48, 18);
       Caption := 'Verifique los pesos antes de finalizar';
       Font.Size := 11; Font.Color := CLR_TEXT_SLATE;
     end;
-    // Datos panel (slate-100)
     pnlDatos := TPanel.Create(F); pnlDatos.Parent := pnlWrap;
     pnlDatos.SetBounds(24, 84, DIALOG_W - 48, 120);
     pnlDatos.BevelOuter := bvNone; pnlDatos.Color := CLR_SIDEBAR_ACTIVE;
-    // Bruto
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
     Lbl.SetBounds(20, 16, 100, 20); Lbl.Caption := 'Peso Bruto';
     Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_SLATE;
@@ -2045,7 +2066,6 @@ begin
     Lbl.SetBounds(200, 16, 150, 20); Lbl.Caption := FormatFloat('#,##0', Bruto) + ' kg';
     Lbl.Font.Size := 13; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
-    // Tara
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
     Lbl.SetBounds(20, 42, 100, 20); Lbl.Caption := 'Tara';
     Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_SLATE;
@@ -2053,12 +2073,10 @@ begin
     Lbl.SetBounds(200, 42, 150, 20); Lbl.Caption := FormatFloat('#,##0', Tara) + ' kg';
     Lbl.Font.Size := 13; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
-    // Divider
     with TPanel.Create(F) do begin Parent := pnlDatos;
       SetBounds(20, 74, pnlDatos.Width - 40, 1); BevelOuter := bvNone;
       Color := CLR_BORDER;
     end;
-    // Neto
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
     Lbl.SetBounds(20, 84, 100, 24); Lbl.Caption := 'Peso Neto';
     Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_HEADING; Lbl.Font.Style := [fsBold];
@@ -2066,14 +2084,12 @@ begin
     Lbl.SetBounds(200, 84, 150, 24); Lbl.Caption := FormatFloat('#,##0', Neto) + ' kg';
     Lbl.Font.Size := 16; Lbl.Font.Color := CLR_PRIMARY; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
-    // Confirm message
     YPos := 216;
     with TLabel.Create(F) do begin Parent := pnlWrap;
       SetBounds(24, YPos, DIALOG_W - 48, 18);
       Caption := 'Confirme la finalizacion del pesaje';
       Font.Size := 11; Font.Color := CLR_TEXT_SLATE;
     end;
-    // Buttons
     YPos := 248;
     W := DIALOG_W - 32;
     CrearBoton(pnlWrap, YPos, W - 220, 100, 36,

@@ -83,7 +83,7 @@ begin
   Constraints.MinHeight := APP_MIN_HEIGHT;
   pnlTop.Color := CLR_CARD;
 
-  // Borde inferior (border-bottom: 1px #E2E8F0)
+  // Borde inferior
   with TPanel.Create(pnlTop) do
   begin
     Parent := pnlTop;
@@ -100,15 +100,15 @@ begin
 
   CargarLogo;
 
-  // Orden exacto del sistema web
-  Items[0].IconCode := FA_HOME;      Items[0].Title := 'Inicio';      Items[0].Tag := 0;
-  Items[1].IconCode := FA_USERS;     Items[1].Title := 'Usuarios';    Items[1].Tag := 10;
-  Items[2].IconCode := FA_BUILDING;  Items[2].Title := 'Empresas';    Items[2].Tag := 2;
-  Items[3].IconCode := FA_USER;      Items[3].Title := 'Choferes';    Items[3].Tag := 3;
-  Items[4].IconCode := FA_INDUSTRY;  Items[4].Title := 'Proveedores'; Items[4].Tag := 4;
-  Items[5].IconCode := FA_SCALE;     Items[5].Title := 'Pesaje';      Items[5].Tag := 1;
+  // Orden del sistema web
+  Items[0].IconCode := FA_HOME;      Items[0].Title := 'Inicio';      Items[0].Tag := 0;   Items[0].HasSub := False;
+  Items[1].IconCode := FA_USERS;     Items[1].Title := 'Usuarios';    Items[1].Tag := 10;  Items[1].HasSub := False;
+  Items[2].IconCode := FA_BUILDING;  Items[2].Title := 'Empresas';    Items[2].Tag := 2;   Items[2].HasSub := False;
+  Items[3].IconCode := FA_USER;      Items[3].Title := 'Choferes';    Items[3].Tag := 3;   Items[3].HasSub := False;
+  Items[4].IconCode := FA_INDUSTRY;  Items[4].Title := 'Proveedores'; Items[4].Tag := 4;   Items[4].HasSub := False;
+  Items[5].IconCode := FA_SCALE;     Items[5].Title := 'Pesaje';      Items[5].Tag := 1;   Items[5].HasSub := False;
   Items[6].IconCode := FA_LIST;      Items[6].Title := 'Catalogo ▼';  Items[6].Tag := 100; Items[6].HasSub := True;
-  Items[7].IconCode := FA_CHART_BAR; Items[7].Title := 'Reportes';    Items[7].Tag := 11;
+  Items[7].IconCode := FA_CHART_BAR; Items[7].Title := 'Reportes';    Items[7].Tag := 11;  Items[7].HasSub := False;
   Items[8].IconCode := FA_COG;       Items[8].Title := 'Config ▼';    Items[8].Tag := 200; Items[8].HasSub := True;
 
   SetLength(FNavItems, 9);
@@ -131,10 +131,10 @@ begin
   FSubCatalogo.Width := 180;
   FSubCatalogo.Height := 152;
 
-  CrearSubItem(FSubCatalogo, FA_TRUCK,     'Vehiculos',  6, 0);
-  CrearSubItem(FSubCatalogo, FA_BOX,       'Productos',  5, 38);
-  CrearSubItem(FSubCatalogo, FA_MAP_PIN,   'Origenes',   7, 76);
-  CrearSubItem(FSubCatalogo, FA_BULLSEYE,  'Destinos',   8, 114);
+  CrearSubItem(FSubCatalogo, FA_TRUCK,    'Vehiculos', 6, 0);
+  CrearSubItem(FSubCatalogo, FA_BOX,      'Productos', 5, 38);
+  CrearSubItem(FSubCatalogo, FA_MAP_PIN,  'Origenes',  7, 76);
+  CrearSubItem(FSubCatalogo, FA_BULLSEYE, 'Destinos',  8, 114);
 
   // Submenu Configuración
   FSubConfig := TPanel.Create(Self);
@@ -149,13 +149,13 @@ begin
   CrearSubItem(FSubConfig, FA_FILE,  'Boleta',  12, 0);
   CrearSubItem(FSubConfig, FA_SCALE, 'Balanza', 13, 40);
 
-  // Botón usuario (TPanel, igual que nav modules)
   // Botón usuario
   FUserBtn := TSpeedButton.Create(pnlTop);
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
-  FUserBtn.Width := 40; FUserBtn.Height := 40;
-  FUserBtn.Top := 25;
+  FUserBtn.Width := 40;
+  FUserBtn.Height := 40;
+  FUserBtn.Top := (FRAME_HEADER_H - 40) div 2;
   FUserBtn.Caption := FAChar(FA_USER);
   FUserBtn.Flat := True;
   FUserBtn.Font.Size := 18;
@@ -178,8 +178,9 @@ end;
 function TfrmMain.CrearNavItem(AIconCode: Word; const ATitle: string; ATag: Integer; X: Integer): TPanel;
 var
   IconLbl, TitleLbl: TLabel;
-  W, IconW: Integer;
+  W, IconW, TitleW: Integer;
   IconStr: string;
+  TmpCanvas: TCanvas;
 begin
   Result := TPanel.Create(pnlTop);
   Result.Parent := pnlTop;
@@ -191,8 +192,14 @@ begin
   else
     IconW := 0;
 
-  W := Result.Canvas.TextWidth(ATitle) + 24 + IconW;
-  Result.SetBounds(X, 25, W, 40);
+  // FIX: medir el texto con la fuente correcta (Size=12) antes de fijar el ancho
+  TmpCanvas := Result.Canvas;
+  TmpCanvas.Font.Size := 12;
+  TmpCanvas.Font.Style := [];
+  TitleW := TmpCanvas.TextWidth(ATitle);
+
+  W := TitleW + 24 + IconW;
+  Result.SetBounds(X, (FRAME_HEADER_H - 40) div 2, W, 40);
   Result.BevelOuter := bvNone;
   Result.Color := CLR_CARD;
   Result.Cursor := crHandPoint;
@@ -218,7 +225,7 @@ begin
 
   TitleLbl := TLabel.Create(Result);
   TitleLbl.Parent := Result;
-  TitleLbl.SetBounds(6 + IconW, 0, Result.Canvas.TextWidth(ATitle) + 6, 40);
+  TitleLbl.SetBounds(6 + IconW, 0, TitleW + 6, 40);
   TitleLbl.Alignment := taLeftJustify;
   TitleLbl.Layout := tlCenter;
   TitleLbl.Caption := ATitle;
@@ -243,7 +250,6 @@ begin
 
   TagVal := Pnl.Tag;
 
-  // Submenus toggle
   if TagVal = 100 then
   begin
     CerrarSubmenus;
@@ -358,17 +364,15 @@ begin
     Exit;
   if Pnl <> FActiveNav then
     Pnl.Color := CLR_CARD;
-end;       
+end;
 
 procedure TfrmMain.NavPaint(Sender: TObject);
 var
   Pnl: TPanel;
 begin
   Pnl := TPanel(Sender);
-  // Rellenar todo con el fondo del navbar para que las esquinas queden "transparentes"
   Pnl.Canvas.Brush.Color := CLR_CARD;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
-  // Dibujar el panel redondeado con su propio color
   Pnl.Canvas.Brush.Color := Pnl.Color;
   Pnl.Canvas.Pen.Style := psClear;
   Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
@@ -430,14 +434,12 @@ var
   YPos: Integer;
   Sep: TPanel;
 begin
-  // Toggle: si ya está abierto, cerrar
   if FUserMenu.Visible then
   begin
     FUserMenu.Visible := False;
     Exit;
   end;
 
-  // Cerrar otros menús
   FSubCatalogo.Visible := False;
   FSubConfig.Visible := False;
 
@@ -488,13 +490,9 @@ var
 begin
   for I := 0 to High(FNavItems) do
     if FNavItems[I] <> KeepActive then
-    begin
-      FNavItems[I].Color := CLR_CARD;
-    end
+      FNavItems[I].Color := CLR_CARD
     else
-    begin
       FNavItems[I].Color := CLR_SIDEBAR_ACTIVE;
-    end;
 end;
 
 procedure TfrmMain.CerrarSubmenus;
@@ -510,22 +508,20 @@ begin
 end;
 
 procedure TfrmMain.NavigateTo(TagVal: Integer);
-var
-  FrameP, FrameD: TFrameAbmSimple;
 begin
   case TagVal of
-    0: LoadFrame(TFrameDashboard, 'Inicio');
-    1: LoadFrame(TFramePesaje, 'Pesaje');
-    2: LoadFrame(TFrameEmpresas, 'Empresas');
-    3: LoadFrame(TFrameChoferes, 'Choferes');
-    4: LoadFrame(TFrameProveedores, 'Proveedores');
-     5: LoadFrame(TFrameProductos, 'Productos');
-    6: LoadFrame(TFrameVehiculos, 'Vehiculos');
-     7: LoadFrame(TFrameOrigenes, 'Origenes');
-     8: LoadFrame(TFrameDestinos, 'Destinos');
-    10: LoadFrame(TFrameUsuarios, 'Usuarios');
-    11: LoadFrame(TFrameReportes, 'Reportes');
-    12: LoadFrame(TFrameBoletaConfig, 'Configuracion Boleta');
+    0:  LoadFrame(TFrameDashboard,     'Inicio');
+    1:  LoadFrame(TFramePesaje,        'Pesaje');
+    2:  LoadFrame(TFrameEmpresas,      'Empresas');
+    3:  LoadFrame(TFrameChoferes,      'Choferes');
+    4:  LoadFrame(TFrameProveedores,   'Proveedores');
+    5:  LoadFrame(TFrameProductos,     'Productos');
+    6:  LoadFrame(TFrameVehiculos,     'Vehiculos');
+    7:  LoadFrame(TFrameOrigenes,      'Origenes');
+    8:  LoadFrame(TFrameDestinos,      'Destinos');
+    10: LoadFrame(TFrameUsuarios,      'Usuarios');
+    11: LoadFrame(TFrameReportes,      'Reportes');
+    12: LoadFrame(TFrameBoletaConfig,  'Configuracion Boleta');
     13: LoadFrame(TFrameConfigBalanza, 'Configuracion Balanza');
     else ShowMessage('Modulo en desarrollo');
   end;
@@ -572,12 +568,11 @@ var
   RawBytes: RawByteString;
   P: Integer;
 begin
-  // Crear componentes solo la primera vez
   if pnlLogoFallback = nil then
   begin
     pnlLogoFallback := TPanel.Create(pnlTop);
     pnlLogoFallback.Parent := pnlTop;
-    pnlLogoFallback.SetBounds(16, 16, 48, 48);
+    pnlLogoFallback.SetBounds(16, (FRAME_HEADER_H - 40) div 2, 40, 40);
     pnlLogoFallback.BevelOuter := bvNone;
     pnlLogoFallback.Color := CLR_PRIMARY;
     pnlLogoFallback.Cursor := crHandPoint;
@@ -590,14 +585,14 @@ begin
     lblLogoFallback.Alignment := taCenter;
     lblLogoFallback.Layout := tlCenter;
     lblLogoFallback.Caption := '🚛';
-    lblLogoFallback.Font.Size := 22;
+    lblLogoFallback.Font.Size := 20;
     lblLogoFallback.Font.Color := CLR_WHITE;
     lblLogoFallback.Cursor := crHandPoint;
     lblLogoFallback.OnClick := @LogoClick;
 
     imgLogo := TImage.Create(pnlTop);
     imgLogo.Parent := pnlTop;
-    imgLogo.SetBounds(16, 12, 56, 56);
+    imgLogo.SetBounds(12, (FRAME_HEADER_H - 44) div 2, 44, 44);
     imgLogo.Visible := False;
     imgLogo.Cursor := crHandPoint;
     imgLogo.OnClick := @LogoClick;
@@ -606,11 +601,9 @@ begin
     imgLogo.Center := True;
   end;
 
-  // Mostrar fallback por defecto
   pnlLogoFallback.Visible := True;
   imgLogo.Visible := False;
 
-  // Consultar logo de la BD
   if (DM = nil) or (not DM.Conexion.Connected) then Exit;
 
   Q := DM.AbrirQuery(
@@ -662,6 +655,9 @@ begin
   NewFrame.Visible := True;
   FActiveFrame := NewFrame;
   Caption := 'Sistema de Pesaje - ' + Title;
+
+  if NewFrame is TFramePesaje then
+    TFramePesaje(NewFrame).AjustarLayoutCards;
 end;
 
 end.
