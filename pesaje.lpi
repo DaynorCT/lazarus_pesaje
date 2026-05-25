@@ -67,7 +67,6 @@
         <ComponentName Value="frmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="192"/>
         <Loaded Value="True"/>
@@ -177,6 +176,7 @@
       </Unit>
       <Unit>
         <Filename Value="src/auth/LoginForm.lfm"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <UsageCount Value="61"/>
         <Loaded Value="True"/>

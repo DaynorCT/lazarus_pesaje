@@ -47,18 +47,15 @@ object frmLogin: TfrmLogin
         ParentBackground = False
         ParentColor = False
         TabOrder = 0
-        object lblLogoIcon: TLabel
+        object imgLogo: TImage
           Left = 0
           Height = 96
           Top = 0
           Width = 96
           Align = alClient
-          Alignment = taCenter
-          Caption = '🚛'
-          Font.Color = 15788258
-          Font.Height = -72
-          Layout = tlCenter
-          ParentFont = False
+          Center = True
+          Proportional = True
+          Stretch = True
         end
       end
       object lblTitulo: TLabel

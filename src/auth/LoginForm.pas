@@ -5,8 +5,8 @@ unit LoginForm;
 interface
 
 uses
-  Classes, SysUtils, SQLDB, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, AuthService, DataModule, Theme;
+  Classes, SysUtils, SQLDB, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, ExtCtrls, AuthService, DataModule, Theme;
 
 type
   TUserRecord = DataModule.TUserRecord;
@@ -17,31 +17,44 @@ type
     pnlBG: TPanel;
     pnlCard: TPanel;
     pnlLogoBox: TPanel;
-    lblLogoIcon: TLabel;
+
+    imgLogo: TImage;
+
     lblTitulo: TLabel;
     lblSubtitulo: TLabel;
+
     pnlDiv1: TPanel;
+
     pnlError: TPanel;
     lblError: TLabel;
+
     lblUsuario: TLabel;
     pnlOuterUsuario: TPanel;
     pnlInnerUsuario: TPanel;
     edtUsuario: TEdit;
+
     lblContrasena: TLabel;
     pnlOuterContrasena: TPanel;
     pnlInnerContrasena: TPanel;
     edtContrasena: TEdit;
+
     pnlDiv2: TPanel;
+
     pnlIngresar: TPanel;
     lblIngresar: TLabel;
+
     lblSalir: TLabel;
+
     SQLScript1: TSQLScript;
+
     procedure btnIngresarClick(Sender: TObject);
     procedure lblSalirClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
+
   private
     FUser: TUserRecord;
+
   public
     property User: TUserRecord read FUser;
   end;
@@ -58,37 +71,66 @@ procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
   Constraints.MinWidth := APP_MIN_WIDTH;
   Constraints.MinHeight := APP_MIN_HEIGHT;
+
   FillChar(FUser, SizeOf(FUser), 0);
+
   lblError.Caption := '';
   pnlError.Visible := False;
   pnlError.Top := 10;
   pnlError.Left := 40;
 
   pnlBG.Color := CLR_LOGIN_BG;
+
   pnlCard.Color := CLR_LOGIN_BG;
   pnlCard.ParentColor := True;
   pnlCard.ParentBackground := True;
-  pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
-  lblLogoIcon.Font.Color := CLR_LOGIN_ICON_FG;
-  lblLogoIcon.Font.Height := -72;
 
+  pnlLogoBox.Color := CLR_LOGIN_ICON_BG;
+
+  // =========================
+  // LOGO PNG
+  // =========================
+  imgLogo.Picture.LoadFromFile(
+    ExtractFilePath(Application.ExeName) +
+    'assets/logo_pesaje.png'
+  );
+
+  imgLogo.Stretch := True;
+  imgLogo.Proportional := True;
+  imgLogo.Center := True;
+
+  // =========================
+  // INPUTS
+  // =========================
   pnlOuterUsuario.Color := CLR_BORDER;
   pnlInnerUsuario.Color := CLR_WHITE;
+
   edtUsuario.Color := CLR_WHITE;
   edtUsuario.Font.Color := CLR_TEXT;
+
   pnlOuterContrasena.Color := CLR_BORDER;
   pnlInnerContrasena.Color := CLR_WHITE;
+
   edtContrasena.Color := CLR_WHITE;
   edtContrasena.Font.Color := CLR_TEXT;
 
+  // =========================
+  // POSICIONES
+  // =========================
   lblUsuario.Font.Height := -14;
   lblUsuario.Top := 248;
+
   pnlOuterUsuario.Top := 270;
+
   lblContrasena.Font.Height := -14;
   lblContrasena.Top := 338;
+
   pnlOuterContrasena.Top := 360;
+
   pnlDiv2.Top := 428;
+
   pnlIngresar.Top := 449;
+
   lblSalir.Top := 509;
 
   ActiveControl := edtUsuario;
@@ -97,10 +139,18 @@ end;
 procedure TfrmLogin.FormResize(Sender: TObject);
 begin
   pnlLogoBox.SetBounds(170, 70, 96, 96);
-  lblTitulo.Left := (pnlCard.ClientWidth - lblTitulo.Width) div 2;
-  lblSubtitulo.Left := (pnlCard.ClientWidth - lblSubtitulo.Width) div 2;
-  pnlCard.Left := (pnlBG.ClientWidth - pnlCard.Width) div 2;
-  pnlCard.Top := (pnlBG.ClientHeight - pnlCard.Height) div 2;
+
+  lblTitulo.Left :=
+    (pnlCard.ClientWidth - lblTitulo.Width) div 2;
+
+  lblSubtitulo.Left :=
+    (pnlCard.ClientWidth - lblSubtitulo.Width) div 2;
+
+  pnlCard.Left :=
+    (pnlBG.ClientWidth - pnlCard.Width) div 2;
+
+  pnlCard.Top :=
+    (pnlBG.ClientHeight - pnlCard.Height) div 2;
 end;
 
 procedure TfrmLogin.btnIngresarClick(Sender: TObject);
@@ -125,37 +175,50 @@ begin
 
   lblError.Caption := '';
   pnlError.Visible := False;
+
   Screen.Cursor := crHourGlass;
+
   try
-    Resultado := TAuthService.Login(Trim(edtUsuario.Text), Trim(edtContrasena.Text), FUser);
+    Resultado := TAuthService.Login(
+      Trim(edtUsuario.Text),
+      Trim(edtContrasena.Text),
+      FUser
+    );
   finally
     Screen.Cursor := crDefault;
   end;
 
   case Resultado of
+
     arSuccess:
       begin
         UsuarioActual := FUser;
         ModalResult := mrOK;
       end;
+
     arInvalidEmail:
       begin
         lblError.Caption := 'Usuario no registrado';
         pnlError.Visible := True;
       end;
+
     arInvalidPassword:
       begin
         lblError.Caption := 'Contraseña incorrecta';
         pnlError.Visible := True;
       end;
+
     arInactiveUser:
       begin
         lblError.Caption := 'Usuario inactivo';
         pnlError.Visible := True;
       end;
+
     arError:
       begin
-        lblError.Caption := 'Error de conexión con la base de datos';
+        lblError.Caption :=
+          'Error de conexión con la base de datos';
+
         pnlError.Visible := True;
       end;
   end;
