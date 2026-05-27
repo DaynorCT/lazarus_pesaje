@@ -104,18 +104,18 @@ const
   APP_MIN_HEIGHT    = 720;
 
   FRAME_MARGIN      = 24;
-  FRAME_TOP         = 80;
+  FRAME_TOP         = 70;
   FRAME_BOTTOM      = 330;   // espacio inferior (grid + margenes)
   FRAME_HEADER_H    = 64;
   FRAME_GAP         = 16;
 
   CARD_REG_X        = FRAME_MARGIN;
-  CARD_REG_W        = 420;
+  CARD_REG_W        = 380;
   CARD_REG_PAD      = FRAME_MARGIN;
   CARD_FORM_GAP     = 36;
   CARD_FORM_X       = CARD_REG_X + CARD_REG_W + CARD_FORM_GAP;
   CARD_FORM_RIGHT   = CARD_FORM_X + FRAME_MARGIN;
-  CARD_GRID_H       = 180;
+  CARD_GRID_H       = 175;
 
 var
   FA_FONT_LOADED: Boolean = False;   // se activa al registrar la fuente
