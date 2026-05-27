@@ -110,12 +110,12 @@ const
   FRAME_GAP         = 16;
 
   CARD_REG_X        = FRAME_MARGIN;
-  CARD_REG_W        = 360;
+  CARD_REG_W        = 420;
   CARD_REG_PAD      = FRAME_MARGIN;
   CARD_FORM_GAP     = 36;
   CARD_FORM_X       = CARD_REG_X + CARD_REG_W + CARD_FORM_GAP;
   CARD_FORM_RIGHT   = CARD_FORM_X + FRAME_MARGIN;
-  CARD_GRID_H       = 210;
+  CARD_GRID_H       = 180;
 
 var
   FA_FONT_LOADED: Boolean = False;   // se activa al registrar la fuente
