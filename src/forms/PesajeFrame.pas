@@ -98,26 +98,18 @@ implementation
 
 {$R *.lfm}
 
-// ─── Dimensiones compactas para caber en 1280×720 ───────────────────────────
-// Espacio vertical disponible para los 2 cards:
-//   720 - 64(topbar) - 70(FRAME_TOP) - 175(grid) - 48(márgenes) ≈ 363px
-// Card izquierdo compactado ocupa ~300px → cabe con margen
-// ─────────────────────────────────────────────────────────────────────────────
 const
-  // Ancho card registro (más ancho que antes)
-  CREG_W   = 390;
-  CREG_PAD = 20;
-  // Alturas compactas card izquierdo
-  C_DISPLAY_H  = 100;   // display peso (era 130)
-  C_BTN_H      = 30;    // altura botones capturar (era 36-40)
-  C_BOX_H      = 32;    // altura boxes bruto/tara/neto (era 40)
-  C_INPUT_H    = 34;    // altura inputs del formulario (era 40)
-  // Columnas formulario derecho
-  FCOL1  = 20;
-  FCOL2  = 290;
-  FCOL3  = 560;
-  FFIELD = 168;
-  FCOMBO = 140;
+  CREG_W      = 390;
+  CREG_PAD    = 20;
+  C_DISPLAY_H = 100;
+  C_BTN_H     = 30;
+  C_BOX_H     = 32;
+  C_INPUT_H   = 34;
+  FCOL1       = 20;
+  FCOL2       = 290;
+  FCOL3       = 560;
+  FFIELD      = 168;
+  FCOMBO      = 140;
 
 function TFramePesaje.BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
 var i: Integer;
@@ -129,12 +121,11 @@ end;
 
 constructor TFramePesaje.Create(AOwner: TComponent);
 var
-  Pnl, pnlRegistro: TPanel;
+  pnlHeader, pnlRegistro: TPanel;
   Lbl: TLabel;
   YPos, InnerW: Integer;
   po, pi: TPanel;
 
-  // Label compacto para el formulario derecho
   function MakeLabel(ATop, ALeft: Integer; const ACaption: string): TLabel;
   begin
     Result := TLabel.Create(pnlForm);
@@ -146,7 +137,6 @@ var
     Result.Font.Color := CLR_TEXT_SLATE;
   end;
 
-  // Input con borde compacto
   function MakeEdit(ATop, ALeft, AWidth: Integer; AReadOnly: Boolean): TEdit;
   var ep, ip: TPanel;
   begin
@@ -179,31 +169,49 @@ begin
   Self.Color := CLR_BG;
 
   // ══════════════════════════════════════════════════════════════
-  // 1) HEADER — alTop, compacto
+  // ORDEN DE CREACIÓN (CRÍTICO en Lazarus):
+  //
+  //  1) pnlHeader  → alTop   (título "Pesaje")
+  //  2) pnlMedio   → alTop   (cards izq+der, altura fija)
+  //  3) pnlCard    → alClient (tabla, ocupa TODO lo que queda)
+  //
+  // Con este orden:
+  //   - pnlHeader  se ancla arriba
+  //   - pnlMedio   se apila bajo el header, altura fija
+  //   - pnlCard    llena el resto vertical → tabla crece con la ventana
   // ══════════════════════════════════════════════════════════════
-  Pnl := TPanel.Create(Self);
-  Pnl.Parent := Self;
-  Pnl.Align := alTop;
-  Pnl.Height := 64;          // compacto: era FRAME_TOP=80
-  Pnl.BevelOuter := bvNone;
-  Pnl.Color := CLR_BG;
+
+  // ── 1) HEADER "Pesaje" ── alTop ─────────────────────────────
+  pnlHeader := TPanel.Create(Self);
+  pnlHeader.Parent := Self;
+  pnlHeader.Align := alTop;
+  pnlHeader.Height := 52;
+  pnlHeader.BevelOuter := bvNone;
+  pnlHeader.Color := CLR_BG;
 
   Lbl := TLabel.Create(Self);
-  Lbl.Parent := Pnl;
-  Lbl.SetBounds(FRAME_MARGIN, 16, 200, 26);
+  Lbl.Parent := pnlHeader;
+  Lbl.SetBounds(FRAME_MARGIN, 10, 200, 28);
   Lbl.Caption := 'Pesaje';
   Lbl.Font.Height := -20;
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  // ══════════════════════════════════════════════════════════════
-  // 2) GRID — alBottom, compacto
-  //    175px de alto + 16px margen bottom + márgenes laterales
-  // ══════════════════════════════════════════════════════════════
+  // ── 2) CONTENEDOR CARDS ── alTop, altura fija ───────────────
+  pnlMedio := TPanel.Create(Self);
+  pnlMedio.Parent := Self;
+  pnlMedio.Align := alTop;
+  pnlMedio.Height := 390;
+  pnlMedio.BevelOuter := bvNone;
+  pnlMedio.Color := CLR_BG;
+  pnlMedio.BorderSpacing.Left   := FRAME_MARGIN;
+  pnlMedio.BorderSpacing.Right  := FRAME_MARGIN;
+  pnlMedio.BorderSpacing.Bottom := 8;
+
+  // ── 3) TABLA ── alClient, crece con la ventana ──────────────
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.Align := alBottom;
-  pnlCard.Height := 175;
+  pnlCard.Align := alClient;   // ← ocupa TODO el espacio restante
   pnlCard.BorderSpacing.Left   := FRAME_MARGIN;
   pnlCard.BorderSpacing.Right  := FRAME_MARGIN;
   pnlCard.BorderSpacing.Bottom := FRAME_MARGIN;
@@ -222,7 +230,6 @@ begin
   Grid.Font.Height := -11; Grid.Font.Color := CLR_TEXT_HEADING;
   Grid.TitleFont.Height := -10; Grid.TitleFont.Style := [fsBold]; Grid.TitleFont.Color := CLR_TEXT_SLATE;
   Grid.GridLineWidth := 0; Grid.Flat := True; Grid.FocusRectVisible := False; Grid.BorderStyle := bsNone;
-
   Grid.Cells[0,0]:='ID';       Grid.Cells[1,0]:='Chofer';    Grid.Cells[2,0]:='Placa';
   Grid.Cells[3,0]:='Licencia'; Grid.Cells[4,0]:='Tipo';      Grid.Cells[5,0]:='Proveedor';
   Grid.Cells[6,0]:='Producto'; Grid.Cells[7,0]:='Origen';    Grid.Cells[8,0]:='Destino';
@@ -230,7 +237,6 @@ begin
   Grid.Cells[12,0]:='Hora';    Grid.Cells[13,0]:='P.Bruto';  Grid.Cells[14,0]:='P.Tara';
   Grid.Cells[15,0]:='P.Neto';  Grid.Cells[16,0]:='Estado';   Grid.Cells[17,0]:='Est.Pesaje';
   Grid.Cells[18,0]:='Acciones';
-
   Grid.ColWidths[0]:=44;  Grid.ColWidths[1]:=160; Grid.ColWidths[2]:=90;
   Grid.ColWidths[3]:=90;  Grid.ColWidths[4]:=90;  Grid.ColWidths[5]:=160;
   Grid.ColWidths[6]:=110; Grid.ColWidths[7]:=110; Grid.ColWidths[8]:=110;
@@ -242,23 +248,7 @@ begin
   Grid.OnMouseDown := @GridMouseDown;
   Grid.OnMouseMove := @GridMouseMove;
 
-  // ══════════════════════════════════════════════════════════════
-  // 3) CONTENEDOR MEDIO — alClient, entre header y grid
-  // ══════════════════════════════════════════════════════════════
-  pnlMedio := TPanel.Create(Self);
-  pnlMedio.Parent := Self;
-  pnlMedio.Align := alClient;
-  pnlMedio.BevelOuter := bvNone;
-  pnlMedio.Color := CLR_BG;
-  pnlMedio.BorderSpacing.Left   := FRAME_MARGIN;
-  pnlMedio.BorderSpacing.Right  := FRAME_MARGIN;
-  pnlMedio.BorderSpacing.Top    := 8;
-  pnlMedio.BorderSpacing.Bottom := 8;
-
-  // ══════════════════════════════════════════════════════════════
-  // 4) CARD IZQUIERDO — alLeft, ancho fijo CREG_W, SIN scroll
-  //    Todo compactado para caber en ~300px de alto
-  // ══════════════════════════════════════════════════════════════
+  // ── 4) CARD IZQUIERDO ── alLeft dentro de pnlMedio ──────────
   InnerW := CREG_W - CREG_PAD * 2;
 
   pnlRegistroCard := TPanel.Create(pnlMedio);
@@ -271,7 +261,6 @@ begin
   pnlRegistroCard.BevelWidth := 1;
   pnlRegistroCard.Color := CLR_CARD;
 
-  // Panel interior sin scroll — todo a la vista
   pnlRegistro := TPanel.Create(pnlRegistroCard);
   pnlRegistro.Parent := pnlRegistroCard;
   pnlRegistro.Align := alClient;
@@ -279,8 +268,6 @@ begin
   pnlRegistro.Color := CLR_CARD;
 
   YPos := 12;
-
-  // Título
   lblRegistroTitle := TLabel.Create(pnlRegistro);
   lblRegistroTitle.Parent := pnlRegistro;
   lblRegistroTitle.SetBounds(CREG_PAD, YPos, InnerW, 18);
@@ -295,22 +282,18 @@ begin
   end;
   YPos := YPos + 10;
 
-  // Display peso — compacto
   pnlDisplay := TPanel.Create(pnlRegistro);
   pnlDisplay.Parent := pnlRegistro;
   pnlDisplay.SetBounds(CREG_PAD, YPos, InnerW, C_DISPLAY_H);
-  pnlDisplay.BevelOuter := bvNone;
-  pnlDisplay.Color := CLR_PRIMARY;
-
+  pnlDisplay.BevelOuter := bvNone; pnlDisplay.Color := CLR_PRIMARY;
   pi := TPanel.Create(pnlDisplay); pi.Parent := pnlDisplay;
   pi.SetBounds(2, 2, InnerW - 4, C_DISPLAY_H - 4);
   pi.BevelOuter := bvNone; pi.Color := CLR_WHITE;
-
   lblPesoDisplay := TLabel.Create(pi); lblPesoDisplay.Parent := pi;
   lblPesoDisplay.Align := alClient;
   lblPesoDisplay.Alignment := taCenter; lblPesoDisplay.Layout := tlCenter;
   lblPesoDisplay.Caption := '0 kg';
-  lblPesoDisplay.Font.Height := -28;   // compacto: era -36
+  lblPesoDisplay.Font.Height := -28;
   lblPesoDisplay.Font.Style := [fsBold];
   lblPesoDisplay.Font.Color := CLR_TEXT_HEADING;
   YPos := YPos + C_DISPLAY_H + 8;
@@ -321,7 +304,6 @@ begin
   end;
   YPos := YPos + 8;
 
-  // Switch + botones capturar — compactos
   pnlSwitchConectar := TPanel.Create(pnlRegistro);
   pnlSwitchConectar.Parent := pnlRegistro;
   pnlSwitchConectar.SetBounds(CREG_PAD, YPos, 78, C_BTN_H);
@@ -358,9 +340,8 @@ begin
   Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
   Lbl.Caption := 'Cap. tara'; Lbl.Font.Size := 10; Lbl.Font.Color := CLR_WHITE;
   Lbl.Transparent := True; Lbl.Cursor := crHandPoint; Lbl.OnClick := @TaraClick;
-  YPos := YPos + C_BTN_H + 18;  // espacio para label "Conexion"
+  YPos := YPos + C_BTN_H + 18;
 
-  // Labels Peso Bruto / Tara / Neto
   Lbl := TLabel.Create(pnlRegistro); Lbl.Parent := pnlRegistro;
   Lbl.SetBounds(CREG_PAD + 4, YPos, 82, 13); Lbl.Caption := 'Peso Bruto';
   Lbl.Font.Size := 9; Lbl.Font.Color := CLR_TEXT_SLATE;
@@ -372,7 +353,6 @@ begin
   Lbl.Font.Size := 9; Lbl.Font.Color := CLR_TEXT_SLATE;
   YPos := YPos + 16;
 
-  // Boxes valores
   po := TPanel.Create(pnlRegistro); po.Parent := pnlRegistro;
   po.SetBounds(CREG_PAD, YPos, 90, C_BOX_H); po.BevelOuter := bvNone; po.Color := CLR_BORDER;
   pi := TPanel.Create(po); pi.Parent := po; pi.SetBounds(1,1,88,C_BOX_H-2);
@@ -400,10 +380,7 @@ begin
   lblValNeto.Caption := '0'; lblValNeto.Font.Size := 11;
   lblValNeto.Font.Style := [fsBold]; lblValNeto.Font.Color := CLR_TEXT_HEADING;
 
-  // ══════════════════════════════════════════════════════════════
-  // 5) CARD DERECHO — alClient, todo el espacio restante
-  //    Formulario compacto para caber sin scroll
-  // ══════════════════════════════════════════════════════════════
+  // ── 5) CARD DERECHO ── alClient dentro de pnlMedio ──────────
   pnlForm := TPanel.Create(pnlMedio);
   pnlForm.Parent := pnlMedio;
   pnlForm.Align := alClient;
@@ -411,7 +388,6 @@ begin
   pnlForm.BevelWidth := 1; pnlForm.Color := CLR_CARD;
 
   YPos := 12;
-
   lblFormTitle := TLabel.Create(pnlForm); lblFormTitle.Parent := pnlForm;
   lblFormTitle.SetBounds(FCOL1, YPos, 300, 18);
   lblFormTitle.Caption := 'Datos del Pesaje';
@@ -424,50 +400,40 @@ begin
   pnlSepFormTop.BevelOuter := bvNone; pnlSepFormTop.Color := CLR_BORDER;
   YPos := YPos + 10;
 
-  // Fila 1: Chofer | Placa * | Licencia
   MakeLabel(YPos, FCOL1, 'Chofer');
   MakeLabel(YPos, FCOL2, 'Placa *');
   MakeLabel(YPos, FCOL3, 'Licencia');
   YPos := YPos + 16;
-
   cmbChofer := TComboBox.Create(pnlForm); ConfigCombo(cmbChofer, YPos, FCOL1, FCOMBO);
   cmbChofer.OnChange := @ChoferChange;
   btnChoNuevo := CrearBoton(pnlForm, YPos, FCOL1+FCOMBO+3, 22, C_INPUT_H, '+', CLR_WHITE, CLR_SUCCESS, 1, @QuickChoferClick);
-
   cmbVehiculo := TComboBox.Create(pnlForm); ConfigCombo(cmbVehiculo, YPos, FCOL2, FCOMBO);
   cmbVehiculo.OnChange := @VehiculoChange;
   btnVehNuevo := CrearBoton(pnlForm, YPos, FCOL2+FCOMBO+3, 22, C_INPUT_H, '+', CLR_WHITE, CLR_SUCCESS, 1, @QuickVehiculoClick);
-
   edtLicencia := MakeEdit(YPos, FCOL3, FFIELD, True); edtLicencia.Text := '';
   YPos := YPos + C_INPUT_H + 10;
 
-  // Fila 2: Tipo | Proveedor | Producto
   MakeLabel(YPos, FCOL1, 'Tipo vehiculo');
   MakeLabel(YPos, FCOL2, 'Proveedor');
   MakeLabel(YPos, FCOL3, 'Producto');
   YPos := YPos + 16;
-
   edtTipo := MakeEdit(YPos, FCOL1, FFIELD, True); edtTipo.Text := '';
   cmbProveedor := TComboBox.Create(pnlForm); ConfigCombo(cmbProveedor, YPos, FCOL2, FFIELD);
   cmbProducto  := TComboBox.Create(pnlForm); ConfigCombo(cmbProducto,  YPos, FCOL3, FFIELD);
   YPos := YPos + C_INPUT_H + 10;
 
-  // Fila 3: Origen | Destino | Costo
   MakeLabel(YPos, FCOL1, 'Origen');
   MakeLabel(YPos, FCOL2, 'Destino');
   MakeLabel(YPos, FCOL3, 'Costo (Bs)');
   YPos := YPos + 16;
-
   cmbOrigen  := TComboBox.Create(pnlForm); ConfigCombo(cmbOrigen,  YPos, FCOL1, FFIELD);
   cmbDestino := TComboBox.Create(pnlForm); ConfigCombo(cmbDestino, YPos, FCOL2, FFIELD);
   edtCosto := MakeEdit(YPos, FCOL3, FFIELD, False); edtCosto.Text := '0';
   YPos := YPos + C_INPUT_H + 10;
 
-  // Fila 4: Flete | Tara (switch+edit)
   MakeLabel(YPos, FCOL1, 'Flete pend. (Bs)');
   MakeLabel(YPos, FCOL2, 'Tara (kg)');
   YPos := YPos + 16;
-
   edtFlete := MakeEdit(YPos, FCOL1, FFIELD, False); edtFlete.Text := '0';
 
   pnlSwitchTara := TPanel.Create(pnlForm); pnlSwitchTara.Parent := pnlForm;
@@ -703,12 +669,12 @@ begin
       Grid.Cells[12,Row] := Copy(FechaStr,12,5);
     end else begin Grid.Cells[11,Row] := Copy(FechaStr,1,10); Grid.Cells[12,Row] := ''; end;
     Grid.Cells[0,Row]:=IntToStr(ID);
-    Grid.Cells[1,Row]:=UpperCase(Q.Fields[1].AsString); Grid.Cells[2,Row]:=UpperCase(Q.Fields[2].AsString);
-    Grid.Cells[3,Row]:=UpperCase(Q.Fields[3].AsString); Grid.Cells[4,Row]:=UpperCase(Q.Fields[4].AsString);
-    Grid.Cells[5,Row]:=UpperCase(Q.Fields[5].AsString); Grid.Cells[6,Row]:=UpperCase(Q.Fields[6].AsString);
-    Grid.Cells[7,Row]:=UpperCase(Q.Fields[7].AsString); Grid.Cells[8,Row]:=UpperCase(Q.Fields[8].AsString);
-    Grid.Cells[9,Row]:=Q.Fields[9].AsString;            Grid.Cells[10,Row]:=Q.Fields[10].AsString;
-    Grid.Cells[13,Row]:=Q.Fields[12].AsString;          Grid.Cells[14,Row]:=Q.Fields[13].AsString;
+    Grid.Cells[1,Row]:=UpperCase(Q.Fields[1].AsString);  Grid.Cells[2,Row]:=UpperCase(Q.Fields[2].AsString);
+    Grid.Cells[3,Row]:=UpperCase(Q.Fields[3].AsString);  Grid.Cells[4,Row]:=UpperCase(Q.Fields[4].AsString);
+    Grid.Cells[5,Row]:=UpperCase(Q.Fields[5].AsString);  Grid.Cells[6,Row]:=UpperCase(Q.Fields[6].AsString);
+    Grid.Cells[7,Row]:=UpperCase(Q.Fields[7].AsString);  Grid.Cells[8,Row]:=UpperCase(Q.Fields[8].AsString);
+    Grid.Cells[9,Row]:=Q.Fields[9].AsString;             Grid.Cells[10,Row]:=Q.Fields[10].AsString;
+    Grid.Cells[13,Row]:=Q.Fields[12].AsString;           Grid.Cells[14,Row]:=Q.Fields[13].AsString;
     Grid.Cells[15,Row]:=Q.Fields[14].AsString;
     Grid.Cells[16,Row]:=UpperCase(Q.Fields[16].AsString);
     Grid.Cells[17,Row]:=UpperCase(Q.Fields[17].AsString);
@@ -1107,7 +1073,7 @@ begin
   pnlGuardarTara.Visible:=False; pnlSwitchTara.Invalidate;
 end;
 
-// ═══════ QUICK DIALOGS ══════════════════════════════════════════════════════
+// ═══════ QUICK DIALOGS ═══════════════════════════════════════════════════════
 
 procedure TFramePesaje.QuickVehiculoClick(Sender: TObject);
 var F: TForm; ePlaca,eTipo,eTara: TEdit; Lbl,Ls: TLabel; YPos: Integer; pO,pI: TPanel;
@@ -1253,7 +1219,7 @@ begin
       with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end; end; YPos:=72;
     Ls:=TLabel.Create(F); Ls.Parent:=F; Ls.SetBounds(24,YPos,300,16); Ls.Caption:='Datos del registro'; Ls.Font.Size:=10; Ls.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
     Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,280,14); Lbl.Caption:='Nombre *'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,260,14); Lbl.Caption:='Descripción'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,260,14); Lbl.Caption:='Descripcion'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
     pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(24,YPos,280,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,278,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
     eNom:=TEdit.Create(pI); eNom.Parent:=pI; eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=10; eNom.CharCase:=ecUpperCase;
     pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(314,YPos,260,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,258,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
