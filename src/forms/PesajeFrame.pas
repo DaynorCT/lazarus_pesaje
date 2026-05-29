@@ -121,7 +121,7 @@ end;
 
 constructor TFramePesaje.Create(AOwner: TComponent);
 var
-  pnlHeader, pnlRegistro: TPanel;
+  pnlRegistro: TPanel;
   Lbl: TLabel;
   YPos, InnerW: Integer;
   po, pi: TPanel;
@@ -169,56 +169,35 @@ begin
   Self.Color := CLR_BG;
 
   // ══════════════════════════════════════════════════════════════
-  // ORDEN DE CREACIÓN (CRÍTICO en Lazarus):
+  // ORDEN DE CREACIÓN EN LAZARUS (REESTRUCTURADO):
   //
-  //  1) pnlHeader  → alTop   (título "Pesaje")
-  //  2) pnlMedio   → alTop   (cards izq+der, altura fija)
-  //  3) pnlCard    → alClient (tabla, ocupa TODO lo que queda)
+  //  1) pnlMedio   → alTop     (Cards Izq + Der con Altura Fija)
+  //  2) pnlCard    → alClient  (Tabla histórica elástica inferior)
   //
-  // Con este orden:
-  //   - pnlHeader  se ancla arriba
-  //   - pnlMedio   se apila bajo el header, altura fija
-  //   - pnlCard    llena el resto vertical → tabla crece con la ventana
+  // Removido pnlHeader para evitar desbordamientos del título en resoluciones altas.
+  // Los títulos internos de cada Card describen claramente el contexto del módulo.
   // ══════════════════════════════════════════════════════════════
 
-  // ── 1) HEADER "Pesaje" ── alTop ─────────────────────────────
-  pnlHeader := TPanel.Create(Self);
-  pnlHeader.Parent := Self;
-  pnlHeader.Align := alTop;
-  pnlHeader.Height := 55; // Reducido para ganar espacio vertical
-  pnlHeader.BevelOuter := bvNone;
-  pnlHeader.Color := CLR_BG;
-
-  Lbl := TLabel.Create(pnlHeader); // <-- CRÍTICO: El dueño y padre es pnlHeader
-  Lbl.Parent := pnlHeader;
-  Lbl.SetBounds(FRAME_MARGIN, 16, 200, 28);
-  Lbl.Caption := 'Pesaje';
-  Lbl.Font.Height := -20;
-  Lbl.Font.Style := [fsBold];
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-
-  // ── 2) CONTENEDOR CARDS ── alTop, altura fija ───────────────
+  // ── 1) CONTENEDOR CARDS ── alTop, altura fija estricta ───────
   pnlMedio := TPanel.Create(Self);
   pnlMedio.Parent := Self;
-  pnlMedio.Align := alClient;
-  pnlMedio.Height := 390;
+  pnlMedio.Align := alTop; 
+  pnlMedio.Height := 385;  // Altura exacta fija para contener los datos de pesaje de forma segura
   pnlMedio.BevelOuter := bvNone;
   pnlMedio.Color := CLR_BG;
   pnlMedio.BorderSpacing.Left   := FRAME_MARGIN;
   pnlMedio.BorderSpacing.Right  := FRAME_MARGIN;
-  pnlMedio.BorderSpacing.Top    := 10;
+  pnlMedio.BorderSpacing.Top    := FRAME_MARGIN; // Margen superior directo contra el borde del Frame
   pnlMedio.BorderSpacing.Bottom := 12;
 
-  // ── 3) TABLA ── alClient, crece con la ventana ──────────────
+  // ── 2) TABLA HISTÓRICA ── alClient, crece elásticamente ─────
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.Align := alBottom;   // <-- CRÍTICO: Forzado abajo de todo
-  pnlCard.Height := 160;       // Altura optimizada para pantallas cortas
+  pnlCard.Align := alClient; 
   pnlCard.BorderSpacing.Left   := FRAME_MARGIN;
   pnlCard.BorderSpacing.Right  := FRAME_MARGIN;
   pnlCard.BorderSpacing.Bottom := FRAME_MARGIN;
-  pnlCard.BevelOuter := bvLowered; pnlCard.BevelInner := bvNone;
-  pnlCard.BevelWidth := 1; pnlCard.Color := CLR_CARD;
+  pnlCard.BevelOuter := bvLowered; pnlCard.Color := CLR_CARD;
 
   Grid := TStringGrid.Create(Self);
   Grid.Parent := pnlCard;
@@ -250,7 +229,7 @@ begin
   Grid.OnMouseDown := @GridMouseDown;
   Grid.OnMouseMove := @GridMouseMove;
 
-  // ── 4) CARD IZQUIERDO ── alLeft dentro de pnlMedio ──────────
+  // ── 3) CARD IZQUIERDO ── alLeft dentro de pnlMedio ──────────
   InnerW := CREG_W - CREG_PAD * 2;
 
   pnlRegistroCard := TPanel.Create(pnlMedio);
@@ -382,7 +361,7 @@ begin
   lblValNeto.Caption := '0'; lblValNeto.Font.Size := 11;
   lblValNeto.Font.Style := [fsBold]; lblValNeto.Font.Color := CLR_TEXT_HEADING;
 
-  // ── 5) CARD DERECHO ── alClient dentro de pnlMedio ──────────
+  // ── 4) CARD DERECHO ── alClient dentro de pnlMedio ──────────
   pnlForm := TPanel.Create(pnlMedio);
   pnlForm.Parent := pnlMedio;
   pnlForm.Align := alClient;

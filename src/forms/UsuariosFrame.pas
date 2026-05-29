@@ -163,7 +163,7 @@ begin
   lblNuevo.ParentColor := False;
   lblNuevo.OnClick := @btnNuevoClick;
 
-  // Card contenedor de la tabla
+  // Card contenedor de la tabla (Borde modificado para consistencia Windows/Mac)
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
   pnlCard.Align := alClient;
@@ -171,10 +171,9 @@ begin
   pnlCard.BorderSpacing.Left := 24;
   pnlCard.BorderSpacing.Right := 24;
   pnlCard.BorderSpacing.Bottom := 24;
-  pnlCard.BevelOuter := bvLowered;
-  pnlCard.BevelInner := bvNone;
-  pnlCard.BevelWidth := 1;
+  pnlCard.BevelOuter := bvNone;              // <-- Se quita el borde nativo (evita bug de Windows)
   pnlCard.Color := CLR_CARD;
+  pnlCard.OnPaint := @PaintRounded;          // <-- Se asigna nuestra pintura personalizada uniforme
 
   // Grid
   Grid := TStringGrid.Create(Self);
@@ -585,6 +584,24 @@ var
   Pnl: TPanel;
 begin
   Pnl := TPanel(Sender);
+
+  // SI ES EL CARD CONTENEDOR DE LA TABLA PRINCIPAL
+  if Pnl = pnlCard then
+  begin
+    // Dibujamos el fondo del Card uniforme
+    Pnl.Canvas.Brush.Color := CLR_CARD;
+    Pnl.Canvas.Brush.Style := bsSolid;
+    Pnl.Canvas.FillRect(Pnl.ClientRect);
+
+    // Dibujamos el borde plano de 1px exacto (Igual en Windows y macOS)
+    Pnl.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
+    Exit;
+  end;
+
+  // COMPORTAMIENTO ORIGINAL PARA LOS BOTONES REDONDEADOS DEL MODAL
   Pnl.Canvas.Brush.Color := CLR_BG;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
   Pnl.Canvas.Brush.Color := Pnl.Color;

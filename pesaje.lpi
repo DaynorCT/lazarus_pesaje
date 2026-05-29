@@ -77,7 +77,6 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
         <TopLine Value="183"/>
         <CursorPos X="3" Y="186"/>
@@ -119,8 +118,9 @@
         <ComponentName Value="FrameUsuarios"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="79"/>
+        <TopLine Value="80"/>
         <CursorPos X="7" Y="87"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
@@ -154,13 +154,13 @@
         <EditorIndex Value="14"/>
         <TopLine Value="4010"/>
         <CursorPos Y="4010"/>
-        <UsageCount Value="96"/>
+        <UsageCount Value="99"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/PesajeFrame.lfm"/>
         <EditorIndex Value="13"/>
-        <UsageCount Value="88"/>
+        <UsageCount Value="91"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
@@ -173,7 +173,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="680"/>
         <CursorPos X="30" Y="685"/>
-        <UsageCount Value="141"/>
+        <UsageCount Value="147"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -182,7 +182,7 @@
         <EditorIndex Value="6"/>
         <TopLine Value="100"/>
         <CursorPos X="32" Y="14"/>
-        <UsageCount Value="70"/>
+        <UsageCount Value="73"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
@@ -192,7 +192,7 @@
         <EditorIndex Value="12"/>
         <TopLine Value="231"/>
         <CursorPos X="20" Y="251"/>
-        <UsageCount Value="94"/>
+        <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -202,7 +202,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="72"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/ReportesFrame.pas"/>
@@ -212,13 +212,13 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="72"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/BoletaConfigFrame.pas"/>
         <IsPartOfProject Value="True"/>
         <HasResources Value="True"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="72"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/ConfigBalanzaFrame.pas"/>
@@ -229,13 +229,13 @@
         <EditorIndex Value="11"/>
         <TopLine Value="384"/>
         <CursorPos Y="394"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="72"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../Downloads/PesajeFrame.pas"/>
         <EditorIndex Value="10"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
