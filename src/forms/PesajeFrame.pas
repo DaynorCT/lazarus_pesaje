@@ -185,13 +185,13 @@ begin
   pnlHeader := TPanel.Create(Self);
   pnlHeader.Parent := Self;
   pnlHeader.Align := alTop;
-  pnlHeader.Height := 52;
+  pnlHeader.Height := 55; // Reducido para ganar espacio vertical
   pnlHeader.BevelOuter := bvNone;
   pnlHeader.Color := CLR_BG;
 
-  Lbl := TLabel.Create(Self);
+  Lbl := TLabel.Create(pnlHeader); // <-- CRÍTICO: El dueño y padre es pnlHeader
   Lbl.Parent := pnlHeader;
-  Lbl.SetBounds(FRAME_MARGIN, 10, 200, 28);
+  Lbl.SetBounds(FRAME_MARGIN, 16, 200, 28);
   Lbl.Caption := 'Pesaje';
   Lbl.Font.Height := -20;
   Lbl.Font.Style := [fsBold];
@@ -200,18 +200,20 @@ begin
   // ── 2) CONTENEDOR CARDS ── alTop, altura fija ───────────────
   pnlMedio := TPanel.Create(Self);
   pnlMedio.Parent := Self;
-  pnlMedio.Align := alTop;
+  pnlMedio.Align := alClient;
   pnlMedio.Height := 390;
   pnlMedio.BevelOuter := bvNone;
   pnlMedio.Color := CLR_BG;
   pnlMedio.BorderSpacing.Left   := FRAME_MARGIN;
   pnlMedio.BorderSpacing.Right  := FRAME_MARGIN;
-  pnlMedio.BorderSpacing.Bottom := 8;
+  pnlMedio.BorderSpacing.Top    := 10;
+  pnlMedio.BorderSpacing.Bottom := 12;
 
   // ── 3) TABLA ── alClient, crece con la ventana ──────────────
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.Align := alClient;   // ← ocupa TODO el espacio restante
+  pnlCard.Align := alBottom;   // <-- CRÍTICO: Forzado abajo de todo
+  pnlCard.Height := 160;       // Altura optimizada para pantallas cortas
   pnlCard.BorderSpacing.Left   := FRAME_MARGIN;
   pnlCard.BorderSpacing.Right  := FRAME_MARGIN;
   pnlCard.BorderSpacing.Bottom := FRAME_MARGIN;
@@ -384,8 +386,10 @@ begin
   pnlForm := TPanel.Create(pnlMedio);
   pnlForm.Parent := pnlMedio;
   pnlForm.Align := alClient;
-  pnlForm.BevelOuter := bvLowered; pnlForm.BevelInner := bvNone;
-  pnlForm.BevelWidth := 1; pnlForm.Color := CLR_CARD;
+  pnlForm.BevelOuter := bvLowered; 
+  pnlForm.BevelInner := bvNone;
+  pnlForm.BevelWidth := 1; 
+  pnlForm.Color := CLR_CARD;
 
   YPos := 12;
   lblFormTitle := TLabel.Create(pnlForm); lblFormTitle.Parent := pnlForm;

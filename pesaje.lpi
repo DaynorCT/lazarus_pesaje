@@ -79,8 +79,8 @@
         <ResourceBaseClass Value="Frame"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="178"/>
-        <CursorPos X="22" Y="187"/>
+        <TopLine Value="183"/>
+        <CursorPos X="3" Y="186"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -241,10 +241,6 @@
     </Units>
     <JumpHistory HistoryIndex="29">
       <Position>
-        <Filename Value="src/auth/LoginForm.pas"/>
-        <Caret Line="67" Column="22" TopLine="47"/>
-      </Position>
-      <Position>
         <Filename Value="src/forms/UsuariosFrame.pas"/>
         <Caret Line="656" Column="18" TopLine="645"/>
       </Position>
@@ -354,6 +350,10 @@
       <Position>
         <Filename Value="src/forms/PesajeFrame.pas"/>
         <Caret Line="186" Column="16" TopLine="175"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/PesajeFrame.pas"/>
+        <Caret Line="187" Column="22" TopLine="179"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
