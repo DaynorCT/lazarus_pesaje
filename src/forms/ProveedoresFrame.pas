@@ -170,15 +170,16 @@ begin
   pnlCard.BorderSpacing.Left := 24;
   pnlCard.BorderSpacing.Right := 24;
   pnlCard.BorderSpacing.Bottom := 24;
-  pnlCard.BevelOuter := bvLowered;
+  pnlCard.BevelOuter := bvNone;
   pnlCard.BevelInner := bvNone;
-  pnlCard.BevelWidth := 1;
   pnlCard.Color := CLR_CARD;
+  pnlCard.OnPaint := @PaintRounded;
 
   // Grid
   Grid := TStringGrid.Create(Self);
   Grid.Parent := pnlCard;
   Grid.Align := alClient;
+  Grid.DoubleBuffered := True; // Evita parpadeos del renderizado manual continuo
   Grid.BorderSpacing.Around := 2;
   Grid.ScrollBars := ssAutoBoth;
   Grid.ColCount := 7;
@@ -221,8 +222,10 @@ begin
   Grid.OnDrawCell := @GridDrawCell;
   Grid.OnMouseDown := @GridMouseDown;
   Grid.OnMouseMove := @GridMouseMove;
+  
   FHintTimer := TTimer.Create(Self);
-  FHintTimer.Interval := 400; FHintTimer.OnTimer := @HintTimerTick;
+  FHintTimer.Interval := 400; 
+  FHintTimer.OnTimer := @HintTimerTick;
   FHintTimer.Enabled := False;
   FHintActive := False;
 
@@ -296,7 +299,6 @@ begin
 
   IsSelected := gdSelected in aState;
 
-  // Columna Acciones: switch (izquierda) + lapiz (derecha)
   if aCol = 5 then
   begin
     if IsSelected then
@@ -344,7 +346,6 @@ begin
     Exit;
   end;
 
-  // Columna Estado: badge coloreado centrado
   if aCol = 4 then
   begin
     if IsSelected then
@@ -534,6 +535,20 @@ var
   Pnl: TPanel;
 begin
   Pnl := TPanel(Sender);
+
+  if Pnl = pnlCard then
+  begin
+    Pnl.Canvas.Brush.Color := CLR_CARD;
+    Pnl.Canvas.Brush.Style := bsSolid;
+    Pnl.Canvas.FillRect(Pnl.ClientRect);
+
+    Pnl.Canvas.Pen.Color := CLR_WHITE;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
+    Exit;
+  end;
+
   Pnl.Canvas.Brush.Color := CLR_BG;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
   Pnl.Canvas.Brush.Color := Pnl.Color;
@@ -559,6 +574,7 @@ var
   Q: TSQLQuery;
   IsNew: Boolean;
   YPos: Integer;
+  DimID: Integer; // Variable local para capturar el ID de la persona en modo síncrono
 
   function MakeLabel(ATop, ALeft: Integer; ACaption: string): TLabel;
   begin
@@ -602,7 +618,6 @@ begin
   IsNew := ID = 0;
   Nombre := ''; ApPat := ''; ApMat := ''; CIStr := ''; Tel := ''; Emp := ''; Desc := '';
 
-  // Cargar datos si editar
   if not IsNew then
   begin
     Q := DM.AbrirQuery(
@@ -634,7 +649,6 @@ begin
     F.BorderStyle := bsDialog;
     F.Color := CLR_WHITE;
 
-    // Header del modal
     with TPanel.Create(F) do
     begin
       Parent := F;
@@ -664,7 +678,6 @@ begin
 
     YPos := 80;
 
-    // Seccion: Datos personales
     LblSection := TLabel.Create(F);
     LblSection.Parent := F;
     LblSection.SetBounds(24, YPos, 300, 20);
@@ -675,7 +688,6 @@ begin
 
     YPos := YPos + 33;
 
-    // Fila 1: Nombre | Apellido paterno | Apellido materno
     MakeLabel(YPos, 24, 'Nombre *');
     MakeLabel(YPos, 212, 'Apellido paterno');
     MakeLabel(YPos, 400, 'Apellido materno');
@@ -689,7 +701,6 @@ begin
     eMat.Text := ApMat;
     YPos := YPos + 48;
 
-    // Fila 2: CI | Telefono
     MakeLabel(YPos, 24, 'Nro. Documento');
     MakeLabel(YPos, 212, 'Telefono');
     YPos := YPos + 28;
@@ -700,7 +711,6 @@ begin
     eTel.Text := Tel;
     YPos := YPos + 56;
 
-    // Seccion: Datos de empresa
     LblSection := TLabel.Create(F);
     LblSection.Parent := F;
     LblSection.SetBounds(24, YPos, 300, 20);
@@ -721,7 +731,6 @@ begin
     eDesc.Text := Desc;
     YPos := YPos + 56;
 
-    // Linea divisora
     with TPanel.Create(F) do
     begin
       Parent := F;
@@ -733,7 +742,6 @@ begin
 
     F.Height := YPos + 70;
 
-    // CANCELAR: panel blanco con borde info
     with TPanel.Create(F) do
     begin
       Parent := F;
@@ -758,7 +766,6 @@ begin
       end;
     end;
 
-    // GUARDAR: panel azul con letra blanca
     with TPanel.Create(F) do
     begin
       Parent := F;
@@ -786,58 +793,69 @@ begin
     begin
       if Trim(eNom.Text) = '' then
       begin
-        ShowMessage('Nombre obligatorio');
-        Exit;
-      end;
+        ShowMessage('El nombre es obligatorio.');
+      end
+      else
+      begin
+        if DM.Transaccion.Active then
+          DM.Transaccion.Rollback;
+        DM.Transaccion.StartTransaction;
+        try
+          if IsNew then
+          begin
+            // Capturamos el id generado de forma segura usando RETURNING
+            Q := DM.AbrirQuery('INSERT INTO personas (nombre, apellido_paterno, apellido_materno, ci, telefono, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+              QuotedStr(Trim(eNom.Text)) + ', ' +
+              QuotedStr(Trim(ePat.Text)) + ', ' +
+              QuotedStr(Trim(eMat.Text)) + ', ' +
+              QuotedStr(Trim(eCI.Text)) + ', ' +
+              QuotedStr(Trim(eTel.Text)) + ', ''ACTIVO'', ' +
+              QuotedStr(FechaHoraActual) + ', ' + QuotedStr(FechaHoraActual) + ') RETURNING id');
+            try
+              DimID := Q.Fields[0].AsInteger;
+            finally
+              Q.Close;
+            end;
 
-      if DM.Transaccion.Active then
-        DM.Transaccion.Rollback;
-      DM.Transaccion.StartTransaction;
-      try
-        if IsNew then
-        begin
-          DM.EjecutarSQL('INSERT INTO personas (nombre, apellido_paterno, apellido_materno, ci, telefono, estado, fecha_creacion, fecha_modificacion) VALUES (' +
-            QuotedStr(Trim(eNom.Text)) + ', ' +
-            QuotedStr(Trim(ePat.Text)) + ', ' +
-            QuotedStr(Trim(eMat.Text)) + ', ' +
-            QuotedStr(Trim(eCI.Text)) + ', ' +
-            QuotedStr(Trim(eTel.Text)) + ', ''ACTIVO'', ''' +
-            FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
-          DM.EjecutarSQL('INSERT INTO proveedores (persona_id, nombre_empresa, descripcion, estado, fecha_creacion, fecha_modificacion) VALUES (' +
-            IntToStr(DM.ObtenerUltimoID) + ', ' +
-            QuotedStr(Trim(eEmp.Text)) + ', ' +
-            QuotedStr(Trim(eDesc.Text)) + ', ''ACTIVO'', ''' +
-            FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
-        end
-        else
-        begin
-          DM.EjecutarSQL('UPDATE personas SET nombre=' + QuotedStr(Trim(eNom.Text)) +
-            ', apellido_paterno=' + QuotedStr(Trim(ePat.Text)) +
-            ', apellido_materno=' + QuotedStr(Trim(eMat.Text)) +
-            ', ci=' + QuotedStr(Trim(eCI.Text)) +
-            ', telefono=' + QuotedStr(Trim(eTel.Text)) +
-            ', fecha_modificacion=''' + FechaHoraActual +
-            ''' WHERE id=(SELECT persona_id FROM proveedores WHERE id=' + IntToStr(ID) + ')');
+            DM.EjecutarSQL('INSERT INTO proveedores (persona_id, nombre_empresa, descripcion, estado, fecha_creacion, fecha_modificacion) VALUES (' +
+              IntToStr(DimID) + ', ' +
+              QuotedStr(Trim(eEmp.Text)) + ', ' +
+              QuotedStr(Trim(eDesc.Text)) + ', ''ACTIVO'', ' +
+              QuotedStr(FechaHoraActual) + ', ' + QuotedStr(FechaHoraActual) + ')');
+          end
+          else
+          begin
+            DM.EjecutarSQL('UPDATE personas SET nombre=' + QuotedStr(Trim(eNom.Text)) +
+              ', apellido_paterno=' + QuotedStr(Trim(ePat.Text)) +
+              ', apellido_materno=' + QuotedStr(Trim(eMat.Text)) +
+              ', ci=' + QuotedStr(Trim(eCI.Text)) +
+              ', telefono=' + QuotedStr(Trim(eTel.Text)) +
+              ', fecha_modificacion=' + QuotedStr(FechaHoraActual) +
+              ' WHERE id=(SELECT persona_id FROM proveedores WHERE id=' + IntToStr(ID) + ')');
 
-          DM.EjecutarSQL('UPDATE proveedores SET nombre_empresa=' + QuotedStr(Trim(eEmp.Text)) +
-            ', descripcion=' + QuotedStr(Trim(eDesc.Text)) +
-            ', fecha_modificacion=''' + FechaHoraActual +
-            ''' WHERE id=' + IntToStr(ID));
+            DM.EjecutarSQL('UPDATE proveedores SET nombre_empresa=' + QuotedStr(Trim(eEmp.Text)) +
+              ', descripcion=' + QuotedStr(Trim(eDesc.Text)) +
+              ', fecha_modificacion=' + QuotedStr(FechaHoraActual) +
+              ' WHERE id=' + IntToStr(ID));
+          end;
+          DM.Transaccion.Commit;
+          Refrescar(nil);
+        except
+          DM.Transaccion.Rollback;
+          ShowMessage('Error al guardar proveedor');
         end;
-        DM.Transaccion.Commit;
-        Refrescar(nil);
-      except
-        DM.Transaccion.Rollback;
-        ShowMessage('Error al guardar proveedor');
       end;
     end;
   finally
-    F.Free;
+    F.Free; // Flujo seguro garantizado, no hay Memory Leaks
+    FModalForm := nil;
   end;
 end;
 
 destructor TFrameProveedores.Destroy;
 begin
+  if (FModalForm <> nil) and FModalForm.Visible then
+    FModalForm.Close;
   if FHintWindow <> nil then FreeAndNil(FHintWindow);
   inherited Destroy;
 end;
