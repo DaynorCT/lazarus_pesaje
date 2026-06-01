@@ -289,7 +289,7 @@ begin
     'SELECT u.id, p.ci, p.nombre, p.apellido_paterno, p.apellido_materno, ' +
     'p.telefono, u.email, u.rol, u.estado ' +
     'FROM usuarios u INNER JOIN personas p ON p.id = u.persona_id ' +
-    'WHERE 1=1 ' + Filtro + ' ORDER BY p.nombre');
+    'WHERE 1=1 ' + Filtro + ' ORDER BY u.id DESC');
 
   Grid.RowCount := Q.RecordCount + 1;
   Row := 1;

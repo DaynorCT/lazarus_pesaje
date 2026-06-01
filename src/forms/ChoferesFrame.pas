@@ -287,7 +287,7 @@ begin
     'SELECT c.id, p.nombre, p.apellido_paterno, p.apellido_materno, ' +
     'p.ci, p.telefono, c.licencia, c.estado ' +
     'FROM choferes c INNER JOIN personas p ON p.id = c.persona_id ' +
-    'WHERE 1=1 ' + Filtro + ' ORDER BY p.nombre');
+    'WHERE 1=1 ' + Filtro + ' ORDER BY c.id DESC');
 
   Grid.RowCount := Q.RecordCount + 1;
   Row := 1;
