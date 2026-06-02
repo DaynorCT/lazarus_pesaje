@@ -121,7 +121,7 @@ end;
 
 constructor TFramePesaje.Create(AOwner: TComponent);
 var
-  pnlHeader, pnlRegistro: TPanel;
+  pnlRegistro: TPanel;   // pnlHeader eliminado — no se usa en este módulo
   Lbl: TLabel;
   YPos, InnerW: Integer;
   po, pi: TPanel;
@@ -170,10 +170,9 @@ begin
 
   // ══════════════════════════════════════════════════════════════
   // ORDEN DE CREACIÓN:
-  //   1) pnlMedio   → alTop   cards izq+der altura fija
+  //   1) pnlMedio   → alTop    cards izq+der altura fija
   //   2) pnlCard    → alClient tabla ocupa todo lo restante
   // ══════════════════════════════════════════════════════════════
-
 
   // ── 1) CONTENEDOR CARDS ── alTop altura fija ─────────────────
   pnlMedio := TPanel.Create(Self);
@@ -194,9 +193,8 @@ begin
   pnlCard.BorderSpacing.Left   := FRAME_MARGIN;
   pnlCard.BorderSpacing.Right  := FRAME_MARGIN;
   pnlCard.BorderSpacing.Bottom := FRAME_MARGIN;
-  pnlCard.BevelOuter := bvNone;     // sin bisel nativo
+  pnlCard.BevelOuter := bvNone;
   pnlCard.Color := CLR_CARD;
-  pnlCard.Tag := 2;                 // borde blanco via PaintRounded
   pnlCard.OnPaint := @PaintRounded;
 
   Grid := TStringGrid.Create(Self);
@@ -229,7 +227,7 @@ begin
   Grid.OnMouseDown := @GridMouseDown;
   Grid.OnMouseMove := @GridMouseMove;
 
-  // ── 4) CARD IZQUIERDO ── alLeft dentro de pnlMedio ───────────
+  // ── 3) CARD IZQUIERDO ── alLeft dentro de pnlMedio ───────────
   InnerW := CREG_W - CREG_PAD * 2;
 
   pnlRegistroCard := TPanel.Create(pnlMedio);
@@ -237,9 +235,8 @@ begin
   pnlRegistroCard.Align := alLeft;
   pnlRegistroCard.Width := CREG_W;
   pnlRegistroCard.BorderSpacing.Right := 16;
-  pnlRegistroCard.BevelOuter := bvNone;   // sin bisel nativo
+  pnlRegistroCard.BevelOuter := bvNone;
   pnlRegistroCard.Color := CLR_CARD;
-  pnlRegistroCard.Tag := 2;              // borde blanco via PaintRounded
   pnlRegistroCard.OnPaint := @PaintRounded;
 
   pnlRegistro := TPanel.Create(pnlRegistroCard);
@@ -361,13 +358,12 @@ begin
   lblValNeto.Caption := '0'; lblValNeto.Font.Size := 11;
   lblValNeto.Font.Style := [fsBold]; lblValNeto.Font.Color := CLR_TEXT_HEADING;
 
-  // ── 5) CARD DERECHO ── alClient dentro de pnlMedio ───────────
+  // ── 4) CARD DERECHO ── alClient dentro de pnlMedio ───────────
   pnlForm := TPanel.Create(pnlMedio);
   pnlForm.Parent := pnlMedio;
   pnlForm.Align := alClient;
-  pnlForm.BevelOuter := bvNone;    // sin bisel nativo
+  pnlForm.BevelOuter := bvNone;
   pnlForm.Color := CLR_CARD;
-  pnlForm.Tag := 2;               // borde blanco via PaintRounded
   pnlForm.OnPaint := @PaintRounded;
 
   YPos := 12;
@@ -466,17 +462,19 @@ begin
 end;
 
 // ══════════════════════════════════════════════════════════════
-// PaintRounded — 3 casos:
-//   Tag = 1 → borde CLR_INFO   (botón Cancelar)
-//   Tag = 2 → borde CLR_WHITE  (cards)
-//   else    → sin borde        (botones Guardar, etc.)
+// PaintRounded
+//   Cards (pnlCard, pnlRegistroCard, pnlForm):
+//     borde blanco plano 1px via Rectangle — consistente en
+//     Windows y macOS, igual que todos los frames ABM
+//   Tag = 1 → borde CLR_INFO  (botón Cancelar)
+//   else    → sin borde       (botones Guardar, Cap.peso, etc.)
 // ══════════════════════════════════════════════════════════════
 procedure TFramePesaje.PaintRounded(Sender: TObject);
 var Pnl: TPanel;
 begin
   Pnl := TPanel(Sender);
 
-  // ── Cards: borde blanco plano 1px, sin redondeado (igual que todos los frames) ──
+  // Cards — borde blanco plano 1px (igual que UsuariosFrame, EmpresasFrame, etc.)
   if (Pnl = pnlCard) or (Pnl = pnlRegistroCard) or (Pnl = pnlForm) then begin
     Pnl.Canvas.Brush.Color := CLR_CARD;
     Pnl.Canvas.Brush.Style := bsSolid;
@@ -488,7 +486,7 @@ begin
     Exit;
   end;
 
-  // ── Botones redondeados ──────────────────────────────────────────────────────────
+  // Botones redondeados
   Pnl.Canvas.Brush.Color := CLR_BG;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
   Pnl.Canvas.Brush.Color := Pnl.Color;
@@ -499,7 +497,7 @@ begin
     Pnl.Canvas.Pen.Style := psSolid;
     Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
   end else begin
-    // Botones sin borde (Guardar, Cap.peso, Cap.tara, etc.)
+    // Botones sin borde (Guardar, Cap.peso, Cap.tara, +, etc.)
     Pnl.Canvas.Pen.Style := psClear;
     Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
   end;
