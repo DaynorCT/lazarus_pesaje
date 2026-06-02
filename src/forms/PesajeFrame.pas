@@ -295,9 +295,11 @@ begin
   Lbl.Caption := 'Conexion'; Lbl.Font.Size := 9;
   Lbl.Font.Color := CLR_TEXT_SLATE; Lbl.Alignment := taCenter;
 
+  YPos := YPos + 14 + 16;
+
   pnlCapturarPeso := TPanel.Create(pnlRegistro);
   pnlCapturarPeso.Parent := pnlRegistro;
-  pnlCapturarPeso.SetBounds(CREG_PAD + 84, YPos, 90, C_BTN_H);
+  pnlCapturarPeso.SetBounds(CREG_PAD + 84, YPos, 120, C_BTN_H);
   pnlCapturarPeso.BevelOuter := bvNone; pnlCapturarPeso.Color := CLR_PRIMARY;
   pnlCapturarPeso.ParentBackground := False; pnlCapturarPeso.ParentColor := False;
   pnlCapturarPeso.Cursor := crHandPoint;
@@ -309,7 +311,7 @@ begin
 
   pnlCapturarTara := TPanel.Create(pnlRegistro);
   pnlCapturarTara.Parent := pnlRegistro;
-  pnlCapturarTara.SetBounds(CREG_PAD + 180, YPos, InnerW - 180, C_BTN_H);
+  pnlCapturarTara.SetBounds(CREG_PAD + 210, YPos, InnerW - 210, C_BTN_H);
   pnlCapturarTara.BevelOuter := bvNone; pnlCapturarTara.Color := CLR_INFO;
   pnlCapturarTara.ParentBackground := False; pnlCapturarTara.ParentColor := False;
   pnlCapturarTara.Cursor := crHandPoint;
@@ -1319,8 +1321,8 @@ begin
     with TLabel.Create(F) do begin Parent:=pnlWrap; SetBounds(20,YPos,DIALOG_W-40,16);
       Caption:='Confirme la finalizacion del pesaje'; Font.Size:=10; Font.Color:=CLR_TEXT_SLATE; end;
     YPos:=224; W:=DIALOG_W-28;
-    CrearBoton(pnlWrap,YPos,W-210,96,30,'Cancelar',CLR_CARD,CLR_TEXT,1,@QuickCancelarClick);
-    CrearBoton(pnlWrap,YPos,W-106,96,30,'Finalizar',CLR_PRIMARY,CLR_PRIMARY_FG,0,@DialogFinalizarOk);
+    CrearBoton(pnlWrap,YPos,W-210,96,30,'CANCELAR',CLR_CARD,CLR_PRIMARY,1,@QuickCancelarClick);
+    CrearBoton(pnlWrap,YPos,W-106,96,30,'FINALIZAR',CLR_PRIMARY,CLR_PRIMARY_FG,0,@DialogFinalizarOk);
     Result:=F.ShowModal=mrOk;
   finally F.Free; end;
 end;
