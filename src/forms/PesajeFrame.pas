@@ -13,6 +13,7 @@ type
 
   TFramePesaje = class(TFrame)
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   private
     FTara: Integer;
     FPesoBruto: Integer;
@@ -90,7 +91,6 @@ type
     function BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
     procedure AjustarSeparadores;
   public
-    destructor Destroy; override;
     procedure AjustarLayoutCards;
   end;
 
@@ -121,7 +121,7 @@ end;
 
 constructor TFramePesaje.Create(AOwner: TComponent);
 var
-  pnlRegistro: TPanel;
+  pnlHeader, pnlRegistro: TPanel;
   Lbl: TLabel;
   YPos, InnerW: Integer;
   po, pi: TPanel;
@@ -169,35 +169,35 @@ begin
   Self.Color := CLR_BG;
 
   // ══════════════════════════════════════════════════════════════
-  // ORDEN DE CREACIÓN EN LAZARUS (REESTRUCTURADO):
-  //
-  //  1) pnlMedio   → alTop     (Cards Izq + Der con Altura Fija)
-  //  2) pnlCard    → alClient  (Tabla histórica elástica inferior)
-  //
-  // Removido pnlHeader para evitar desbordamientos del título en resoluciones altas.
-  // Los títulos internos de cada Card describen claramente el contexto del módulo.
+  // ORDEN DE CREACIÓN:
+  //   1) pnlMedio   → alTop   cards izq+der altura fija
+  //   2) pnlCard    → alClient tabla ocupa todo lo restante
   // ══════════════════════════════════════════════════════════════
 
-  // ── 1) CONTENEDOR CARDS ── alTop, altura fija estricta ───────
+
+  // ── 1) CONTENEDOR CARDS ── alTop altura fija ─────────────────
   pnlMedio := TPanel.Create(Self);
   pnlMedio.Parent := Self;
-  pnlMedio.Align := alTop; 
-  pnlMedio.Height := 385;  // Altura exacta fija para contener los datos de pesaje de forma segura
+  pnlMedio.Align := alTop;
+  pnlMedio.Height := 385;
   pnlMedio.BevelOuter := bvNone;
   pnlMedio.Color := CLR_BG;
   pnlMedio.BorderSpacing.Left   := FRAME_MARGIN;
   pnlMedio.BorderSpacing.Right  := FRAME_MARGIN;
-  pnlMedio.BorderSpacing.Top    := FRAME_MARGIN; // Margen superior directo contra el borde del Frame
+  pnlMedio.BorderSpacing.Top    := FRAME_MARGIN;
   pnlMedio.BorderSpacing.Bottom := 12;
 
-  // ── 2) TABLA HISTÓRICA ── alClient, crece elásticamente ─────
+  // ── 2) TABLA ── alClient crece con la ventana ────────────────
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
-  pnlCard.Align := alClient; 
+  pnlCard.Align := alClient;
   pnlCard.BorderSpacing.Left   := FRAME_MARGIN;
   pnlCard.BorderSpacing.Right  := FRAME_MARGIN;
   pnlCard.BorderSpacing.Bottom := FRAME_MARGIN;
-  pnlCard.BevelOuter := bvLowered; pnlCard.Color := CLR_CARD;
+  pnlCard.BevelOuter := bvNone;     // sin bisel nativo
+  pnlCard.Color := CLR_CARD;
+  pnlCard.Tag := 2;                 // borde blanco via PaintRounded
+  pnlCard.OnPaint := @PaintRounded;
 
   Grid := TStringGrid.Create(Self);
   Grid.Parent := pnlCard;
@@ -229,7 +229,7 @@ begin
   Grid.OnMouseDown := @GridMouseDown;
   Grid.OnMouseMove := @GridMouseMove;
 
-  // ── 3) CARD IZQUIERDO ── alLeft dentro de pnlMedio ──────────
+  // ── 4) CARD IZQUIERDO ── alLeft dentro de pnlMedio ───────────
   InnerW := CREG_W - CREG_PAD * 2;
 
   pnlRegistroCard := TPanel.Create(pnlMedio);
@@ -237,10 +237,10 @@ begin
   pnlRegistroCard.Align := alLeft;
   pnlRegistroCard.Width := CREG_W;
   pnlRegistroCard.BorderSpacing.Right := 16;
-  pnlRegistroCard.BevelOuter := bvLowered;
-  pnlRegistroCard.BevelInner := bvNone;
-  pnlRegistroCard.BevelWidth := 1;
+  pnlRegistroCard.BevelOuter := bvNone;   // sin bisel nativo
   pnlRegistroCard.Color := CLR_CARD;
+  pnlRegistroCard.Tag := 2;              // borde blanco via PaintRounded
+  pnlRegistroCard.OnPaint := @PaintRounded;
 
   pnlRegistro := TPanel.Create(pnlRegistroCard);
   pnlRegistro.Parent := pnlRegistroCard;
@@ -361,14 +361,14 @@ begin
   lblValNeto.Caption := '0'; lblValNeto.Font.Size := 11;
   lblValNeto.Font.Style := [fsBold]; lblValNeto.Font.Color := CLR_TEXT_HEADING;
 
-  // ── 4) CARD DERECHO ── alClient dentro de pnlMedio ──────────
+  // ── 5) CARD DERECHO ── alClient dentro de pnlMedio ───────────
   pnlForm := TPanel.Create(pnlMedio);
   pnlForm.Parent := pnlMedio;
   pnlForm.Align := alClient;
-  pnlForm.BevelOuter := bvLowered; 
-  pnlForm.BevelInner := bvNone;
-  pnlForm.BevelWidth := 1; 
+  pnlForm.BevelOuter := bvNone;    // sin bisel nativo
   pnlForm.Color := CLR_CARD;
+  pnlForm.Tag := 2;               // borde blanco via PaintRounded
+  pnlForm.OnPaint := @PaintRounded;
 
   YPos := 12;
   lblFormTitle := TLabel.Create(pnlForm); lblFormTitle.Parent := pnlForm;
@@ -463,6 +463,46 @@ begin
   OnResize := @FormResize;
   CargarCombos;
   RefrescarPesajes(nil);
+end;
+
+// ══════════════════════════════════════════════════════════════
+// PaintRounded — 3 casos:
+//   Tag = 1 → borde CLR_INFO   (botón Cancelar)
+//   Tag = 2 → borde CLR_WHITE  (cards)
+//   else    → sin borde        (botones Guardar, etc.)
+// ══════════════════════════════════════════════════════════════
+procedure TFramePesaje.PaintRounded(Sender: TObject);
+var Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+
+  // ── Cards: borde blanco plano 1px, sin redondeado (igual que todos los frames) ──
+  if (Pnl = pnlCard) or (Pnl = pnlRegistroCard) or (Pnl = pnlForm) then begin
+    Pnl.Canvas.Brush.Color := CLR_CARD;
+    Pnl.Canvas.Brush.Style := bsSolid;
+    Pnl.Canvas.FillRect(Pnl.ClientRect);
+    Pnl.Canvas.Pen.Color := CLR_WHITE;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
+    Exit;
+  end;
+
+  // ── Botones redondeados ──────────────────────────────────────────────────────────
+  Pnl.Canvas.Brush.Color := CLR_BG;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  if Pnl.Tag = 1 then begin
+    // Botón Cancelar — borde CLR_INFO
+    Pnl.Canvas.Pen.Color := CLR_INFO;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end else begin
+    // Botones sin borde (Guardar, Cap.peso, Cap.tara, etc.)
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  end;
 end;
 
 procedure TFramePesaje.AjustarSeparadores;
@@ -1056,6 +1096,37 @@ begin
   pnlGuardarTara.Visible:=False; pnlSwitchTara.Invalidate;
 end;
 
+function TFramePesaje.CrearBoton(AParent: TPanel; ATop,ALeft,AW,AH: Integer;
+  const ACaption: string; AColor,AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
+var Lbl: TLabel;
+begin
+  Result:=TPanel.Create(AParent); Result.Parent:=AParent;
+  Result.SetBounds(ALeft,ATop,AW,AH); Result.BevelOuter:=bvNone;
+  Result.Color:=AColor; Result.Tag:=ATag; Result.Cursor:=crHandPoint;
+  Result.OnClick:=AClick; Result.OnPaint:=@PaintRounded;
+  Result.ParentBackground:=False; Result.ParentColor:=False;
+  Lbl:=TLabel.Create(Result); Lbl.Parent:=Result;
+  Lbl.Align:=alClient; Lbl.Alignment:=taCenter; Lbl.Layout:=tlCenter;
+  Lbl.Caption:=ACaption; Lbl.Font.Size:=10; Lbl.Font.Style:=[];
+  Lbl.Font.Color:=AFontColor; Lbl.OnClick:=AClick;
+end;
+
+procedure TFramePesaje.QuickCancelarClick(Sender: TObject);
+var Frm: TCustomForm; Pnl: TWinControl;
+begin
+  if Sender is TLabel then Pnl:=TLabel(Sender).Parent
+  else if Sender is TPanel then Pnl:=TPanel(Sender) else Exit;
+  Frm:=GetParentForm(Pnl); if Frm<>nil then Frm.ModalResult:=mrCancel;
+end;
+
+procedure TFramePesaje.QuickGuardarClick(Sender: TObject);
+var Frm: TCustomForm; Pnl: TWinControl;
+begin
+  if Sender is TLabel then Pnl:=TLabel(Sender).Parent
+  else if Sender is TPanel then Pnl:=TPanel(Sender) else Exit;
+  Frm:=GetParentForm(Pnl); if Frm<>nil then Frm.ModalResult:=mrOK;
+end;
+
 // ═══════ QUICK DIALOGS ═══════════════════════════════════════════════════════
 
 procedure TFramePesaje.QuickVehiculoClick(Sender: TObject);
@@ -1220,52 +1291,6 @@ begin
       CargarCombos;
     end;
   finally F.Free; end;
-end;
-
-function TFramePesaje.CrearBoton(AParent: TPanel; ATop,ALeft,AW,AH: Integer;
-  const ACaption: string; AColor,AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
-var Lbl: TLabel;
-begin
-  Result:=TPanel.Create(AParent); Result.Parent:=AParent;
-  Result.SetBounds(ALeft,ATop,AW,AH); Result.BevelOuter:=bvNone;
-  Result.Color:=AColor; Result.Tag:=ATag; Result.Cursor:=crHandPoint;
-  Result.OnClick:=AClick; Result.OnPaint:=@PaintRounded;
-  Result.ParentBackground:=False; Result.ParentColor:=False;
-  Lbl:=TLabel.Create(Result); Lbl.Parent:=Result;
-  Lbl.Align:=alClient; Lbl.Alignment:=taCenter; Lbl.Layout:=tlCenter;
-  Lbl.Caption:=ACaption; Lbl.Font.Size:=10; Lbl.Font.Style:=[];
-  Lbl.Font.Color:=AFontColor; Lbl.OnClick:=AClick;
-end;
-
-procedure TFramePesaje.QuickCancelarClick(Sender: TObject);
-var Frm: TCustomForm; Pnl: TWinControl;
-begin
-  if Sender is TLabel then Pnl:=TLabel(Sender).Parent
-  else if Sender is TPanel then Pnl:=TPanel(Sender) else Exit;
-  Frm:=GetParentForm(Pnl); if Frm<>nil then Frm.ModalResult:=mrCancel;
-end;
-
-procedure TFramePesaje.QuickGuardarClick(Sender: TObject);
-var Frm: TCustomForm; Pnl: TWinControl;
-begin
-  if Sender is TLabel then Pnl:=TLabel(Sender).Parent
-  else if Sender is TPanel then Pnl:=TPanel(Sender) else Exit;
-  Frm:=GetParentForm(Pnl); if Frm<>nil then Frm.ModalResult:=mrOK;
-end;
-
-procedure TFramePesaje.PaintRounded(Sender: TObject);
-var Pnl: TPanel;
-begin
-  Pnl:=TPanel(Sender);
-  Pnl.Canvas.Brush.Color:=CLR_BG; Pnl.Canvas.FillRect(0,0,Pnl.Width,Pnl.Height);
-  Pnl.Canvas.Brush.Color:=Pnl.Color;
-  if Pnl.Tag=1 then begin
-    Pnl.Canvas.Pen.Color:=CLR_INFO; Pnl.Canvas.Pen.Width:=1;
-    Pnl.Canvas.RoundRect(1,1,Pnl.Width-1,Pnl.Height-1,8,8);
-  end else begin
-    Pnl.Canvas.Pen.Style:=psClear;
-    Pnl.Canvas.RoundRect(0,0,Pnl.Width,Pnl.Height,8,8);
-  end;
 end;
 
 function TFramePesaje.MostrarDialogFinalizar(PesajeID,Bruto,Tara,Neto: Integer): Boolean;

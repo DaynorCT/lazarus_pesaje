@@ -77,12 +77,12 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="184"/>
+        <TopLine Value="185"/>
         <CursorPos X="3" Y="186"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/DashboardFrame.pas"/>
@@ -124,7 +124,6 @@
         <ComponentName Value="FrameUsuarios"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
         <CursorPos X="9" Y="16"/>
         <UsageCount Value="205"/>
@@ -177,9 +176,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <EditorIndex Value="2"/>
-        <CursorPos X="12" Y="16"/>
+        <CursorPos X="17"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/auth/LoginForm.lfm"/>
@@ -245,9 +245,6 @@
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="pesaje.lpr"/>
-      </Position>
       <Position>
         <Filename Value="src/forms/PesajeFrame.pas"/>
         <Caret Line="158" Column="20" TopLine="139"/>
@@ -362,6 +359,10 @@
       <Position>
         <Filename Value="src/forms/EmpresasFrame.pas"/>
         <Caret Line="892" Column="7" TopLine="881"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/UsuariosFrame.pas"/>
+        <Caret Line="16" Column="9"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
