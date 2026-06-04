@@ -67,6 +67,7 @@ begin
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
   // Card contenedor de la tabla
+  // Borde blanco plano via PaintRounded — consistente en Windows y macOS
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
   pnlCard.Align := alClient;
@@ -74,10 +75,9 @@ begin
   pnlCard.BorderSpacing.Left := 24;
   pnlCard.BorderSpacing.Right := 24;
   pnlCard.BorderSpacing.Bottom := 24;
-  pnlCard.BevelOuter := bvLowered;
-  pnlCard.BevelInner := bvNone;
-  pnlCard.BevelWidth := 1;
+  pnlCard.BevelOuter := bvNone;
   pnlCard.Color := CLR_CARD;
+  pnlCard.OnPaint := @PaintRounded;
 
   // Grid
   Grid := TStringGrid.Create(Self);
@@ -123,15 +123,51 @@ begin
   Grid.ColWidths[6] := 120;
   Grid.ColWidths[7] := 0;
 
-  Grid.OnDrawCell := @GridDrawCell;
+  Grid.OnDrawCell  := @GridDrawCell;
   Grid.OnMouseDown := @GridMouseDown;
   Grid.OnMouseMove := @GridMouseMove;
+
   FHintTimer := TTimer.Create(Self);
-  FHintTimer.Interval := 400; FHintTimer.OnTimer := @HintTimerTick;
+  FHintTimer.Interval := 400;
+  FHintTimer.OnTimer := @HintTimerTick;
   FHintTimer.Enabled := False;
   FHintActive := False;
 
   Refrescar(nil);
+end;
+
+// ══════════════════════════════════════════════════════════════
+// PaintRounded — patrón estándar de toda la app:
+//   pnlCard  → borde blanco plano 1px via Rectangle
+//   Tag = 1  → borde CLR_INFO  (botón Cancelar del modal)
+//   else     → sin borde       (botón Guardar)
+// ══════════════════════════════════════════════════════════════
+procedure TFrameBoletaConfig.PaintRounded(Sender: TObject);
+var Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  if Pnl = pnlCard then begin
+    Pnl.Canvas.Brush.Color := CLR_CARD;
+    Pnl.Canvas.Brush.Style := bsSolid;
+    Pnl.Canvas.FillRect(Pnl.ClientRect);
+    Pnl.Canvas.Pen.Color := CLR_WHITE;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
+    Exit;
+  end;
+  Pnl.Canvas.Brush.Color := CLR_BG;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  if Pnl.Tag = 1 then begin
+    Pnl.Canvas.Pen.Color := CLR_INFO;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end else begin
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  end;
 end;
 
 procedure TFrameBoletaConfig.Refrescar(Sender: TObject);
@@ -143,14 +179,11 @@ begin
 
   Q := DM.AbrirQuery('SELECT * FROM boleta_config ORDER BY id LIMIT 1');
 
-  if Q.EOF then
-    Grid.RowCount := 1
-  else
-    Grid.RowCount := 2;
+  if Q.EOF then Grid.RowCount := 1
+  else Grid.RowCount := 2;
 
   Row := 1;
-  while not Q.EOF do
-  begin
+  while not Q.EOF do begin
     ID := Q.Fields[0].AsInteger;
     Grid.Objects[0, Row] := TObject(PtrInt(ID));
     Grid.Cells[0, Row] := UpperCase(Q.FieldByName('titulo_superior').AsString);
@@ -169,68 +202,50 @@ end;
 
 procedure TFrameBoletaConfig.GridDrawCell(Sender: TObject; aCol, aRow: Integer;
   aRect: TRect; aState: TGridDrawState);
-var
-  Ts: TTextStyle;
-  IsSelected: Boolean;
+var Ts: TTextStyle; IsSelected: Boolean;
 begin
-  if aRow = 0 then
-  begin
+  if aRow = 0 then begin
     Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
     Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
     Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
     Ts := Grid.Canvas.TextStyle;
-    Ts.Alignment := taCenter;
-    Ts.Layout := tlCenter;
+    Ts.Alignment := taCenter; Ts.Layout := tlCenter;
     Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
     Exit;
   end;
 
   IsSelected := gdSelected in aState;
 
-  // Columna Acciones: lápiz centrado
-  if aCol = 6 then
-  begin
-    if IsSelected then
-      Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
-    else
-      Grid.Canvas.Brush.Color := CLR_CARD;
+  if aCol = 6 then begin
+    if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
-
-    if (aRow = FHoverRow) and (FHoverZone = 1) then
-    begin
+    if (aRow = FHoverRow) and (FHoverZone = 1) then begin
       Grid.Canvas.Brush.Color := CLR_SIDEBAR_ACTIVE;
       Grid.Canvas.Pen.Style := psClear;
-      Grid.Canvas.RoundRect(aRect.Left + 12, aRect.Top + 4, aRect.Right - 12, aRect.Bottom - 4, 6, 6);
+      Grid.Canvas.RoundRect(aRect.Left+12, aRect.Top+4, aRect.Right-12, aRect.Bottom-4, 6, 6);
     end;
-
     Grid.Canvas.Font.Height := -13;
     Grid.Canvas.Font.Color := CLR_PRIMARY;
     Grid.Canvas.Font.Style := [fsBold];
     Ts := Grid.Canvas.TextStyle;
-    Ts.Alignment := taCenter;
-    Ts.Layout := tlCenter;
-    Grid.Canvas.Font.Name := FAFuente; Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, FAIconoStr(FA_EDIT, '✎'), Ts);
+    Ts.Alignment := taCenter; Ts.Layout := tlCenter;
+    Grid.Canvas.Font.Name := FAFuente;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, FAIconoStr(FA_EDIT, '✎'), Ts);
     Exit;
   end;
 
-  if IsSelected then
-    Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
-  else
-    Grid.Canvas.Brush.Color := CLR_CARD;
-
+  if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+  else Grid.Canvas.Brush.Color := CLR_CARD;
   Grid.Canvas.FillRect(aRect);
-
   Ts := Grid.Canvas.TextStyle;
-  Ts.Alignment := taCenter;
-  Ts.Layout := tlCenter;
+  Ts.Alignment := taCenter; Ts.Layout := tlCenter;
   Grid.Canvas.Font.Height := -12;
   Grid.Canvas.Font.Color := CLR_TEXT_HEADING;
   Grid.Canvas.Font.Style := [];
   Grid.Canvas.TextRect(aRect, aRect.Left + 6, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
-
-  if aCol = 0 then
-  begin
+  if aCol = 0 then begin
     Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
     Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
   end;
@@ -238,21 +253,15 @@ end;
 
 procedure TFrameBoletaConfig.GridMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-var
-  Col, Row: Integer;
-  ID, TotalH, I: Integer;
+var Col, Row, ID, TotalH, I: Integer;
 begin
   if Button <> mbLeft then Exit;
   Grid.MouseToCell(X, Y, Col, Row);
   if (Row < 1) or (Row >= Grid.RowCount) then Exit;
-
   TotalH := 0;
-  for I := 0 to Grid.RowCount - 1 do
-    TotalH := TotalH + Grid.RowHeights[I];
+  for I := 0 to Grid.RowCount - 1 do TotalH := TotalH + Grid.RowHeights[I];
   if Y > TotalH then Exit;
-
-  if Col = 6 then
-  begin
+  if Col = 6 then begin
     ID := PtrInt(Grid.Objects[0, Row]);
     ShowConfigForm(ID);
   end;
@@ -260,57 +269,41 @@ end;
 
 procedure TFrameBoletaConfig.GridMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
-var
-  Col, Row: Integer;
-  NewZone: Integer;
+var Col, Row, NewZone: Integer;
 begin
   Grid.MouseToCell(X, Y, Col, Row);
-  if (Col <> 6) or (Row < 1) or (Row >= Grid.RowCount) then
-  begin
+  if (Col <> 6) or (Row < 1) or (Row >= Grid.RowCount) then begin
     NewZone := 0; Row := 0;
-  end
-  else
+  end else
     NewZone := 1;
 
-  if (FHoverRow <> Row) or (FHoverZone <> NewZone) then
-  begin
+  if (FHoverRow <> Row) or (FHoverZone <> NewZone) then begin
     if (FHoverRow > 0) and (FHoverRow < Grid.RowCount) then
       Grid.InvalidateCell(6, FHoverRow);
-    FHoverRow := Row;
-    FHoverZone := NewZone;
+    FHoverRow := Row; FHoverZone := NewZone;
     if (Row > 0) and (Row < Grid.RowCount) then
       Grid.InvalidateCell(6, Row);
-    if FHintActive then
-    begin
-      FHintWindow.Hide;
-      FHintActive := False;
-    end;
+    if FHintActive then begin FHintWindow.Hide; FHintActive := False; end;
     FHintTimer.Enabled := NewZone > 0;
   end;
 end;
 
 procedure TFrameBoletaConfig.HintTimerTick(Sender: TObject);
-var
-  Texto: string;
-  P: TPoint;
+var Texto: string; P: TPoint;
 begin
   FHintTimer.Enabled := False;
   if FHoverZone = 0 then Exit;
   Texto := 'Editar configuración';
   P := Mouse.CursorPos;
   MostrarHintAccion(Texto);
-  FHintWindow.Top := P.Y + 20;
-  FHintWindow.Left := P.X + 12;
-  FHintWindow.Show;
-  FHintActive := True;
+  FHintWindow.Top := P.Y + 20; FHintWindow.Left := P.X + 12;
+  FHintWindow.Show; FHintActive := True;
 end;
 
 procedure TFrameBoletaConfig.MostrarHintAccion(const Texto: string);
-var
-  R: TRect;
+var R: TRect;
 begin
-  if FHintWindow = nil then
-  begin
+  if FHintWindow = nil then begin
     FHintWindow := THintWindow.Create(Self);
     FHintWindow.Color := CLR_TEXT;
     FHintWindow.Font.Size := 11;
@@ -318,27 +311,6 @@ begin
   end;
   R := FHintWindow.CalcHintRect(250, Texto, nil);
   FHintWindow.ActivateHint(R, Texto);
-end;
-
-procedure TFrameBoletaConfig.PaintRounded(Sender: TObject);
-var
-  Pnl: TPanel;
-begin
-  Pnl := TPanel(Sender);
-  Pnl.Canvas.Brush.Color := CLR_BG;
-  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
-  Pnl.Canvas.Brush.Color := Pnl.Color;
-  if Pnl.Tag = 1 then
-  begin
-    Pnl.Canvas.Pen.Color := CLR_INFO;
-    Pnl.Canvas.Pen.Width := 1;
-    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
-  end
-  else
-  begin
-    Pnl.Canvas.Pen.Style := psClear;
-    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
-  end;
 end;
 
 procedure TFrameBoletaConfig.GuardarClick(Sender: TObject);
@@ -354,7 +326,7 @@ end;
 procedure TFrameBoletaConfig.ShowConfigForm(ID: Integer);
 var
   F: TForm;
-  Lbl, LblSection: TLabel;
+  LblSection: TLabel;
   eSalida, eDireccion, eCelular1, eCelular2, eCiudad: TEdit;
   eTituloSuperior, eMarca, eTituloDocumento, eAcreditacion: TEdit;
   Q: TSQLQuery;
@@ -362,245 +334,157 @@ var
 
   function MakeLabel(ATop, ALeft: Integer; ACaption: string): TLabel;
   begin
-    Result := TLabel.Create(F);
-    Result.Parent := F;
+    Result := TLabel.Create(F); Result.Parent := F;
     Result.SetBounds(ALeft, ATop, 300, 16);
     Result.Caption := ACaption;
-    Result.Font.Size := 11;
-    Result.Font.Style := [];
+    Result.Font.Size := 11; Result.Font.Style := [];
     Result.Font.Color := CLR_TEXT_HEADING;
   end;
 
   function MakeEditConBorde(ATop, ALeft, AWidth: Integer): TEdit;
-  var
-    pnlOuter, pnlInner: TPanel;
+  var pO, pI: TPanel;
   begin
-    pnlOuter := TPanel.Create(F);
-    pnlOuter.Parent := F;
-    pnlOuter.SetBounds(ALeft, ATop, AWidth, 40);
-    pnlOuter.BevelOuter := bvNone;
-    pnlOuter.Color := CLR_BORDER;
-
-    pnlInner := TPanel.Create(pnlOuter);
-    pnlInner.Parent := pnlOuter;
-    pnlInner.SetBounds(1, 1, AWidth - 2, 38);
-    pnlInner.BevelOuter := bvNone;
-    pnlInner.Color := CLR_WHITE;
-    pnlInner.BorderWidth := 6;
-
-    Result := TEdit.Create(pnlInner);
-    Result.Parent := pnlInner;
-    Result.Align := alClient;
-    Result.BorderStyle := bsNone;
-    Result.Font.Size := 11;
-    Result.Font.Color := CLR_TEXT;
-    Result.CharCase := ecUpperCase;
-    Result.Color := CLR_WHITE;
+    pO := TPanel.Create(F); pO.Parent := F;
+    pO.SetBounds(ALeft, ATop, AWidth, 40);
+    pO.BevelOuter := bvNone; pO.Color := CLR_BORDER;
+    pI := TPanel.Create(pO); pI.Parent := pO;
+    pI.SetBounds(1, 1, AWidth - 2, 38);
+    pI.BevelOuter := bvNone; pI.Color := CLR_WHITE; pI.BorderWidth := 6;
+    Result := TEdit.Create(pI); Result.Parent := pI;
+    Result.Align := alClient; Result.BorderStyle := bsNone;
+    Result.Font.Size := 11; Result.Font.Color := CLR_TEXT;
+    Result.CharCase := ecUpperCase; Result.Color := CLR_WHITE;
   end;
 
 begin
   Q := DM.AbrirQuery('SELECT * FROM boleta_config WHERE id = ' + IntToStr(ID));
   try
-    if Q.EOF then
-    begin
-      Q.Close;
-      Exit;
-    end;
+    if Q.EOF then Exit;
 
     F := TForm.Create(nil);
     FModalForm := F;
     try
-      F.Caption := '';
-      F.Width := 600;
-      F.Position := poOwnerFormCenter;
-      F.BorderStyle := bsDialog;
-      F.Color := CLR_WHITE;
+      F.Caption := ''; F.Width := 600; F.Position := poOwnerFormCenter;
+      F.BorderStyle := bsDialog; F.Color := CLR_WHITE;
 
-      // Header del modal
-      with TPanel.Create(F) do
-      begin
-        Parent := F;
-        Align := alTop;
-        Height := 60;
-        BevelOuter := bvNone;
-        Color := CLR_WHITE;
-        with TLabel.Create(F) do
-        begin
-          Parent := TPanel(F.Controls[F.ControlCount - 1]);
-          SetBounds(24, 14, 400, 24);
+      with TPanel.Create(F) do begin
+        Parent := F; Align := alTop; Height := 60; BevelOuter := bvNone; Color := CLR_WHITE;
+        with TLabel.Create(F) do begin
+          Parent := TPanel(F.Controls[F.ControlCount-1]); SetBounds(24,14,400,24);
           Caption := 'Editar configuración de boleta';
-          Font.Size := 14;
-          Font.Style := [];
-          Font.Color := CLR_TEXT_HEADING;
+          Font.Size := 14; Font.Style := []; Font.Color := CLR_TEXT_HEADING;
         end;
-        with TPanel.Create(F) do
-        begin
-          Parent := TPanel(F.Controls[F.ControlCount - 1]);
-          Align := alBottom;
-          Height := 1;
-          BevelOuter := bvNone;
-          Color := CLR_BORDER;
+        with TPanel.Create(F) do begin
+          Parent := TPanel(F.Controls[F.ControlCount-1]);
+          Align := alBottom; Height := 1; BevelOuter := bvNone; Color := CLR_BORDER;
         end;
       end;
 
       YPos := 80;
 
-      // Sección: Encabezado de boleta
-      LblSection := TLabel.Create(F);
-      LblSection.Parent := F;
-      LblSection.SetBounds(24, YPos, 300, 20);
-      LblSection.Caption := 'Encabezado de boleta';
-      LblSection.Font.Size := 11;
-      LblSection.Font.Style := [];
-      LblSection.Font.Color := CLR_TEXT_HEADING;
-
+      // Encabezado de boleta
+      LblSection := TLabel.Create(F); LblSection.Parent := F;
+      LblSection.SetBounds(24,YPos,300,20); LblSection.Caption := 'Encabezado de boleta';
+      LblSection.Font.Size := 11; LblSection.Font.Style := []; LblSection.Font.Color := CLR_TEXT_HEADING;
       YPos := YPos + 33;
 
-      // Título Superior | Título Documento
       MakeLabel(YPos, 24, 'Título superior');
       MakeLabel(YPos, 314, 'Título documento');
       YPos := YPos + 28;
-
-      eTituloSuperior := MakeEditConBorde(YPos, 24, 280);
+      eTituloSuperior  := MakeEditConBorde(YPos, 24, 280);
       eTituloSuperior.Text := UpperCase(Q.FieldByName('titulo_superior').AsString);
       eTituloDocumento := MakeEditConBorde(YPos, 314, 260);
       eTituloDocumento.Text := UpperCase(Q.FieldByName('titulo_documento').AsString);
       YPos := YPos + 48;
 
-      // Marca | Acreditación
       MakeLabel(YPos, 24, 'Marca');
       MakeLabel(YPos, 314, 'Acreditación');
       YPos := YPos + 28;
-
-      eMarca := MakeEditConBorde(YPos, 24, 280);
-      eMarca.Text := UpperCase(Q.FieldByName('marca').AsString);
+      eMarca        := MakeEditConBorde(YPos, 24, 280);
+      eMarca.Text   := UpperCase(Q.FieldByName('marca').AsString);
       eAcreditacion := MakeEditConBorde(YPos, 314, 260);
-      if Q.FieldByName('acreditacion').AsString <> '' then
-        eAcreditacion.Text := UpperCase(Q.FieldByName('acreditacion').AsString);
+      eAcreditacion.Text := UpperCase(Q.FieldByName('acreditacion').AsString);
       YPos := YPos + 56;
 
-      // Sección: Datos de contacto
-      LblSection := TLabel.Create(F);
-      LblSection.Parent := F;
-      LblSection.SetBounds(24, YPos, 300, 20);
-      LblSection.Caption := 'Datos de contacto';
-      LblSection.Font.Size := 11;
-      LblSection.Font.Style := [];
-      LblSection.Font.Color := CLR_TEXT_HEADING;
-
+      // Datos de contacto
+      LblSection := TLabel.Create(F); LblSection.Parent := F;
+      LblSection.SetBounds(24,YPos,300,20); LblSection.Caption := 'Datos de contacto';
+      LblSection.Font.Size := 11; LblSection.Font.Style := []; LblSection.Font.Color := CLR_TEXT_HEADING;
       YPos := YPos + 33;
 
-      // Salida | Dirección
       MakeLabel(YPos, 24, 'Salida');
       MakeLabel(YPos, 314, 'Dirección');
       YPos := YPos + 28;
-
-      eSalida := MakeEditConBorde(YPos, 24, 280);
+      eSalida    := MakeEditConBorde(YPos, 24, 280);
       eSalida.Text := UpperCase(Q.FieldByName('salida').AsString);
       eDireccion := MakeEditConBorde(YPos, 314, 260);
       eDireccion.Text := UpperCase(Q.FieldByName('direccion').AsString);
       YPos := YPos + 48;
 
-      // Celular 1 | Celular 2
       MakeLabel(YPos, 24, 'Celular 1');
       MakeLabel(YPos, 314, 'Celular 2');
       YPos := YPos + 28;
-
       eCelular1 := MakeEditConBorde(YPos, 24, 280);
       eCelular1.Text := UpperCase(Q.FieldByName('celular1').AsString);
       eCelular2 := MakeEditConBorde(YPos, 314, 260);
       eCelular2.Text := UpperCase(Q.FieldByName('celular2').AsString);
       YPos := YPos + 48;
 
-      // Ciudad
       MakeLabel(YPos, 24, 'Ciudad');
       YPos := YPos + 28;
-
       eCiudad := MakeEditConBorde(YPos, 24, 280);
       eCiudad.Text := UpperCase(Q.FieldByName('ciudad').AsString);
       YPos := YPos + 56;
 
-      // Línea divisora
-      with TPanel.Create(F) do
-      begin
-        Parent := F;
-        SetBounds(24, YPos, 556, 1);
-        BevelOuter := bvNone;
-        Color := CLR_BORDER;
+      with TPanel.Create(F) do begin
+        Parent := F; SetBounds(24,YPos,556,1); BevelOuter := bvNone; Color := CLR_BORDER;
       end;
       YPos := YPos + 16;
-
       F.Height := YPos + 70;
 
       // CANCELAR
-      with TPanel.Create(F) do
-      begin
-        Parent := F;
-        SetBounds(310, YPos, 130, 36);
-        BevelOuter := bvNone;
-        Color := CLR_WHITE;
-        Tag := 1;
-        Cursor := crHandPoint;
-        OnPaint := @PaintRounded;
-        OnClick := @CancelarClick;
-        with TLabel.Create(F) do
-        begin
-          Parent := TPanel(F.Controls[F.ControlCount - 1]);
-          Align := alClient;
-          Alignment := taCenter;
-          Layout := tlCenter;
-          Caption := 'CANCELAR';
-          Font.Size := 12;
-          Font.Style := [];
-          Font.Color := CLR_PRIMARY;
-          OnClick := @CancelarClick;
+      with TPanel.Create(F) do begin
+        Parent := F; SetBounds(310,YPos,130,36);
+        BevelOuter := bvNone; Color := CLR_WHITE; Tag := 1;
+        Cursor := crHandPoint; OnPaint := @PaintRounded; OnClick := @CancelarClick;
+        with TLabel.Create(F) do begin
+          Parent := TPanel(F.Controls[F.ControlCount-1]);
+          Align := alClient; Alignment := taCenter; Layout := tlCenter;
+          Caption := 'CANCELAR'; Font.Size := 12; Font.Style := [];
+          Font.Color := CLR_PRIMARY; OnClick := @CancelarClick;
         end;
       end;
 
       // GUARDAR
-      with TPanel.Create(F) do
-      begin
-        Parent := F;
-        SetBounds(450, YPos, 130, 36);
-        BevelOuter := bvNone;
-        Color := CLR_PRIMARY;
-        Cursor := crHandPoint;
-        OnPaint := @PaintRounded;
-        OnClick := @GuardarClick;
-        with TLabel.Create(F) do
-        begin
-          Parent := TPanel(F.Controls[F.ControlCount - 1]);
-          Align := alClient;
-          Alignment := taCenter;
-          Layout := tlCenter;
-          Caption := 'GUARDAR';
-          Font.Size := 12;
-          Font.Style := [];
-          Font.Color := CLR_WHITE;
-          OnClick := @GuardarClick;
+      with TPanel.Create(F) do begin
+        Parent := F; SetBounds(450,YPos,130,36);
+        BevelOuter := bvNone; Color := CLR_PRIMARY;
+        Cursor := crHandPoint; OnPaint := @PaintRounded; OnClick := @GuardarClick;
+        with TLabel.Create(F) do begin
+          Parent := TPanel(F.Controls[F.ControlCount-1]);
+          Align := alClient; Alignment := taCenter; Layout := tlCenter;
+          Caption := 'GUARDAR'; Font.Size := 12; Font.Style := [];
+          Font.Color := CLR_WHITE; OnClick := @GuardarClick;
         end;
       end;
 
-      if F.ShowModal = mrOK then
-      begin
-        if DM.Transaccion.Active then
-          DM.Transaccion.Rollback;
+      if F.ShowModal = mrOK then begin
+        if DM.Transaccion.Active then DM.Transaccion.Rollback;
         DM.Transaccion.StartTransaction;
         try
           DM.EjecutarSQL(
             'UPDATE boleta_config SET ' +
-            'salida = '             + QuotedStr(UpperCase(Trim(eSalida.Text))) + ', ' +
-            'direccion = '          + QuotedStr(UpperCase(Trim(eDireccion.Text))) + ', ' +
-            'celular1 = '           + QuotedStr(UpperCase(Trim(eCelular1.Text))) + ', ' +
-            'celular2 = '           + QuotedStr(UpperCase(Trim(eCelular2.Text))) + ', ' +
-            'ciudad = '             + QuotedStr(UpperCase(Trim(eCiudad.Text))) + ', ' +
-            'titulo_superior = '    + QuotedStr(UpperCase(Trim(eTituloSuperior.Text))) + ', ' +
-            'marca = '              + QuotedStr(UpperCase(Trim(eMarca.Text))) + ', ' +
-            'titulo_documento = '   + QuotedStr(UpperCase(Trim(eTituloDocumento.Text))) + ', ' +
-            'acreditacion = '       + QuotedStr(UpperCase(Trim(eAcreditacion.Text))) + ', ' +
+            'salida = '           + QuotedStr(UpperCase(Trim(eSalida.Text))) + ', ' +
+            'direccion = '        + QuotedStr(UpperCase(Trim(eDireccion.Text))) + ', ' +
+            'celular1 = '         + QuotedStr(UpperCase(Trim(eCelular1.Text))) + ', ' +
+            'celular2 = '         + QuotedStr(UpperCase(Trim(eCelular2.Text))) + ', ' +
+            'ciudad = '           + QuotedStr(UpperCase(Trim(eCiudad.Text))) + ', ' +
+            'titulo_superior = '  + QuotedStr(UpperCase(Trim(eTituloSuperior.Text))) + ', ' +
+            'marca = '            + QuotedStr(UpperCase(Trim(eMarca.Text))) + ', ' +
+            'titulo_documento = ' + QuotedStr(UpperCase(Trim(eTituloDocumento.Text))) + ', ' +
+            'acreditacion = '     + QuotedStr(UpperCase(Trim(eAcreditacion.Text))) + ', ' +
             'fecha_modificacion = ''' + FechaHoraActual +
             ''' WHERE id = ' + IntToStr(ID));
-
           DM.Transaccion.Commit;
           Refrescar(nil);
         except
@@ -610,6 +494,7 @@ begin
       end;
     finally
       F.Free;
+      FModalForm := nil;
     end;
   finally
     Q.Close;
@@ -618,6 +503,8 @@ end;
 
 destructor TFrameBoletaConfig.Destroy;
 begin
+  if (FModalForm <> nil) and FModalForm.Visible then
+    FModalForm.Close;
   if FHintWindow <> nil then FreeAndNil(FHintWindow);
   inherited Destroy;
 end;
