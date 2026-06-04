@@ -445,7 +445,7 @@ begin
   pnlSepFormBot.BevelOuter := bvNone; pnlSepFormBot.Color := CLR_BORDER;
   YPos := YPos + 10;
 
-  pnlCancelEdit := CrearBoton(pnlForm, YPos, FCOL1, 130, 32, 'Cancelar', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
+  pnlCancelEdit := CrearBoton(pnlForm, YPos, FCOL1, 130, 32, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
   pnlCancelEdit.Visible := False;
   pnlGuardar := CrearBoton(pnlForm, YPos, FCOL3+FFIELD-170, 170, 32, 'Registrar Pesaje', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
 
