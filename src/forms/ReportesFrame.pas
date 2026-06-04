@@ -31,15 +31,53 @@ implementation
 
 {$R *.lfm}
 
+// ══════════════════════════════════════════════════════════════
+// PaintRounded — Método Genérico Unificado Basado en Tags
+// ══════════════════════════════════════════════════════════════
 procedure TFrameReportes.PaintRounded(Sender: TObject);
 var Pnl: TPanel;
 begin
+  if not (Sender is TPanel) then Exit;
   Pnl := TPanel(Sender);
-  Pnl.Canvas.Brush.Color := CLR_BG;
-  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
-  Pnl.Canvas.Brush.Color := Pnl.Color;
-  Pnl.Canvas.Pen.Style := psClear;
-  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+
+  case Pnl.Tag of
+    // ══════════════════════════════════════════════════════════════
+    // CASO 2: Contenedor Card (Esquinas rectas + borde sutil plano)
+    // ══════════════════════════════════════════════════════════════
+    2: begin
+         Pnl.Canvas.Brush.Color := CLR_CARD;
+         Pnl.Canvas.Brush.Style := bsSolid;
+         Pnl.Canvas.FillRect(Pnl.ClientRect);
+         Pnl.Canvas.Pen.Color := CLR_BORDER_LIGHT; // Borde sutil moderno
+         Pnl.Canvas.Pen.Width := 1;
+         Pnl.Canvas.Pen.Style := psSolid;
+         Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
+       end;
+
+    // ══════════════════════════════════════════════════════════════
+    // CASO 1: Botones Secundarios (Con borde CLR_INFO)
+    // ══════════════════════════════════════════════════════════════
+    1: begin
+         Pnl.Canvas.Brush.Color := CLR_BG;
+         Pnl.Canvas.FillRect(Pnl.ClientRect);
+         Pnl.Canvas.Brush.Color := Pnl.Color;
+         Pnl.Canvas.Pen.Color := CLR_INFO;
+         Pnl.Canvas.Pen.Width := 1;
+         Pnl.Canvas.Pen.Style := psSolid;
+         Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+       end;
+
+    // ══════════════════════════════════════════════════════════════
+    // CASO POR DEFECTO (0): Botones Primarios (Sin borde, redondeados)
+    // ══════════════════════════════════════════════════════════════
+    else begin
+         Pnl.Canvas.Brush.Color := CLR_BG;
+         Pnl.Canvas.FillRect(Pnl.ClientRect);
+         Pnl.Canvas.Brush.Color := Pnl.Color;
+         Pnl.Canvas.Pen.Style := psClear;
+         Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+       end;
+  end;
 end;
 
 constructor TFrameReportes.Create(AOwner: TComponent);
@@ -175,6 +213,7 @@ begin
   pnlPDF.ParentColor := False;
   pnlPDF.Cursor := crHandPoint;
   pnlPDF.OnClick := @btnPDFClick;
+  pnlPDF.Tag := 0; // Botón primario por defecto
   pnlPDF.OnPaint := @PaintRounded;
 
   lblPDF := TLabel.Create(Self);
@@ -190,7 +229,7 @@ begin
   lblPDF.ParentColor := False;
   lblPDF.OnClick := @btnPDFClick;
 
-  // ═══ Card contenedor ═══
+  // ═══ Card contenedor (Actualizado a arquitectura limpia) ═══
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
   pnlCard.Align := alClient;
@@ -198,10 +237,10 @@ begin
   pnlCard.BorderSpacing.Left := 24;
   pnlCard.BorderSpacing.Right := 24;
   pnlCard.BorderSpacing.Bottom := 24;
-  pnlCard.BevelOuter := bvLowered;
-  pnlCard.BevelInner := bvNone;
-  pnlCard.BevelWidth := 1;
+  pnlCard.BevelOuter := bvNone; // Quitamos bisel viejo de Windows
   pnlCard.Color := CLR_CARD;
+  pnlCard.Tag := 2; // Asignación de comportamiento Card (Borde plano sutil)
+  pnlCard.OnPaint := @PaintRounded;
 
   // ═══ Grid ═══
   Grid := TStringGrid.Create(Self);

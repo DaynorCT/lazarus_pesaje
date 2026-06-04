@@ -73,7 +73,6 @@ begin
   Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := CLR_TEXT_HEADING;
 
-  // Búsqueda por nombre
   Lbl := TLabel.Create(Self);
   Lbl.Parent := Pnl;
   Lbl.SetBounds(240, 28, 70, 16);
@@ -104,7 +103,7 @@ begin
   edtBuscar.CharCase := ecUpperCase;
   edtBuscar.OnChange := @Refrescar;
 
-  // Botón + AGREGAR (panel azul + label blanco)
+  // Botón + AGREGAR
   pnlNuevo := TPanel.Create(Self);
   pnlNuevo.Parent := Pnl;
   pnlNuevo.Width := 120;
@@ -183,13 +182,13 @@ begin
   Grid.ColWidths[3] := 200;
   Grid.ColWidths[4] := 0;
 
-  Grid.OnDblClick := @GridDblClick;
-  Grid.OnDrawCell := @GridDrawCell;
+  Grid.OnDblClick  := @GridDblClick;
+  Grid.OnDrawCell  := @GridDrawCell;
   Grid.OnMouseDown := @GridMouseDown;
   Grid.OnMouseMove := @GridMouseMove;
 
   FHintTimer := TTimer.Create(Self);
-  FHintTimer.Interval := 400; 
+  FHintTimer.Interval := 400;
   FHintTimer.OnTimer := @HintTimerTick;
   FHintTimer.Enabled := False;
   FHintActive := False;
@@ -198,13 +197,15 @@ begin
 end;
 
 // ══════════════════════════════════════════════════════════════
-// PaintRounded — patrón estándar de toda la app unificado
+// PaintRounded — patrón estándar de toda la app:
+//   pnlCard  → borde blanco plano 1px via Rectangle
+//   Tag = 1  → borde CLR_INFO  (botón Cancelar del modal)
+//   else     → sin borde       (botones Guardar, Agregar)
 // ══════════════════════════════════════════════════════════════
 procedure TFrameOrigenes.PaintRounded(Sender: TObject);
 var Pnl: TPanel;
 begin
   Pnl := TPanel(Sender);
-
   if Pnl = pnlCard then begin
     Pnl.Canvas.Brush.Color := CLR_CARD;
     Pnl.Canvas.Brush.Style := bsSolid;
@@ -215,7 +216,6 @@ begin
     Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
     Exit;
   end;
-
   Pnl.Canvas.Brush.Color := CLR_BG;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
   Pnl.Canvas.Brush.Color := Pnl.Color;
@@ -247,33 +247,25 @@ begin
     'SELECT id, nombre, descripcion, estado ' +
     'FROM origenes ' + Filtro + ' ORDER BY id DESC');
 
-  Grid.BeginUpdate;
-  try
-    Grid.RowCount := 1; 
-    Row := 1;
-    while not Q.EOF do begin
-      Grid.RowCount := Grid.RowCount + 1;
-      ID := Q.Fields[0].AsInteger;
-      Grid.Objects[0, Row] := TObject(PtrInt(ID));
-      Grid.Cells[0, Row] := UpperCase(Q.Fields[1].AsString);
-      Grid.Cells[1, Row] := UpperCase(Q.Fields[2].AsString);
-      Grid.Cells[2, Row] := UpperCase(Q.Fields[3].AsString);
-      Grid.Cells[3, Row] := FAIconoStr(FA_EDIT, '✎');
-      Grid.Cells[4, Row] := IntToStr(ID);
-      Q.Next;
-      Inc(Row);
-    end;
-  finally
-    Grid.EndUpdate;
-    Q.Close;
+  Grid.RowCount := Q.RecordCount + 1;
+  Row := 1;
+  while not Q.EOF do begin
+    ID := Q.Fields[0].AsInteger;
+    Grid.Objects[0, Row] := TObject(PtrInt(ID));
+    Grid.Cells[0, Row] := UpperCase(Q.Fields[1].AsString);
+    Grid.Cells[1, Row] := UpperCase(Q.Fields[2].AsString);
+    Grid.Cells[2, Row] := UpperCase(Q.Fields[3].AsString);
+    Grid.Cells[3, Row] := FAIconoStr(FA_EDIT, '✎');
+    Grid.Cells[4, Row] := IntToStr(ID);
+    Q.Next;
+    Inc(Row);
   end;
+  Q.Close;
 end;
 
 procedure TFrameOrigenes.GridDrawCell(Sender: TObject; aCol, aRow: Integer;
   aRect: TRect; aState: TGridDrawState);
-var
-  Ts: TTextStyle;
-  IsSelected: Boolean;
+var Ts: TTextStyle; IsSelected: Boolean;
 begin
   if aRow = 0 then begin
     Grid.Canvas.Brush.Color := CLR_CARD;
@@ -292,36 +284,32 @@ begin
     if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
     else Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
-
     if (aRow = FHoverRow) and (FHoverZone > 0) then begin
       Grid.Canvas.Brush.Color := CLR_SIDEBAR_ACTIVE;
       Grid.Canvas.Pen.Style := psClear;
       case FHoverZone of
-        1: Grid.Canvas.RoundRect(aRect.Left + 41, aRect.Top + 4, aRect.Left + 109, aRect.Bottom - 4, 6, 6);
-        2: Grid.Canvas.RoundRect(aRect.Left + 101, aRect.Top + 4, aRect.Left + 159, aRect.Bottom - 4, 6, 6);
+        1: Grid.Canvas.RoundRect(aRect.Left+41, aRect.Top+4, aRect.Left+109, aRect.Bottom-4, 6, 6);
+        2: Grid.Canvas.RoundRect(aRect.Left+101,aRect.Top+4, aRect.Left+159, aRect.Bottom-4, 6, 6);
       end;
     end;
-
     Ts := Grid.Canvas.TextStyle; Ts.Layout := tlCenter;
     Grid.Canvas.Font.Height := -13; Grid.Canvas.Font.Style := [fsBold];
-    
     if Grid.Cells[2, aRow] = 'ACTIVO' then begin
       Grid.Canvas.Font.Color := CLR_SUCCESS; Ts.Alignment := taCenter;
-      Grid.Canvas.Font.Name := FAFuente; 
-      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
-        aRect.Left + 45, aRect.Top + 2, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
+      Grid.Canvas.Font.Name := FAFuente;
+      Grid.Canvas.TextRect(Rect(aRect.Left+45,aRect.Top,aRect.Left+105,aRect.Bottom),
+        aRect.Left+45, aRect.Top+2, FAIconoStr(FA_CHECK,'●')+' ──', Ts);
     end else begin
       Grid.Canvas.Font.Color := CLR_DESTRUCTIVE; Ts.Alignment := taCenter;
-      Grid.Canvas.Font.Name := FAFuente; 
-      Grid.Canvas.TextRect(Rect(aRect.Left + 45, aRect.Top, aRect.Left + 105, aRect.Bottom),
-        aRect.Left + 45, aRect.Top + 2, FAIconoStr(FA_TIMES, '○') + ' ──', Ts);
+      Grid.Canvas.Font.Name := FAFuente;
+      Grid.Canvas.TextRect(Rect(aRect.Left+45,aRect.Top,aRect.Left+105,aRect.Bottom),
+        aRect.Left+45, aRect.Top+2, FAIconoStr(FA_TIMES,'○')+' ──', Ts);
     end;
-
     Grid.Canvas.Font.Height := -13; Grid.Canvas.Font.Color := CLR_PRIMARY;
     Grid.Canvas.Font.Style := [fsBold]; Ts.Alignment := taCenter;
-    Grid.Canvas.Font.Name := FAFuente; 
-    Grid.Canvas.TextRect(Rect(aRect.Left + 105, aRect.Top, aRect.Left + 155, aRect.Bottom),
-      aRect.Left + 105, aRect.Top + 2, FAIconoStr(FA_EDIT, '✎'), Ts);
+    Grid.Canvas.Font.Name := FAFuente;
+    Grid.Canvas.TextRect(Rect(aRect.Left+105,aRect.Top,aRect.Left+155,aRect.Bottom),
+      aRect.Left+105, aRect.Top+2, FAIconoStr(FA_EDIT,'✎'), Ts);
     Exit;
   end;
 
@@ -329,15 +317,13 @@ begin
     if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
     else Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
-
     if Grid.Cells[2, aRow] = 'ACTIVO' then begin
       Grid.Canvas.Brush.Color := CLR_SUCCESS_BG; Grid.Canvas.Font.Color := CLR_TEAL;
     end else begin
       Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG; Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
     end;
-
     Grid.Canvas.Pen.Style := psClear;
-    Grid.Canvas.RoundRect(aRect.Left + 55, aRect.Top + 6, aRect.Left + 145, aRect.Top + 30, 12, 12);
+    Grid.Canvas.RoundRect(aRect.Left+55, aRect.Top+6, aRect.Left+145, aRect.Top+30, 12, 12);
     Grid.Canvas.Font.Height := -11; Grid.Canvas.Font.Style := [fsBold];
     Ts := Grid.Canvas.TextStyle; Ts.Alignment := taCenter; Ts.Layout := tlCenter;
     Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, Grid.Cells[2, aRow], Ts);
@@ -347,30 +333,28 @@ begin
   if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
   else Grid.Canvas.Brush.Color := CLR_CARD;
   Grid.Canvas.FillRect(aRect);
-
-  Ts := Grid.Canvas.TextStyle; Ts.Alignment := taCenter; Ts.Layout := tlCenter;
-  Grid.Canvas.Font.Height := -12; Grid.Canvas.Font.Color := CLR_TEXT_HEADING; Grid.Canvas.Font.Style := [];
-  Grid.Canvas.TextRect(aRect, aRect.Left + 6, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
-
+  Ts := Grid.Canvas.TextStyle;
+  Ts.Alignment := taCenter; Ts.Layout := tlCenter;
+  Grid.Canvas.Font.Height := -12;
+  Grid.Canvas.Font.Color := CLR_TEXT_HEADING;
+  Grid.Canvas.Font.Style := [];
+  Grid.Canvas.TextRect(aRect, aRect.Left+6, aRect.Top+2, Grid.Cells[aCol, aRow], Ts);
   if aCol = 0 then begin
     Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
-    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom-1, aRect.Right, aRect.Bottom-1);
   end;
 end;
 
 procedure TFrameOrigenes.GridMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-var
-  Col, Row, ID, TotalH, I: Integer;
+var Col, Row, ID, TotalH, I: Integer;
 begin
   if Button <> mbLeft then Exit;
   Grid.MouseToCell(X, Y, Col, Row);
   if (Row < 1) or (Row >= Grid.RowCount) then Exit;
-
   TotalH := 0;
   for I := 0 to Grid.RowCount - 1 do TotalH := TotalH + Grid.RowHeights[I];
   if Y > TotalH then Exit;
-
   if Col = 3 then begin
     ID := PtrInt(Grid.Objects[0, Row]);
     if X < Grid.CellRect(Col, Row).Left + 105 then
@@ -418,7 +402,9 @@ var R: TRect;
 begin
   if FHintWindow = nil then begin
     FHintWindow := THintWindow.Create(Self);
-    FHintWindow.Color := CLR_TEXT; FHintWindow.Font.Size := 11; FHintWindow.Font.Color := CLR_WHITE;
+    FHintWindow.Color := CLR_TEXT;
+    FHintWindow.Font.Size := 11;
+    FHintWindow.Font.Color := CLR_WHITE;
   end;
   R := FHintWindow.CalcHintRect(250, Texto, nil);
   FHintWindow.ActivateHint(R, Texto);
@@ -453,7 +439,6 @@ var NuevoEstado: string; Row: Integer;
 begin
   if ID = 0 then Exit;
   if EstadoActual = 'ACTIVO' then NuevoEstado := 'INACTIVO' else NuevoEstado := 'ACTIVO';
-
   if DM.Transaccion.Active then DM.Transaccion.Rollback;
   DM.Transaccion.StartTransaction;
   try
@@ -487,21 +472,20 @@ var
     Result := TLabel.Create(F); Result.Parent := F;
     Result.SetBounds(ALeft, ATop, 300, 16);
     Result.Caption := ACaption;
-    Result.Font.Size := 11; Result.Font.Style := []; Result.Font.Color := CLR_TEXT_HEADING;
+    Result.Font.Size := 11; Result.Font.Style := [];
+    Result.Font.Color := CLR_TEXT_HEADING;
   end;
 
   function MakeEditConBorde(ATop, ALeft, AWidth: Integer): TEdit;
-  var pnlOuter, pnlInner: TPanel;
+  var pO, pI: TPanel;
   begin
-    pnlOuter := TPanel.Create(F); pnlOuter.Parent := F;
-    pnlOuter.SetBounds(ALeft, ATop, AWidth, 40);
-    pnlOuter.BevelOuter := bvNone; pnlOuter.Color := CLR_BORDER;
-
-    pnlInner := TPanel.Create(pnlOuter); pnlInner.Parent := pnlOuter;
-    pnlInner.SetBounds(1, 1, AWidth - 2, 38);
-    pnlInner.BevelOuter := bvNone; pnlInner.Color := CLR_WHITE; pnlInner.BorderWidth := 6;
-
-    Result := TEdit.Create(pnlInner); Result.Parent := pnlInner;
+    pO := TPanel.Create(F); pO.Parent := F;
+    pO.SetBounds(ALeft, ATop, AWidth, 40);
+    pO.BevelOuter := bvNone; pO.Color := CLR_BORDER;
+    pI := TPanel.Create(pO); pI.Parent := pO;
+    pI.SetBounds(1, 1, AWidth - 2, 38);
+    pI.BevelOuter := bvNone; pI.Color := CLR_WHITE; pI.BorderWidth := 6;
+    Result := TEdit.Create(pI); Result.Parent := pI;
     Result.Align := alClient; Result.BorderStyle := bsNone;
     Result.Font.Size := 11; Result.Font.Color := CLR_TEXT;
     Result.Color := CLR_WHITE; Result.CharCase := ecUpperCase;
@@ -512,10 +496,11 @@ begin
   Nombre := ''; Descripcion := '';
 
   if not IsNew then begin
-    Q := DM.AbrirQuery('SELECT nombre, descripcion FROM origenes WHERE id=' + IntToStr(ID));
+    Q := DM.AbrirQuery(
+      'SELECT nombre, descripcion FROM origenes WHERE id=' + IntToStr(ID));
     try
       if not Q.EOF then begin
-        Nombre := UpperCase(Q.FieldByName('nombre').AsString);
+        Nombre      := UpperCase(Q.FieldByName('nombre').AsString);
         Descripcion := UpperCase(Q.FieldByName('descripcion').AsString);
       end;
     finally Q.Close; end;
@@ -530,91 +515,82 @@ begin
     with TPanel.Create(F) do begin
       Parent := F; Align := alTop; Height := 60; BevelOuter := bvNone; Color := CLR_WHITE;
       with TLabel.Create(F) do begin
-        Parent := TPanel(F.Controls[F.ControlCount - 1]); SetBounds(24, 14, 400, 24);
+        Parent := TPanel(F.Controls[F.ControlCount-1]); SetBounds(24,14,400,24);
         if IsNew then Caption := 'Nuevo origen' else Caption := 'Editar origen';
         Font.Size := 14; Font.Style := []; Font.Color := CLR_TEXT_HEADING;
       end;
       with TPanel.Create(F) do begin
-        Parent := TPanel(F.Controls[F.ControlCount - 1]); Align := alBottom; Height := 1; BevelOuter := bvNone; Color := CLR_BORDER;
+        Parent := TPanel(F.Controls[F.ControlCount-1]);
+        Align := alBottom; Height := 1; BevelOuter := bvNone; Color := CLR_BORDER;
       end;
     end;
 
     YPos := 80;
     LblSection := TLabel.Create(F); LblSection.Parent := F;
-    LblSection.SetBounds(24, YPos, 300, 20); LblSection.Caption := 'Datos del Origen';
+    LblSection.SetBounds(24,YPos,300,20); LblSection.Caption := 'Datos del Origen';
     LblSection.Font.Size := 11; LblSection.Font.Style := []; LblSection.Font.Color := CLR_TEXT_HEADING;
     YPos := YPos + 33;
 
     MakeLabel(YPos, 24, 'Nombre *');
     MakeLabel(YPos, 314, 'Descripción');
     YPos := YPos + 28;
-
     eNom := MakeEditConBorde(YPos, 24, 280);  eNom.Text := Nombre;
     eDes := MakeEditConBorde(YPos, 314, 260); eDes.Text := Descripcion;
     YPos := YPos + 56;
 
     with TPanel.Create(F) do begin
-      Parent := F; SetBounds(24, YPos, 556, 1); BevelOuter := bvNone; Color := CLR_BORDER;
+      Parent := F; SetBounds(24,YPos,556,1); BevelOuter := bvNone; Color := CLR_BORDER;
     end;
     YPos := YPos + 16;
     F.Height := YPos + 70;
 
     // CANCELAR
     with TPanel.Create(F) do begin
-      Parent := F; SetBounds(310, YPos, 130, 36);
+      Parent := F; SetBounds(310,YPos,130,36);
       BevelOuter := bvNone; Color := CLR_WHITE; Tag := 1;
       Cursor := crHandPoint; OnPaint := @PaintRounded; OnClick := @CancelarClick;
       with TLabel.Create(F) do begin
-        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        Parent := TPanel(F.Controls[F.ControlCount-1]);
         Align := alClient; Alignment := taCenter; Layout := tlCenter;
-        Caption := 'CANCELAR'; Font.Size := 12; Font.Style := []; Font.Color := CLR_PRIMARY;
-        OnClick := @CancelarClick;
+        Caption := 'CANCELAR'; Font.Size := 12; Font.Style := [];
+        Font.Color := CLR_PRIMARY; OnClick := @CancelarClick;
       end;
     end;
 
     // GUARDAR
     with TPanel.Create(F) do begin
-      Parent := F; SetBounds(450, YPos, 130, 36);
+      Parent := F; SetBounds(450,YPos,130,36);
       BevelOuter := bvNone; Color := CLR_PRIMARY;
       Cursor := crHandPoint; OnPaint := @PaintRounded; OnClick := @GuardarClick;
       with TLabel.Create(F) do begin
-        Parent := TPanel(F.Controls[F.ControlCount - 1]);
+        Parent := TPanel(F.Controls[F.ControlCount-1]);
         Align := alClient; Alignment := taCenter; Layout := tlCenter;
-        Caption := 'GUARDAR'; Font.Size := 12; Font.Style := []; Font.Color := CLR_WHITE;
-        OnClick := @GuardarClick;
+        Caption := 'GUARDAR'; Font.Size := 12; Font.Style := [];
+        Font.Color := CLR_WHITE; OnClick := @GuardarClick;
       end;
     end;
 
-    // BUCLE SEGURO DE VALIDACIÓN MANTIENE ABIERTO SI FALTA EL NOMBRE
-    while F.ShowModal = mrOK do begin
-      if Trim(eNom.Text) = '' then begin
-        ShowMessage('El nombre es obligatorio');
-        Continue; 
-      end;
-
+    if F.ShowModal = mrOK then begin
+      if Trim(eNom.Text) = '' then begin ShowMessage('El nombre es obligatorio'); Exit; end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback;
       DM.Transaccion.StartTransaction;
       try
         if IsNew then begin
-          DM.EjecutarSQL('INSERT INTO origenes (nombre, descripcion, estado, ' +
-            'fecha_creacion, fecha_modificacion) VALUES (' +
-            QuotedStr(UpperCase(Trim(eNom.Text))) + ', ' +
-            QuotedStr(UpperCase(Trim(eDes.Text))) +
-            ', ''ACTIVO'', ''' + FechaHoraActual + ''', ''' + FechaHoraActual + ''')');
+          DM.EjecutarSQL('INSERT INTO origenes (nombre,descripcion,estado,' +
+            'fecha_creacion,fecha_modificacion) VALUES (' +
+            QuotedStr(UpperCase(Trim(eNom.Text)))+','+
+            QuotedStr(UpperCase(Trim(eDes.Text)))+
+            ',''ACTIVO'','''+FechaHoraActual+''','''+FechaHoraActual+''')');
         end else begin
-          DM.EjecutarSQL('UPDATE origenes SET nombre=' +
-            QuotedStr(UpperCase(Trim(eNom.Text))) +
-            ', descripcion=' + QuotedStr(UpperCase(Trim(eDes.Text))) +
-            ', fecha_modificacion=''' + FechaHoraActual +
-            ''' WHERE id=' + IntToStr(ID));
+          DM.EjecutarSQL('UPDATE origenes SET nombre='+QuotedStr(UpperCase(Trim(eNom.Text)))+
+            ',descripcion='+QuotedStr(UpperCase(Trim(eDes.Text)))+
+            ',fecha_modificacion='''+FechaHoraActual+''' WHERE id='+IntToStr(ID));
         end;
         DM.Transaccion.Commit;
         Refrescar(nil);
-        Break;
       except
         DM.Transaccion.Rollback;
         ShowMessage('Error al guardar origen');
-        Break;
       end;
     end;
   finally
