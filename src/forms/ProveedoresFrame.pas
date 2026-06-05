@@ -437,7 +437,8 @@ begin
   else Exit; end;
   P := Mouse.CursorPos;
   MostrarHintAccion(Texto);
-  FHintWindow.Top := P.Y + 20; FHintWindow.Left := P.X + 12;
+  FHintWindow.Top := P.Y + 20; 
+  FHintWindow.Left := P.X - FHintWindow.Width - 12;
   FHintWindow.Show; FHintActive := True;
 end;
 

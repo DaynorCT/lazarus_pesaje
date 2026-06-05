@@ -261,7 +261,14 @@ begin
   TotalH := 0;
   for I := 0 to Grid.RowCount - 1 do TotalH := TotalH + Grid.RowHeights[I];
   if Y > TotalH then Exit;
-  if Col = 6 then begin
+  if Col = 6 then 
+  begin
+    FHintTimer.Enabled := False;
+    if FHintActive and (FHintWindow <> nil) then
+    begin
+      FHintWindow.Hide;
+      FHintActive := False;
+    end;
     ID := PtrInt(Grid.Objects[0, Row]);
     ShowConfigForm(ID);
   end;
@@ -296,7 +303,8 @@ begin
   Texto := 'Editar configuración';
   P := Mouse.CursorPos;
   MostrarHintAccion(Texto);
-  FHintWindow.Top := P.Y + 20; FHintWindow.Left := P.X + 12;
+  FHintWindow.Top := P.Y + 20; 
+  FHintWindow.Left := P.X - FHintWindow.Width - 12;
   FHintWindow.Show; FHintActive := True;
 end;
 

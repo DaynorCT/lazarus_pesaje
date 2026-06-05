@@ -32,7 +32,10 @@ implementation
 {$R *.lfm}
 
 // ══════════════════════════════════════════════════════════════
-// PaintRounded — Método Genérico Unificado Basado en Tags
+// PaintRounded — patrón estándar de toda la app:
+//   pnlCard  → borde blanco plano 1px via Rectangle
+//   Tag = 1  → borde CLR_INFO  (botón Cancelar)
+//   else     → sin borde       (botones Guardar, Generar PDF)
 // ══════════════════════════════════════════════════════════════
 procedure TFrameReportes.PaintRounded(Sender: TObject);
 var Pnl: TPanel;
@@ -40,43 +43,30 @@ begin
   if not (Sender is TPanel) then Exit;
   Pnl := TPanel(Sender);
 
-  case Pnl.Tag of
-    // ══════════════════════════════════════════════════════════════
-    // CASO 2: Contenedor Card (Esquinas rectas + borde sutil plano)
-    // ══════════════════════════════════════════════════════════════
-    2: begin
-         Pnl.Canvas.Brush.Color := CLR_CARD;
-         Pnl.Canvas.Brush.Style := bsSolid;
-         Pnl.Canvas.FillRect(Pnl.ClientRect);
-         Pnl.Canvas.Pen.Color := CLR_BORDER_LIGHT; // Borde sutil moderno
-         Pnl.Canvas.Pen.Width := 1;
-         Pnl.Canvas.Pen.Style := psSolid;
-         Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
-       end;
+  // Card tabla — borde blanco plano 1px (igual que todos los frames)
+  if Pnl = pnlCard then begin
+    Pnl.Canvas.Brush.Color := CLR_CARD;
+    Pnl.Canvas.Brush.Style := bsSolid;
+    Pnl.Canvas.FillRect(Pnl.ClientRect);
+    Pnl.Canvas.Pen.Color := CLR_WHITE;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
+    Exit;
+  end;
 
-    // ══════════════════════════════════════════════════════════════
-    // CASO 1: Botones Secundarios (Con borde CLR_INFO)
-    // ══════════════════════════════════════════════════════════════
-    1: begin
-         Pnl.Canvas.Brush.Color := CLR_BG;
-         Pnl.Canvas.FillRect(Pnl.ClientRect);
-         Pnl.Canvas.Brush.Color := Pnl.Color;
-         Pnl.Canvas.Pen.Color := CLR_INFO;
-         Pnl.Canvas.Pen.Width := 1;
-         Pnl.Canvas.Pen.Style := psSolid;
-         Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
-       end;
-
-    // ══════════════════════════════════════════════════════════════
-    // CASO POR DEFECTO (0): Botones Primarios (Sin borde, redondeados)
-    // ══════════════════════════════════════════════════════════════
-    else begin
-         Pnl.Canvas.Brush.Color := CLR_BG;
-         Pnl.Canvas.FillRect(Pnl.ClientRect);
-         Pnl.Canvas.Brush.Color := Pnl.Color;
-         Pnl.Canvas.Pen.Style := psClear;
-         Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
-       end;
+  // Botones redondeados
+  Pnl.Canvas.Brush.Color := CLR_BG;
+  Pnl.Canvas.FillRect(Pnl.ClientRect);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  if Pnl.Tag = 1 then begin
+    Pnl.Canvas.Pen.Color := CLR_INFO;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end else begin
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
   end;
 end;
 
@@ -90,7 +80,7 @@ begin
   FHoverRow := 0;
   Self.Color := CLR_BG;
 
-  // ═══ Header ═══
+  // Header
   Pnl := TPanel.Create(Self);
   Pnl.Parent := Self;
   Pnl.Align := alTop;
@@ -199,7 +189,7 @@ begin
   edtPlaca.Color := CLR_WHITE;
   edtPlaca.OnChange := @Refrescar;
 
-  // Boton GENERAR PDF
+  // Botón GENERAR PDF
   pnlPDF := TPanel.Create(Self);
   pnlPDF.Parent := Pnl;
   pnlPDF.Width := 140;
@@ -213,8 +203,7 @@ begin
   pnlPDF.ParentColor := False;
   pnlPDF.Cursor := crHandPoint;
   pnlPDF.OnClick := @btnPDFClick;
-  pnlPDF.Tag := 0; // Botón primario por defecto
-  pnlPDF.OnPaint := @PaintRounded;
+  pnlPDF.OnPaint := @PaintRounded;  // Tag=0 → sin borde (botón azul)
 
   lblPDF := TLabel.Create(Self);
   lblPDF.Parent := pnlPDF;
@@ -229,7 +218,7 @@ begin
   lblPDF.ParentColor := False;
   lblPDF.OnClick := @btnPDFClick;
 
-  // ═══ Card contenedor (Actualizado a arquitectura limpia) ═══
+  // Card contenedor de la tabla
   pnlCard := TPanel.Create(Self);
   pnlCard.Parent := Self;
   pnlCard.Align := alClient;
@@ -237,12 +226,11 @@ begin
   pnlCard.BorderSpacing.Left := 24;
   pnlCard.BorderSpacing.Right := 24;
   pnlCard.BorderSpacing.Bottom := 24;
-  pnlCard.BevelOuter := bvNone; // Quitamos bisel viejo de Windows
+  pnlCard.BevelOuter := bvNone;
   pnlCard.Color := CLR_CARD;
-  pnlCard.Tag := 2; // Asignación de comportamiento Card (Borde plano sutil)
   pnlCard.OnPaint := @PaintRounded;
 
-  // ═══ Grid ═══
+  // Grid
   Grid := TStringGrid.Create(Self);
   Grid.Parent := pnlCard;
   Grid.Align := alClient;
@@ -300,7 +288,7 @@ begin
   Grid.ColWidths[13] := 85;
   Grid.ColWidths[14] := 110;
 
-  Grid.OnDrawCell := @GridDrawCell;
+  Grid.OnDrawCell  := @GridDrawCell;
   Grid.OnMouseMove := @GridMouseMove;
 
   Refrescar(nil);
@@ -314,7 +302,7 @@ end;
 procedure TFrameReportes.Refrescar(Sender: TObject);
 var
   Q: TSQLQuery;
-  SQL, Filtro, FechaDesde, FechaHasta, Placa, FechaStr: string;
+  SQL, FechaDesde, FechaHasta, Placa, FechaStr: string;
   Row: Integer;
 begin
   if (DM = nil) or (not DM.Conexion.Connected) then Exit;
@@ -360,26 +348,20 @@ begin
     Grid.RowCount := Q.RecordCount + 1;
     if Q.RecordCount = 0 then Exit;
     Row := 1;
-    while not Q.EOF do
-    begin
+    while not Q.EOF do begin
       Grid.Objects[0, Row] := TObject(PtrInt(Q.Fields[0].AsInteger));
-
       Grid.Cells[0, Row] := Q.Fields[0].AsString;
 
       FechaStr := Q.Fields[1].AsString;
-      if Length(FechaStr) >= 16 then
-      begin
-        Grid.Cells[1, Row] := Copy(FechaStr, 9, 2) + '/' + Copy(FechaStr, 6, 2) + '/' + Copy(FechaStr, 1, 4);
-        Grid.Cells[2, Row] := Copy(FechaStr, 12, 5);
-      end
-      else
-      begin
-        Grid.Cells[1, Row] := Copy(FechaStr, 1, 10);
+      if Length(FechaStr) >= 16 then begin
+        Grid.Cells[1, Row] := Copy(FechaStr,9,2)+'/'+Copy(FechaStr,6,2)+'/'+Copy(FechaStr,1,4);
+        Grid.Cells[2, Row] := Copy(FechaStr,12,5);
+      end else begin
+        Grid.Cells[1, Row] := Copy(FechaStr,1,10);
         Grid.Cells[2, Row] := '';
       end;
 
-      Grid.Cells[3, Row]  := UpperCase(Trim(Q.Fields[2].AsString + ' ' +
-        Q.Fields[3].AsString + ' ' + Q.Fields[4].AsString));
+      Grid.Cells[3, Row]  := UpperCase(Trim(Q.Fields[2].AsString+' '+Q.Fields[3].AsString+' '+Q.Fields[4].AsString));
       Grid.Cells[4, Row]  := UpperCase(Q.Fields[5].AsString);
       Grid.Cells[5, Row]  := UpperCase(Q.Fields[6].AsString);
       Grid.Cells[6, Row]  := UpperCase(Q.Fields[7].AsString);
@@ -401,125 +383,84 @@ begin
 end;
 
 procedure TFrameReportes.FechaExit(Sender: TObject);
-var
-  Ed: TEdit;
+var Ed: TEdit;
 begin
   Ed := TEdit(Sender);
-  if Trim(Ed.Text) <> '' then
-  begin
-    Ed.Text := ConvertirFechaISO(Ed.Text);
+  if Trim(Ed.Text) <> '' then begin
+    //Ed.Text := ConvertirFechaISO(Ed.Text);
     Refrescar(nil);
   end;
 end;
 
 procedure TFrameReportes.btnPDFClick(Sender: TObject);
-var
-  Stream: TMemoryStream;
-  Ruta: string;
+var Stream: TMemoryStream; Ruta: string;
 begin
-  if Grid.RowCount <= 1 then
-  begin
+  if Grid.RowCount <= 1 then begin
     ShowMessage('No hay resultados para generar el reporte.');
     Exit;
   end;
-
   Screen.Cursor := crHourGlass;
   try
     Stream := TMemoryStream.Create;
     try
-      if not GenerarReportePDF(edtFechaDesde.Text, edtFechaHasta.Text, edtPlaca.Text, Stream) then
-      begin
+      if not GenerarReportePDF(edtFechaDesde.Text, edtFechaHasta.Text, edtPlaca.Text, Stream) then begin
         ShowMessage('No se pudo generar el reporte.');
         Exit;
       end;
       Ruta := '/tmp/reporte-pesaje.pdf';
       Stream.SaveToFile(Ruta);
       OpenDocument(Ruta);
-    finally
-      Stream.Free;
-    end;
-  finally
-    Screen.Cursor := crDefault;
-  end;
+    finally Stream.Free; end;
+  finally Screen.Cursor := crDefault; end;
 end;
 
 procedure TFrameReportes.GridDrawCell(Sender: TObject; aCol, aRow: Integer;
   aRect: TRect; aState: TGridDrawState);
-var
-  Ts: TTextStyle;
-  IsSelected: Boolean;
-  BadgeText: string;
+var Ts: TTextStyle; IsSelected: Boolean; BadgeText: string;
 begin
-  if aRow = 0 then
-  begin
+  if aRow = 0 then begin
     Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
     Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
-    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom-1, aRect.Right, aRect.Bottom-1);
     Ts := Grid.Canvas.TextStyle;
-    Ts.Alignment := taCenter;
-    Ts.Layout := tlCenter;
-    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
+    Ts.Alignment := taCenter; Ts.Layout := tlCenter;
+    Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top+2, Grid.Cells[aCol, aRow], Ts);
     Exit;
   end;
 
   IsSelected := gdSelected in aState;
 
-  // Columna Estado: badge coloreado centrado
-  if aCol = 14 then
-  begin
-    if IsSelected then
-      Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
-    else
-      Grid.Canvas.Brush.Color := CLR_CARD;
+  if aCol = 14 then begin
+    if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+    else Grid.Canvas.Brush.Color := CLR_CARD;
     Grid.Canvas.FillRect(aRect);
-
     BadgeText := Grid.Cells[14, aRow];
-    if BadgeText = 'ACTIVO' then
-    begin
-      Grid.Canvas.Brush.Color := CLR_SUCCESS_BG;
-      Grid.Canvas.Font.Color := CLR_TEAL;
-    end
-    else
-    begin
-      Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG;
-      Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
+    if BadgeText = 'ACTIVO' then begin
+      Grid.Canvas.Brush.Color := CLR_SUCCESS_BG; Grid.Canvas.Font.Color := CLR_TEAL;
+    end else begin
+      Grid.Canvas.Brush.Color := CLR_DESTRUCTIVE_BG; Grid.Canvas.Font.Color := CLR_DESTRUCTIVE;
     end;
-
     Grid.Canvas.Pen.Style := psClear;
-    Grid.Canvas.RoundRect(
-      aRect.Left + 8, aRect.Top + 6,
-      aRect.Right - 8, aRect.Top + 30,
-      12, 12);
-
-    Grid.Canvas.Font.Height := -11;
-    Grid.Canvas.Font.Style := [fsBold];
-    Ts := Grid.Canvas.TextStyle;
-    Ts.Alignment := taCenter;
-    Ts.Layout := tlCenter;
+    Grid.Canvas.RoundRect(aRect.Left+8, aRect.Top+6, aRect.Right-8, aRect.Top+30, 12, 12);
+    Grid.Canvas.Font.Height := -11; Grid.Canvas.Font.Style := [fsBold];
+    Ts := Grid.Canvas.TextStyle; Ts.Alignment := taCenter; Ts.Layout := tlCenter;
     Grid.Canvas.TextRect(aRect, aRect.Left, aRect.Top, BadgeText, Ts);
     Exit;
   end;
 
-  if IsSelected then
-    Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
-  else
-    Grid.Canvas.Brush.Color := CLR_CARD;
-
+  if IsSelected then Grid.Canvas.Brush.Color := CLR_TABLE_ROW_HOVER
+  else Grid.Canvas.Brush.Color := CLR_CARD;
   Grid.Canvas.FillRect(aRect);
-
   Ts := Grid.Canvas.TextStyle;
-  Ts.Alignment := taCenter;
-  Ts.Layout := tlCenter;
+  Ts.Alignment := taCenter; Ts.Layout := tlCenter;
   Grid.Canvas.Font.Height := -12;
   Grid.Canvas.Font.Color := CLR_TEXT_HEADING;
   Grid.Canvas.Font.Style := [];
-  Grid.Canvas.TextRect(aRect, aRect.Left + 4, aRect.Top + 2, Grid.Cells[aCol, aRow], Ts);
-
-  if aCol = 0 then
-  begin
+  Grid.Canvas.TextRect(aRect, aRect.Left+4, aRect.Top+2, Grid.Cells[aCol, aRow], Ts);
+  if aCol = 0 then begin
     Grid.Canvas.Pen.Color := CLR_SIDEBAR_BORDER;
-    Grid.Canvas.Line(aRect.Left, aRect.Bottom - 1, aRect.Right, aRect.Bottom - 1);
+    Grid.Canvas.Line(aRect.Left, aRect.Bottom-1, aRect.Right, aRect.Bottom-1);
   end;
 end;
 
@@ -528,13 +469,11 @@ var Col, Row: Integer;
 begin
   Grid.MouseToCell(X, Y, Col, Row);
   if (Row < 1) or (Row >= Grid.RowCount) then Row := 0;
-  if FHoverRow <> Row then
-  begin
+  if FHoverRow <> Row then begin
     if (FHoverRow > 0) and (FHoverRow < Grid.RowCount) then
       Grid.InvalidateRow(FHoverRow);
     FHoverRow := Row;
-    if Row > 0 then
-      Grid.InvalidateRow(Row);
+    if Row > 0 then Grid.InvalidateRow(Row);
   end;
 end;
 
