@@ -371,8 +371,16 @@ begin
     if X < Grid.CellRect(Col, Row).Left + 105 then
       ToggleEstado(ID, Grid.Cells[3, Row])
     else
-      ShowVehicleForm(ID);
+    begin
+     FHintTimer.Enabled := False;
+     if FHintActive and (FHintWindow <> nil) then
+     begin
+       FHintWindow.Hide;
+       FHintActive := False;
+     end;
+     ShowVehicleForm(ID);
   end;
+ end;
 end;
 
 procedure TFrameVehiculos.GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);

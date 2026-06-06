@@ -407,8 +407,16 @@ begin
     if X < Grid.CellRect(Col, Row).Left + 105 then
       ToggleEstado(ID, Grid.Cells[4, Row])
     else
+    begin
+      FHintTimer.Enabled := False;
+      if FHintActive and (FHintWindow <> nil) then
+      begin
+        FHintWindow.Hide;
+        FHintActive := False;
+      end;
       ShowChoferForm(ID);
   end;
+ end;
 end;
 
 procedure TFrameChoferes.GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);

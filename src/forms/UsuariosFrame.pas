@@ -418,7 +418,15 @@ begin
     if X < Grid.CellRect(Col, Row).Left + 105 then
       ToggleEstado(ID, Grid.Cells[5, Row])
     else
+    begin
+      FHintTimer.Enabled := False;
+      if FHintActive and (FHintWindow <> nil) then
+      begin
+        FHintWindow.Hide;
+        FHintActive := False;
+      end;
       ShowUserForm(ID);
+    end;
   end;
 end;
 
