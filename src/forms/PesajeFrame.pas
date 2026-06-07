@@ -90,6 +90,7 @@ type
       AColor: TColor; AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
     function BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
     procedure AjustarSeparadores;
+    procedure AjustarFormLayout;
   public
     procedure AjustarLayoutCards;
   end;
@@ -106,6 +107,8 @@ const
   C_BOX_H     = 32;
   C_INPUT_H   = 34;
   FCOL1       = 20;
+  // FCOL2, FCOL3, FFIELD, FCOMBO se calculan dinámicamente en AjustarFormLayout
+  // Los valores abajo son solo para el constructor (posición inicial aproximada)
   FCOL2       = 290;
   FCOL3       = 560;
   FFIELD      = 168;
@@ -121,7 +124,7 @@ end;
 
 constructor TFramePesaje.Create(AOwner: TComponent);
 var
-  pnlRegistro: TPanel;   // pnlHeader eliminado — no se usa en este módulo
+  pnlRegistro: TPanel;
   Lbl: TLabel;
   YPos, InnerW: Integer;
   po, pi: TPanel;
@@ -445,7 +448,7 @@ begin
   pnlSepFormBot.BevelOuter := bvNone; pnlSepFormBot.Color := CLR_BORDER;
   YPos := YPos + 10;
 
-  pnlCancelEdit := CrearBoton(pnlForm, YPos, FCOL1, 130, 32, 'Cancelar', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
+  pnlCancelEdit := CrearBoton(pnlForm, YPos, FCOL1, 130, 32, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
   pnlCancelEdit.Visible := False;
   pnlGuardar := CrearBoton(pnlForm, YPos, FCOL3+FFIELD-170, 170, 32, 'Registrar Pesaje', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
 
@@ -461,13 +464,14 @@ begin
   OnResize := @FormResize;
   CargarCombos;
   RefrescarPesajes(nil);
+  // Ajuste inicial de columnas según el ancho real del form
+  AjustarFormLayout;
 end;
 
 // ══════════════════════════════════════════════════════════════
 // PaintRounded
 //   Cards (pnlCard, pnlRegistroCard, pnlForm):
-//     borde blanco plano 1px via Rectangle — consistente en
-//     Windows y macOS, igual que todos los frames ABM
+//     borde blanco plano 1px via Rectangle
 //   Tag = 1 → borde CLR_INFO  (botón Cancelar)
 //   else    → sin borde       (botones Guardar, Cap.peso, etc.)
 // ══════════════════════════════════════════════════════════════
@@ -475,8 +479,6 @@ procedure TFramePesaje.PaintRounded(Sender: TObject);
 var Pnl: TPanel;
 begin
   Pnl := TPanel(Sender);
-
-  // Cards — borde blanco plano 1px (igual que UsuariosFrame, EmpresasFrame, etc.)
   if (Pnl = pnlCard) or (Pnl = pnlRegistroCard) or (Pnl = pnlForm) then begin
     Pnl.Canvas.Brush.Color := CLR_CARD;
     Pnl.Canvas.Brush.Style := bsSolid;
@@ -487,19 +489,15 @@ begin
     Pnl.Canvas.Rectangle(0, 0, Pnl.Width, Pnl.Height);
     Exit;
   end;
-
-  // Botones redondeados
   Pnl.Canvas.Brush.Color := CLR_BG;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
   Pnl.Canvas.Brush.Color := Pnl.Color;
   if Pnl.Tag = 1 then begin
-    // Botón Cancelar — borde CLR_INFO
     Pnl.Canvas.Pen.Color := CLR_INFO;
     Pnl.Canvas.Pen.Width := 1;
     Pnl.Canvas.Pen.Style := psSolid;
     Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
   end else begin
-    // Botones sin borde (Guardar, Cap.peso, Cap.tara, +, etc.)
     Pnl.Canvas.Pen.Style := psClear;
     Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
   end;
@@ -515,14 +513,89 @@ begin
   if pnlSepFormBot <> nil then pnlSepFormBot.Width := W;
 end;
 
+// ══════════════════════════════════════════════════════════════
+// AjustarFormLayout — redistribuye las 3 columnas del formulario
+// dinámicamente según el ancho real de pnlForm.
+// Funciona en cualquier resolución (1280, 1366, 1920, etc.)
+//
+// Estrategia: 3 columnas iguales con gap de 8px entre ellas
+//   col1 = FCOL1 (fijo = 20px desde borde)
+//   col2 = FCOL1 + colW + 8
+//   col3 = col2  + colW + 8
+//   ancho de cada columna = (W - 2*FCOL1 - 2*8) / 3
+// ══════════════════════════════════════════════════════════════
+procedure TFramePesaje.AjustarFormLayout;
+var
+  W, ColW, Col2, Col3, Gap: Integer;
+
+  // Mueve y redimensiona el panel contenedor externo de un TEdit
+  // (jerarquia: pnlOuter[colW x C_INPUT_H] > pnlInner > TEdit)
+  procedure AjustarEdit(AEdit: TEdit; ALeft, AWidth: Integer);
+  var PnlOuter, PnlInner: TPanel;
+  begin
+    if AEdit = nil then Exit;
+    PnlInner := TPanel(AEdit.Parent);
+    PnlOuter := TPanel(PnlInner.Parent);
+    PnlOuter.Left  := ALeft;
+    PnlOuter.Width := AWidth;
+    PnlInner.Width := AWidth - 2;
+  end;
+
+begin
+  if pnlForm = nil then Exit;
+  W := pnlForm.ClientWidth;
+  if W < 400 then Exit;
+
+  Gap  := 8;
+  ColW := (W - FCOL1 * 2 - Gap * 2) div 3;
+  if ColW < 100 then ColW := 100;
+  Col2 := FCOL1 + ColW + Gap;
+  Col3 := Col2  + ColW + Gap;
+
+  // Separadores — ancho total del formulario
+  if pnlSepFormTop <> nil then pnlSepFormTop.Width := W - FCOL1 * 2;
+  if pnlSepFormBot <> nil then pnlSepFormBot.Width := W - FCOL1 * 2;
+
+  // ── Fila 1: Chofer (col1) | Placa (col2) | Licencia (col3) ──
+  if cmbChofer   <> nil then begin cmbChofer.Left := FCOL1; cmbChofer.Width := ColW - 25; end;
+  if btnChoNuevo <> nil then btnChoNuevo.Left := FCOL1 + ColW - 22;
+  if cmbVehiculo <> nil then begin cmbVehiculo.Left := Col2; cmbVehiculo.Width := ColW - 25; end;
+  if btnVehNuevo <> nil then btnVehNuevo.Left := Col2 + ColW - 22;
+  AjustarEdit(edtLicencia, Col3, ColW);
+
+  // ── Fila 2: Tipo (col1) | Proveedor (col2) | Producto (col3) ──
+  AjustarEdit(edtTipo, FCOL1, ColW);
+  if cmbProveedor <> nil then begin cmbProveedor.Left := Col2; cmbProveedor.Width := ColW; end;
+  if cmbProducto  <> nil then begin cmbProducto.Left  := Col3; cmbProducto.Width  := ColW; end;
+
+  // ── Fila 3: Origen (col1) | Destino (col2) | Costo (col3) ──
+  if cmbOrigen  <> nil then begin cmbOrigen.Left  := FCOL1; cmbOrigen.Width  := ColW; end;
+  if cmbDestino <> nil then begin cmbDestino.Left := Col2;  cmbDestino.Width := ColW; end;
+  AjustarEdit(edtCosto, Col3, ColW);
+
+  // ── Fila 4: Flete (col1) | Switch+Tara (col2) ──
+  AjustarEdit(edtFlete, FCOL1, ColW);
+  if pnlSwitchTara  <> nil then pnlSwitchTara.Left  := Col2;
+  AjustarEdit(edtTaraManual, Col2 + 40, 118);
+  if pnlGuardarTara <> nil then pnlGuardarTara.Left := Col2 + 162;
+
+  // ── Botones inferiores ──
+  if pnlCancelEdit <> nil then pnlCancelEdit.Left := FCOL1;
+  // "Registrar Pesaje" pegado al borde derecho con mismo margen que FCOL1
+  if pnlGuardar <> nil then
+    pnlGuardar.Left := W - FCOL1 - pnlGuardar.Width;
+
+  pnlForm.Invalidate;
+end;
+
 procedure TFramePesaje.AjustarLayoutCards;
 begin
-  AjustarSeparadores;
+  AjustarFormLayout;
 end;
 
 procedure TFramePesaje.FormResize(Sender: TObject);
 begin
-  AjustarSeparadores;
+  AjustarFormLayout;
 end;
 
 destructor TFramePesaje.Destroy;
@@ -1321,8 +1394,8 @@ begin
     with TLabel.Create(F) do begin Parent:=pnlWrap; SetBounds(20,YPos,DIALOG_W-40,16);
       Caption:='Confirme la finalizacion del pesaje'; Font.Size:=10; Font.Color:=CLR_TEXT_SLATE; end;
     YPos:=224; W:=DIALOG_W-28;
-    CrearBoton(pnlWrap,YPos,W-210,96,30,'Cancelar',CLR_CARD,CLR_TEXT,1,@QuickCancelarClick);
-    CrearBoton(pnlWrap,YPos,W-106,96,30,'Finalizar',CLR_PRIMARY,CLR_PRIMARY_FG,0,@DialogFinalizarOk);
+    CrearBoton(pnlWrap,YPos,W-210,96,30,'CANCELAR',CLR_CARD,CLR_PRIMARY,1,@QuickCancelarClick);
+    CrearBoton(pnlWrap,YPos,W-106,96,30,'FINALIZAR',CLR_PRIMARY,CLR_PRIMARY_FG,0,@DialogFinalizarOk);
     Result:=F.ShowModal=mrOk;
   finally F.Free; end;
 end;
