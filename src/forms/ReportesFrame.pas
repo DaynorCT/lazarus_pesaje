@@ -210,7 +210,7 @@ begin
   lblPDF.Align := alClient;
   lblPDF.Alignment := taCenter;
   lblPDF.Layout := tlCenter;
-  lblPDF.Caption := 'Generar PDF';
+  lblPDF.Caption := 'Generar reporte';
   lblPDF.Font.Size := 12;
   lblPDF.Font.Style := [];
   lblPDF.Font.Color := CLR_WHITE;

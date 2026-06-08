@@ -450,7 +450,10 @@ begin
 
   pnlCancelEdit := CrearBoton(pnlForm, YPos, FCOL1, 130, 32, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
   pnlCancelEdit.Visible := False;
-  pnlGuardar := CrearBoton(pnlForm, YPos, FCOL3+FFIELD-170, 170, 32, 'Registrar Pesaje', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
+  pnlGuardar := CrearBoton(
+    pnlForm, 
+    YPos, 
+    FCOL3+FFIELD-170, 170, 32, 'Registrar Pesaje', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
 
   // Timers
   TimerLectura := TTimer.Create(Self);

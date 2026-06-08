@@ -79,8 +79,8 @@
         <ResourceBaseClass Value="Frame"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="6"/>
-        <CursorPos X="3" Y="17"/>
+        <TopLine Value="446"/>
+        <CursorPos X="5" Y="457"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -125,8 +125,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="421"/>
-        <CursorPos Y="433"/>
+        <TopLine Value="732"/>
+        <CursorPos X="5" Y="743"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit>
@@ -179,7 +179,6 @@
         <CursorPos X="8" Y="13"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/auth/LoginForm.lfm"/>
@@ -240,7 +239,7 @@
       <Unit>
         <Filename Value="../../Downloads/PesajeFrame.pas"/>
         <EditorIndex Value="13"/>
-        <UsageCount Value="78"/>
+        <UsageCount Value="88"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -248,7 +247,7 @@
         <HasResources Value="True"/>
         <EditorIndex Value="11"/>
         <CursorPos X="41" Y="17"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="43"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -259,31 +258,11 @@
         <EditorIndex Value="12"/>
         <TopLine Value="362"/>
         <CursorPos Y="374"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="21"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-      </Position>
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-        <Caret Line="127" Column="10" TopLine="127"/>
-      </Position>
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-        <Caret Line="173" Column="29" TopLine="162"/>
-      </Position>
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-        <Caret Line="220" Column="28" TopLine="220"/>
-      </Position>
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-        <Caret Line="321" Column="55" TopLine="310"/>
-      </Position>
       <Position>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <Caret Line="347" Column="20" TopLine="336"/>
@@ -383,6 +362,26 @@
       <Position>
         <Filename Value="src/forms/ProductosFrame.pas"/>
         <Caret Line="17" Column="41"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/UsuariosFrame.pas"/>
+        <Caret Line="433" TopLine="421"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/UsuariosFrame.pas"/>
+        <Caret Line="653" Column="22" TopLine="641"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/UsuariosFrame.pas"/>
+        <Caret Line="689" Column="19" TopLine="678"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/PesajeFrame.pas"/>
+        <Caret Line="17" Column="3" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/PesajeFrame.pas"/>
+        <Caret Line="457" Column="93" TopLine="445"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
