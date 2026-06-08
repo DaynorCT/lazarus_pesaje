@@ -91,6 +91,7 @@ type
     function BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
     procedure AjustarSeparadores;
     procedure AjustarFormLayout;
+    procedure AjustarCardIzquierdo;
   public
     procedure AjustarLayoutCards;
   end;
@@ -448,12 +449,9 @@ begin
   pnlSepFormBot.BevelOuter := bvNone; pnlSepFormBot.Color := CLR_BORDER;
   YPos := YPos + 10;
 
-  pnlCancelEdit := CrearBoton(pnlForm, YPos, FCOL1, 130, 32, 'CANCELAR', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
+  pnlCancelEdit := CrearBoton(pnlForm, YPos, FCOL1, 130, 32, 'Cancelar', CLR_WHITE, CLR_PRIMARY, 1, @CancelEditClick);
   pnlCancelEdit.Visible := False;
-  pnlGuardar := CrearBoton(
-    pnlForm, 
-    YPos, 
-    FCOL3+FFIELD-170, 170, 32, 'Registrar Pesaje', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
+  pnlGuardar := CrearBoton(pnlForm, YPos, FCOL3+FFIELD-170, 170, 32, 'Registrar Pesaje', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
 
   // Timers
   TimerLectura := TTimer.Create(Self);
@@ -467,7 +465,8 @@ begin
   OnResize := @FormResize;
   CargarCombos;
   RefrescarPesajes(nil);
-  // Ajuste inicial de columnas según el ancho real del form
+  // Ajuste inicial: card izquierdo 40% y columnas del formulario
+  AjustarCardIzquierdo;
   AjustarFormLayout;
 end;
 
@@ -591,13 +590,57 @@ begin
   pnlForm.Invalidate;
 end;
 
+// ══════════════════════════════════════════════════════════════
+// AjustarCardIzquierdo — card "Registro de peso" ocupa el 40%
+// del ancho de pnlMedio; el card derecho (pnlForm=alClient)
+// se ajusta automáticamente al espacio restante.
+// Se llama al crear el frame y en cada resize.
+// ══════════════════════════════════════════════════════════════
+procedure TFramePesaje.AjustarCardIzquierdo;
+var W, RegW, InnerW: Integer;
+begin
+  if (pnlMedio = nil) or (pnlRegistroCard = nil) then Exit;
+  W := pnlMedio.ClientWidth;
+  if W < 400 then Exit;
+
+  // 40% para el card izquierdo (incluye su BorderSpacing.Right=16)
+  RegW := (W * 40) div 100;
+  if RegW < 300 then RegW := 300;
+  pnlRegistroCard.Width := RegW;
+
+  // Reubicar controles internos del card izquierdo
+  // basados en el nuevo InnerW = RegW - CREG_PAD*2 - 16(spacing)
+  InnerW := RegW - CREG_PAD * 2 - 16;
+  if InnerW < 200 then InnerW := 200;
+
+  if lblRegistroTitle <> nil then lblRegistroTitle.Width := InnerW;
+
+  // Display de peso
+  if pnlDisplay <> nil then begin
+    pnlDisplay.Width := InnerW;
+    if pnlDisplay.ControlCount > 0 then begin
+      pnlDisplay.Controls[0].Width := InnerW - 4;  // panel interno
+    end;
+  end;
+
+  // Botón Cap.tara — ocupa el resto después del botón Cap.peso
+  if pnlCapturarTara <> nil then
+    pnlCapturarTara.Width := InnerW - (pnlCapturarTara.Left - CREG_PAD);
+
+  // Caja P.Neto — ocupa el resto
+  // lblValNeto está en po → pi; po está a CREG_PAD+192
+  // No reubicamos individualmente — los labels de valores son fijos internamente
+end;
+
 procedure TFramePesaje.AjustarLayoutCards;
 begin
+  AjustarCardIzquierdo;
   AjustarFormLayout;
 end;
 
 procedure TFramePesaje.FormResize(Sender: TObject);
 begin
+  AjustarCardIzquierdo;
   AjustarFormLayout;
 end;
 
@@ -1397,8 +1440,8 @@ begin
     with TLabel.Create(F) do begin Parent:=pnlWrap; SetBounds(20,YPos,DIALOG_W-40,16);
       Caption:='Confirme la finalizacion del pesaje'; Font.Size:=10; Font.Color:=CLR_TEXT_SLATE; end;
     YPos:=224; W:=DIALOG_W-28;
-    CrearBoton(pnlWrap,YPos,W-210,96,30,'CANCELAR',CLR_CARD,CLR_PRIMARY,1,@QuickCancelarClick);
-    CrearBoton(pnlWrap,YPos,W-106,96,30,'FINALIZAR',CLR_PRIMARY,CLR_PRIMARY_FG,0,@DialogFinalizarOk);
+    CrearBoton(pnlWrap,YPos,W-210,96,30,'Cancelar',CLR_CARD,CLR_TEXT,1,@QuickCancelarClick);
+    CrearBoton(pnlWrap,YPos,W-106,96,30,'Finalizar',CLR_PRIMARY,CLR_PRIMARY_FG,0,@DialogFinalizarOk);
     Result:=F.ShowModal=mrOk;
   finally F.Free; end;
 end;
