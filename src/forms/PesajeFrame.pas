@@ -597,7 +597,7 @@ end;
 // Se llama al crear el frame y en cada resize.
 // ══════════════════════════════════════════════════════════════
 procedure TFramePesaje.AjustarCardIzquierdo;
-var W, RegW, InnerW: Integer;
+var W, RegW, InnerW, BtnLeft, BtnAreaW, BtnW: Integer;
 begin
   if (pnlMedio = nil) or (pnlRegistroCard = nil) then Exit;
   W := pnlMedio.ClientWidth;
@@ -623,12 +623,20 @@ begin
     end;
   end;
 
-  // Botón Cap.tara — ocupa el resto después del botón Cap.peso
-  if pnlCapturarTara <> nil then
-    pnlCapturarTara.Width := InnerW - (pnlCapturarTara.Left - CREG_PAD);
+  // Botones Cap.peso y Cap.tara — mismo ancho, llenan el espacio
+  // tras el switch (78px) + gap (6px). Se dividen el resto en 2 partes iguales.
+  if (pnlCapturarPeso <> nil) and (pnlCapturarTara <> nil) then begin
+    BtnLeft  := CREG_PAD + 84;
+    BtnAreaW := InnerW - 84;
+    BtnW     := (BtnAreaW - 6) div 2;
+    if BtnW < 60 then BtnW := 60;
+    pnlCapturarPeso.Left  := BtnLeft;
+    pnlCapturarPeso.Width := BtnW;
+    pnlCapturarTara.Left  := BtnLeft + BtnW + 6;
+    pnlCapturarTara.Width := BtnW;
+  end;
 
-  // Caja P.Neto — ocupa el resto
-  // lblValNeto está en po → pi; po está a CREG_PAD+192
+  // Caja P.Neto — ocupa el resto a partir de CREG_PAD+192
   // No reubicamos individualmente — los labels de valores son fijos internamente
 end;
 
