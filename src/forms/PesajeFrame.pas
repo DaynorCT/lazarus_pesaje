@@ -37,6 +37,7 @@ type
     edtTaraManual: TEdit;
     Grid: TStringGrid;
     pnlSwitchConectar, pnlCapturarPeso, pnlCapturarTara: TPanel;
+    pnlValBruto, pnlValTara, pnlValNeto: TPanel;  // paneles externos cuadros de peso
     pnlSwitchTara, pnlGuardarTara: TPanel;
     pnlGuardar, pnlCancelEdit: TPanel;
     btnVehNuevo, btnChoNuevo, btnPrvNuevo: TPanel;
@@ -339,6 +340,7 @@ begin
 
   po := TPanel.Create(pnlRegistro); po.Parent := pnlRegistro;
   po.SetBounds(CREG_PAD, YPos, 90, C_BOX_H); po.BevelOuter := bvNone; po.Color := CLR_BORDER;
+  pnlValBruto := po;
   pi := TPanel.Create(po); pi.Parent := po; pi.SetBounds(1,1,88,C_BOX_H-2);
   pi.BevelOuter := bvNone; pi.Color := CLR_WHITE; pi.BorderWidth := 4;
   lblValBruto := TLabel.Create(pi); lblValBruto.Parent := pi;
@@ -348,6 +350,7 @@ begin
 
   po := TPanel.Create(pnlRegistro); po.Parent := pnlRegistro;
   po.SetBounds(CREG_PAD + 96, YPos, 90, C_BOX_H); po.BevelOuter := bvNone; po.Color := CLR_BORDER;
+  pnlValTara := po;
   pi := TPanel.Create(po); pi.Parent := po; pi.SetBounds(1,1,88,C_BOX_H-2);
   pi.BevelOuter := bvNone; pi.Color := CLR_WHITE; pi.BorderWidth := 4;
   lblValTara := TLabel.Create(pi); lblValTara.Parent := pi;
@@ -357,6 +360,7 @@ begin
 
   po := TPanel.Create(pnlRegistro); po.Parent := pnlRegistro;
   po.SetBounds(CREG_PAD + 192, YPos, InnerW - 192, C_BOX_H); po.BevelOuter := bvNone; po.Color := CLR_BORDER;
+  pnlValNeto := po;
   pi := TPanel.Create(po); pi.Parent := po; pi.SetBounds(1,1,InnerW-194,C_BOX_H-2);
   pi.BevelOuter := bvNone; pi.Color := CLR_WHITE; pi.BorderWidth := 4;
   lblValNeto := TLabel.Create(pi); lblValNeto.Parent := pi;
@@ -597,7 +601,7 @@ end;
 // Se llama al crear el frame y en cada resize.
 // ══════════════════════════════════════════════════════════════
 procedure TFramePesaje.AjustarCardIzquierdo;
-var W, RegW, InnerW, BtnLeft, BtnAreaW, BtnW: Integer;
+var W, RegW, InnerW, BtnLeft, BtnAreaW, BtnW, BoxW: Integer;
 begin
   if (pnlMedio = nil) or (pnlRegistroCard = nil) then Exit;
   W := pnlMedio.ClientWidth;
@@ -636,8 +640,24 @@ begin
     pnlCapturarTara.Width := BtnW;
   end;
 
-  // Caja P.Neto — ocupa el resto a partir de CREG_PAD+192
-  // No reubicamos individualmente — los labels de valores son fijos internamente
+  // Cuadros Peso Bruto | Peso Tara | Peso Neto — 3 columnas iguales
+  // Se distribuyen en el InnerW disponible con gap de 6px
+  if (pnlValBruto <> nil) and (pnlValTara <> nil) and (pnlValNeto <> nil) then begin
+    BoxW := (InnerW - 6 * 2) div 3;
+    if BoxW < 60 then BoxW := 60;
+    // panel externo (borde gris) + panel interno (blanco, 1px más pequeño cada lado)
+    pnlValBruto.Left  := CREG_PAD;
+    pnlValBruto.Width := BoxW;
+    TPanel(pnlValBruto.Controls[0]).Width := BoxW - 2;
+
+    pnlValTara.Left  := CREG_PAD + BoxW + 6;
+    pnlValTara.Width := BoxW;
+    TPanel(pnlValTara.Controls[0]).Width := BoxW - 2;
+
+    pnlValNeto.Left  := CREG_PAD + (BoxW + 6) * 2;
+    pnlValNeto.Width := InnerW - (BoxW + 6) * 2;  // ocupa el resto exacto
+    TPanel(pnlValNeto.Controls[0]).Width := pnlValNeto.Width - 2;
+  end;
 end;
 
 procedure TFramePesaje.AjustarLayoutCards;
