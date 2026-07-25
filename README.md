@@ -52,7 +52,17 @@ Un solo comando desde macOS compila, descarga `sqlite3.dll` y empaqueta todo:
 ./empaquetar_win64.sh
 ```
 
-Genera en `dist/` un archivo `Sistema_Pesaje_v1.0.zip` con todo lo necesario:
+Genera en `dist/` dos productos:
+
+```
+dist/
+├── Sistema_Pesaje_v1.0.zip          # Version portable (sin instalador)
+└── kit-instalador-windows/          # Kit para generar el instalador .exe
+```
+
+#### 1) ZIP portable
+
+`Sistema_Pesaje_v1.0.zip` contiene:
 
 ```
 Sistema_Pesaje_v1.0/
@@ -64,9 +74,22 @@ Sistema_Pesaje_v1.0/
 
 El cliente solo descomprime el ZIP en cualquier carpeta de Windows y hace doble clic en `pesaje.exe`. Sin instalador, sin dependencias.
 
-### Alternativa: Inno Setup (instalador profesional)
+#### 2) Instalador profesional `.exe`
 
-Para crear un instalador `.exe` con acceso directo en escritorio, menú inicio y desinstalador, ver la sección [Instalador Windows (Inno Setup)](#instalador-windows-inno-setup). Requiere una PC con Windows para generar el instalador.
+Para entregar un instalador de Windows con acceso directo en escritorio, menú inicio y desinstalador, usá el kit que genera el mismo script:
+
+```
+dist/kit-instalador-windows/
+├── pesaje.exe
+├── sqlite3.dll
+├── config.json
+├── assets/                    # icono, fuente
+├── instalador.iss              # script de Inno Setup
+├── generar_instalador_windows.bat
+└── README_LEEME.txt
+```
+
+Llevá esta carpeta a una PC con Windows, instalá Inno Setup y ejecutá `generar_instalador_windows.bat`. Ver la sección [Instalador Windows (Inno Setup)](#instalador-windows-inno-setup) para el detalle.
 
 ## Ícono de la Aplicación
 
@@ -93,77 +116,50 @@ El `.lpi` (`pesaje.lpi`) está configurado para embeber este ícono en el `.exe`
 
 ## Instalador Windows (Inno Setup) {#instalador-windows-inno-setup}
 
-Para crear un instalador `.exe` profesional con acceso directo en escritorio, menú inicio y desinstalador.
+Crea un instalador `.exe` profesional con acceso directo en escritorio, menú inicio y desinstalador. Compatible con **Windows 7 SP1 / 8 / 10 / 11 (64-bit)**.
 
 ### Requisitos en Windows
 
-- [Inno Setup](https://jrsoftware.org/isinfo.php) (gratuito, instalar con extensión ISPP)
-- [sqlite3.dll 64 bits](https://www.sqlite.org/download.html) (sección "Precompiled Binaries for Windows", archivo `sqlite-dll-win-x64-*.zip`)
+- [Inno Setup 6](https://jrsoftware.org/isinfo.php) (gratuito).
+  - Asegurate de marcar la opción **"Install Inno Setup Preprocessor (ISPP)"** durante la instalación.
+- El kit del instalador generado por `./empaquetar_win64.sh`:
+  - `dist/kit-instalador-windows/`
 
-### Script del instalador (`instalador.iss`)
+### Generar el instalador con un solo comando
 
-```pascal
-[Setup]
-AppName=Sistema de Pesaje
-AppVersion=1.0
-AppPublisher=Lazarus Pesaje
-DefaultDirName={pf}\SistemaPesaje
-DefaultGroupName=Sistema de Pesaje
-OutputDir=.\dist
-OutputBaseFilename=Instalador_Sistema_Pesaje
-Compression=lzma
-SolidCompression=yes
-SetupIconFile=assets\logo_pesaje.ico
-UninstallDisplayIcon={app}\pesaje.exe
-PrivilegesRequired=admin
+Llevá la carpeta `dist/kit-instalador-windows/` a una PC con Windows, instalá Inno Setup y ejecutá:
 
-[Languages]
-Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
-
-[Tasks]
-Name: "desktopicon"; Description: "Crear acceso directo en el escritorio"
-
-[Files]
-Source: "pesaje.exe"; DestDir: "{app}"
-Source: "sqlite3.dll"; DestDir: "{app}"
-Source: "config.json"; DestDir: "{app}"; Flags: onlyifdoesntexist
-
-[Icons]
-Name: "{commondesktop}\Sistema de Pesaje"; Filename: "{app}\pesaje.exe"; Tasks: desktopicon
-Name: "{group}\Sistema de Pesaje"; Filename: "{app}\pesaje.exe"
-Name: "{group}\Desinstalar Sistema de Pesaje"; Filename: "{uninstallexe}"
-
-[Run]
-Filename: "{app}\pesaje.exe"; Description: "Iniciar Sistema de Pesaje"; Flags: nowait postinstall skipifsilent
+```bat
+generar_instalador_windows.bat
 ```
 
-### Generar el instalador
+El script:
+- Detecta automáticamente `ISCC.exe`.
+- Verifica que existan `pesaje.exe`, `sqlite3.dll`, `config.json` y los recursos gráficos.
+- Genera `dist/Instalador_Sistema_Pesaje.exe`.
 
-1. Compilá el `.exe` desde macOS:
-   ```bash
-   ./compilar_win32.sh
-   ```
+### Generar el instalador manualmente (alternativa)
 
-2. Copiá a una máquina Windows los siguientes archivos:
-   ```
-   pesaje.exe
-   sqlite3.dll
-   config.json
-   assets/logo_pesaje.ico
-   instalador.iss
-   ```
+1. Abrir `instalador.iss` con **Inno Setup Compiler**.
+2. Presionar `Ctrl+F9` (o menú Build → Compile).
+3. El instalador se genera en `dist/Instalador_Sistema_Pesaje.exe`.
 
-3. En Windows, abrí `instalador.iss` con Inno Setup Compiler y presioná `Ctrl+F9`.
+### Características del instalador
 
-4. El instalador se genera en la carpeta `dist/Instalador_Sistema_Pesaje.exe`.
+- Instala en `C:\Archivos de Programa\SistemaPesaje` (o equivalente automático según el sistema).
+- Crea acceso directo en el escritorio.
+- Crea grupo de programas en el menú Inicio con acceso directo al sistema y al desinstalador.
+- Incluye desinstalador registrado en Panel de Control.
+- Requiere permisos de administrador.
+- Interface en español.
+- **No sobrescribe `config.json` ya existente**, para conservar la configuración del usuario.
+- Incluye la fuente `fa-solid-900.ttf` usada por la interfaz.
+- Compatible con Windows 7 SP1 y versiones posteriores.
 
-El instalador resultante:
-- Instala en `C:\Archivos de Programa\SistemaPesaje`
-- Crea acceso directo en el escritorio
-- Crea acceso directo en el menú inicio con desinstalador
-- Requiere permisos de administrador
-- Usa español como idioma del instalador
-- No sobrescribe `config.json` si ya existe
+### Archivos del instalador
+
+- `instalador.iss`: script principal de Inno Setup.
+- `generar_instalador_windows.bat`: automatiza la compilación en Windows.
 
 ## Ejecución
 

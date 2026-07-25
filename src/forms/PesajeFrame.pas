@@ -38,6 +38,7 @@ type
     Grid: TStringGrid;
     pnlSwitchConectar, pnlCapturarPeso, pnlCapturarTara: TPanel;
     pnlValBruto, pnlValTara, pnlValNeto: TPanel;  // paneles externos cuadros de peso
+    lblBrutoTit, lblTaraTit, lblNetoTit: TLabel;  // títulos sobre los cuadros
     pnlSwitchTara, pnlGuardarTara: TPanel;
     pnlGuardar, pnlCancelEdit: TPanel;
     btnVehNuevo, btnChoNuevo, btnPrvNuevo: TPanel;
@@ -327,15 +328,15 @@ begin
   Lbl.Transparent := True; Lbl.Cursor := crHandPoint; Lbl.OnClick := @TaraClick;
   YPos := YPos + C_BTN_H + 18;
 
-  Lbl := TLabel.Create(pnlRegistro); Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(CREG_PAD + 4, YPos, 82, 13); Lbl.Caption := 'Peso Bruto';
-  Lbl.Font.Size := 9; Lbl.Font.Color := CLR_TEXT_SLATE;
-  Lbl := TLabel.Create(pnlRegistro); Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(CREG_PAD + 100, YPos, 70, 13); Lbl.Caption := 'Peso tara';
-  Lbl.Font.Size := 9; Lbl.Font.Color := CLR_TEXT_SLATE;
-  Lbl := TLabel.Create(pnlRegistro); Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(CREG_PAD + 196, YPos, 80, 13); Lbl.Caption := 'Peso Neto';
-  Lbl.Font.Size := 9; Lbl.Font.Color := CLR_TEXT_SLATE;
+  lblBrutoTit := TLabel.Create(pnlRegistro); lblBrutoTit.Parent := pnlRegistro;
+  lblBrutoTit.SetBounds(CREG_PAD + 4, YPos, 82, 13); lblBrutoTit.Caption := 'Peso Bruto';
+  lblBrutoTit.Font.Size := 9; lblBrutoTit.Font.Color := CLR_TEXT_SLATE;
+  lblTaraTit := TLabel.Create(pnlRegistro); lblTaraTit.Parent := pnlRegistro;
+  lblTaraTit.SetBounds(CREG_PAD + 100, YPos, 70, 13); lblTaraTit.Caption := 'Peso tara';
+  lblTaraTit.Font.Size := 9; lblTaraTit.Font.Color := CLR_TEXT_SLATE;
+  lblNetoTit := TLabel.Create(pnlRegistro); lblNetoTit.Parent := pnlRegistro;
+  lblNetoTit.SetBounds(CREG_PAD + 196, YPos, 80, 13); lblNetoTit.Caption := 'Peso Neto';
+  lblNetoTit.Font.Size := 9; lblNetoTit.Font.Color := CLR_TEXT_SLATE;
   YPos := YPos + 16;
 
   po := TPanel.Create(pnlRegistro); po.Parent := pnlRegistro;
@@ -640,23 +641,39 @@ begin
     pnlCapturarTara.Width := BtnW;
   end;
 
-  // Cuadros Peso Bruto | Peso Tara | Peso Neto — 3 columnas iguales
-  // Se distribuyen en el InnerW disponible con gap de 6px
+  // Cuadros + títulos Peso Bruto | Peso Tara | Peso Neto — 3 columnas iguales
   if (pnlValBruto <> nil) and (pnlValTara <> nil) and (pnlValNeto <> nil) then begin
     BoxW := (InnerW - 6 * 2) div 3;
     if BoxW < 60 then BoxW := 60;
-    // panel externo (borde gris) + panel interno (blanco, 1px más pequeño cada lado)
+
+    // Cuadro Bruto
     pnlValBruto.Left  := CREG_PAD;
     pnlValBruto.Width := BoxW;
     TPanel(pnlValBruto.Controls[0]).Width := BoxW - 2;
 
+    // Cuadro Tara
     pnlValTara.Left  := CREG_PAD + BoxW + 6;
     pnlValTara.Width := BoxW;
     TPanel(pnlValTara.Controls[0]).Width := BoxW - 2;
 
+    // Cuadro Neto
     pnlValNeto.Left  := CREG_PAD + (BoxW + 6) * 2;
-    pnlValNeto.Width := InnerW - (BoxW + 6) * 2;  // ocupa el resto exacto
+    pnlValNeto.Width := InnerW - (BoxW + 6) * 2;
     TPanel(pnlValNeto.Controls[0]).Width := pnlValNeto.Width - 2;
+
+    // Títulos — se alinean con el centro de cada cuadro
+    if lblBrutoTit <> nil then begin
+      lblBrutoTit.Left  := pnlValBruto.Left + 4;
+      lblBrutoTit.Width := BoxW - 4;
+    end;
+    if lblTaraTit <> nil then begin
+      lblTaraTit.Left  := pnlValTara.Left + 4;
+      lblTaraTit.Width := BoxW - 4;
+    end;
+    if lblNetoTit <> nil then begin
+      lblNetoTit.Left  := pnlValNeto.Left + 4;
+      lblNetoTit.Width := pnlValNeto.Width - 4;
+    end;
   end;
 end;
 
