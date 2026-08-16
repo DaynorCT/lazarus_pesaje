@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 
 echo =========================================
 echo   GENERAR INSTALADOR WINDOWS
-echo   Sistema de Pesaje v1.0
+echo   Sistema de Pesaje
 echo =========================================
 echo.
 
@@ -53,8 +53,8 @@ echo.
 if not exist "pesaje.exe" (
     echo ERROR: No se encontro pesaje.exe en la carpeta actual.
     echo.
-    echo Compila primero desde macOS con: ./compilar_win32.sh
-echo    o desde Lazarus IDE para Windows 64-bit.
+    echo Compila primero desde macOS con: ./compilar.sh win64
+    echo o desde Lazarus IDE para Windows 64-bit.
     echo.
     pause
     exit /b 1
@@ -64,8 +64,8 @@ if not exist "sqlite3.dll" (
     echo ERROR: No se encontro sqlite3.dll en la carpeta actual.
     echo.
     echo Descargalo de https://www.sqlite.org/download.html
-echo    busca: sqlite-dll-win-x64-*.zip
-echo.
+    echo busca: sqlite-dll-win-x64-*.zip
+    echo.
     pause
     exit /b 1
 )

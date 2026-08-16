@@ -1,8 +1,17 @@
 #!/bin/bash
 set -e
 
-PROJECT_DIR="/Users/jaru/dev/lazarus-pesaje"
-VERSION="1.0"
+# ============================================================
+# EMPAQUETAR SISTEMA DE PESAJE (Windows 64-bit)
+# Uso: ./empaquetar.sh
+# Genera en dist/:
+#   Sistema_Pesaje_v<VERSION>.zip  -> portable
+#   kit-instalador-windows/        -> kit para crear el instalador .exe
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$SCRIPT_DIR}"
+VERSION="${VERSION:-1.0}"
 
 cd "$PROJECT_DIR"
 
@@ -12,12 +21,12 @@ echo "========================================="
 echo ""
 
 # --- 1. Compilar ---
-echo "[1/5] Compilando pesaje.exe para Windows 64-bit..."
-./compilar_win32.sh
+echo "[1/6] Compilando pesaje.exe para Windows 64-bit..."
+./compilar.sh win64
 echo ""
 
 # --- 2. Descargar sqlite3.dll ---
-echo "[2/5] Buscando sqlite3.dll..."
+echo "[2/6] Buscando sqlite3.dll..."
 SQLITE_DLL="sqlite3.dll"
 
 if [ -f "$SQLITE_DLL" ]; then
@@ -46,7 +55,7 @@ fi
 echo ""
 
 # --- 3. Crear carpeta de distribucion portable ---
-echo "[3/5] Preparando carpeta de distribucion portable..."
+echo "[3/6] Preparando carpeta de distribucion portable..."
 DIST_DIR="$PROJECT_DIR/dist/Sistema_Pesaje_v${VERSION}"
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
@@ -65,7 +74,7 @@ echo "  Archivos copiados a dist/Sistema_Pesaje_v${VERSION}/"
 echo ""
 
 # --- 4. Crear ZIP portable ---
-echo "[4/5] Creando ZIP portable..."
+echo "[4/6] Creando ZIP portable..."
 ZIP_FILE="$PROJECT_DIR/dist/Sistema_Pesaje_v${VERSION}.zip"
 rm -f "$ZIP_FILE"
 cd "$PROJECT_DIR/dist"
@@ -74,7 +83,7 @@ cd "$PROJECT_DIR"
 echo ""
 
 # --- 5. Preparar kit para instalador Windows ---
-echo "[5/5] Preparando kit para generar instalador .exe en Windows..."
+echo "[5/6] Preparando kit para generar instalador .exe en Windows..."
 KIT_DIR="$PROJECT_DIR/dist/kit-instalador-windows"
 rm -rf "$KIT_DIR"
 mkdir -p "$KIT_DIR"
@@ -83,7 +92,10 @@ mkdir -p "$KIT_DIR"
 cp pesaje.exe "$KIT_DIR/"
 cp "$SQLITE_DLL" "$KIT_DIR/"
 cp config.json "$KIT_DIR/"
-cp instalador.iss "$KIT_DIR/"
+
+# instalador.iss con la version inyectada (unica fuente: VERSION arriba)
+sed "s/#define MyAppVersion \".*\"/#define MyAppVersion \"$VERSION\"/" \
+    instalador.iss > "$KIT_DIR/instalador.iss"
 cp generar_instalador_windows.bat "$KIT_DIR/"
 
 # Carpeta assets necesaria para el instalador
@@ -92,9 +104,10 @@ cp assets/logo_pesaje.ico "$KIT_DIR/assets/"
 cp assets/fa-solid-900.ttf "$KIT_DIR/assets/"
 
 # README con instrucciones para Windows
-cat > "$KIT_DIR/README_LEEME.txt" <<'EOF'
+cat > "$KIT_DIR/README_LEEME.txt" <<EOF
 =====================================================================
   KIT PARA GENERAR EL INSTALADOR DE SISTEMA DE PESAJE (Windows)
+  Version: $VERSION
 =====================================================================
 
 Este kit contiene todo lo necesario para crear el instalador
@@ -146,6 +159,62 @@ EOF
 
 echo "  Archivos copiados a dist/kit-instalador-windows/"
 echo ""
+
+# --- 6. Verificar kit ---
+echo "[6/6] Verificando kit y portable..."
+echo ""
+echo "  Contenido del kit:"
+FAILED=0
+for f in "pesaje.exe" "sqlite3.dll" "config.json" "instalador.iss" \
+         "generar_instalador_windows.bat" "assets/logo_pesaje.ico" \
+         "assets/fa-solid-900.ttf" "README_LEEME.txt"; do
+    if [ -f "$KIT_DIR/$f" ]; then
+        SIZE=$(stat -f "%z" "$KIT_DIR/$f")
+        printf "    [OK] %-28s %s bytes\n" "$f" "$SIZE"
+    else
+        echo "    [FALTA] $f"
+        FAILED=1
+    fi
+done
+
+echo ""
+echo "  Contenido del portable:"
+for f in "pesaje.exe" "sqlite3.dll" "config.json" "fa-solid-900.ttf"; do
+    if [ -f "$DIST_DIR/$f" ]; then
+        SIZE=$(stat -f "%z" "$DIST_DIR/$f")
+        printf "    [OK] %-28s %s bytes\n" "$f" "$SIZE"
+    else
+        echo "    [FALTA] $f"
+        FAILED=1
+    fi
+done
+
+# Version inyectada en el instalador.iss del kit
+ISS_VERSION=$(grep -o '#define MyAppVersion "[^"]*"' "$KIT_DIR/instalador.iss" | head -1)
+echo ""
+echo "  Version en instalador.iss: $ISS_VERSION"
+
+# Detectar fuentes mas nuevas que el binario (evita kits viejos)
+echo ""
+echo "  Chequeo de frescura del binario:"
+NEWEST_SRC=$(stat -f "%m" pesaje.lpi)
+for f in pesaje.lpr $(find src -name '*.pas'); do
+    MT=$(stat -f "%m" "$f")
+    [ "$MT" -gt "$NEWEST_SRC" ] && NEWEST_SRC=$MT
+done
+EXE_MT=$(stat -f "%m" pesaje.exe)
+if [ "$NEWEST_SRC" -gt "$EXE_MT" ]; then
+    echo "    [OBSOLETO] pesaje.exe es mas viejo que las fuentes (recompilar)"
+    STALE=1
+else
+    echo "    [OK] pesaje.exe esta al dia respecto a las fuentes"
+fi
+
+echo ""
+if [ "$FAILED" = "1" ]; then
+    echo "  ERROR: Faltan archivos en el kit/portable. Revisa arriba."
+    exit 1
+fi
 
 # --- Resumen final ---
 echo "========================================="

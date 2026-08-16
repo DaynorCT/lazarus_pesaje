@@ -28,7 +28,7 @@ Requiere instalar el cross-compiler **x86_64-win64** una sola vez desde fpcupdel
 Luego:
 
 ```bash
-./compilar_win32.sh
+./compilar.sh win64
 ```
 
 Genera `pesaje.exe` de 64 bits — compatible con Windows 7, 8, 10, 11 (64-bit).
@@ -49,7 +49,7 @@ Para garantizar que los íconos de interfaz se vean correctamente en todas las v
 Un solo comando desde macOS compila, descarga `sqlite3.dll` y empaqueta todo:
 
 ```bash
-./empaquetar_win64.sh
+./empaquetar.sh
 ```
 
 Genera en `dist/` dos productos:
@@ -122,7 +122,7 @@ Crea un instalador `.exe` profesional con acceso directo en escritorio, menú in
 
 - [Inno Setup 6](https://jrsoftware.org/isinfo.php) (gratuito).
   - Asegurate de marcar la opción **"Install Inno Setup Preprocessor (ISPP)"** durante la instalación.
-- El kit del instalador generado por `./empaquetar_win64.sh`:
+- El kit del instalador generado por `./empaquetar.sh`:
   - `dist/kit-instalador-windows/`
 
 ### Generar el instalador con un solo comando
@@ -179,7 +179,7 @@ Al primer arranque se crea automáticamente la base de datos `pesaje.db` con el 
 
 ## Base de Datos
 
-**Archivo:** `pesaje.db` (SQLite, se crea en la raíz del proyecto)
+**Archivo:** `pesaje.db` (SQLite). En Windows se crea en `%APPDATA%\SistemaPesaje\`; en macOS en `~/Library/Application Support/SistemaPesaje/`. La primera ejecución la crea automáticamente con el admin sembrado.
 
 ### Resetear la BD
 
@@ -215,9 +215,8 @@ File > Open Database > /Users/jaru/dev/lazarus-pesaje/pesaje.db
 
 ```
 lazarus-pesaje/
-├── compilar.sh               # Script de compilación macOS
-├── compilar_win32.sh         # Script de compilación Windows (cross)
-├── empaquetar_win64.sh       # Script de empaquetado ZIP (compila + sqlite + ZIP)
+├── compilar.sh               # Script de compilación (mac | win64)
+├── empaquetar.sh             # Script de empaquetado ZIP (compila + sqlite + ZIP + kit)
 ├── instalador.iss            # Script de Inno Setup para instalador Windows
 ├── reset_bd.sh               # Resetear base de datos
 ├── pesaje.lpr                # Entry point
@@ -336,6 +335,6 @@ Todos los colores están centralizados en `src/utils/Theme.pas`:
 
 - El proyecto usa widgetset Cocoa para macOS
 - `{$linkframework UserNotifications}` requerido en el .lpr
-- La BD se crea en el mismo directorio que el ejecutable
+- En Windows la BD se crea en `%APPDATA%\SistemaPesaje`; en macOS en `~/Library/Application Support/SistemaPesaje`
 - Si se ejecuta desde el .app bundle, `DBPath` resuelve al directorio del proyecto
 - No depende de archivos .lfm para el diseño de frames
