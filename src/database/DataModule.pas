@@ -5,7 +5,7 @@ unit DataModule;
 interface
 
 uses
-  Classes, SysUtils, SQLDB, SQLite3Conn, synaser, Utils;
+  Classes, SysUtils, SQLDB, SQLite3Conn, synaser, FileUtil, Utils;
 
 type
   TUserRecord = record
@@ -26,7 +26,19 @@ type
     procedure DataModuleDestroy(Sender: TObject);
   private
     FPuertoSerial: TBlockSerial;
-    function DBPath: string;
+    function GetDataDirectory: string;
+    function GetDatabasePath: string;
+    function GetOldDatabasePath: string;
+    function GetAppBundleParentDatabasePath: string;
+    procedure EnsureDataDirectory;
+    procedure MigrateOldDatabase;
+    procedure BackupDatabase;
+    function ColumnaExiste(const NombreTabla, NombreColumna: string): Boolean;
+    procedure AplicarMigracionesEsquema;
+    // Helper: inicia transacción solo si no hay una activa
+    procedure SafeStartTransaction;
+    procedure SafeCommit;
+    procedure SafeRollback;
   public
     function ConectarBaseDatos: Boolean;
     procedure InicializarBaseDatos;
@@ -51,22 +63,196 @@ implementation
 
 {$R *.lfm}
 
-function TDM.DBPath: string;
+const
+  APP_DATA_FOLDER = 'SistemaPesaje';
+  DB_FILE_NAME    = 'pesaje.db';
+  BACKUP_FILE_NAME = 'pesaje.db.backup';
+
+// ══════════════════════════════════════════════════════════════════════
+// Helpers de transacción seguros
+// ══════════════════════════════════════════════════════════════════════
+
+// Inicia transacción SOLO si no hay una activa.
+// Esto evita el error "Transaction already active" que ocurre cuando
+// EjecutarSQL/AbrirQuery abren una transacción implícita en SQLite
+// y luego el código intenta abrir otra manualmente.
+procedure TDM.SafeStartTransaction;
 begin
-  {$IFDEF DARWIN}
-  Result := '/Users/jaru/dev/lazarus-pesaje/pesaje.db';
-  {$ELSE}
-  Result := ExtractFilePath(ParamStr(0)) + 'pesaje.db';
-  {$ENDIF}
+  if not Transaccion.Active then
+    Transaccion.StartTransaction;
 end;
+
+procedure TDM.SafeCommit;
+begin
+  if Transaccion.Active then
+    Transaccion.Commit;
+end;
+
+procedure TDM.SafeRollback;
+begin
+  if Transaccion.Active then
+    Transaccion.Rollback;
+end;
+
+// ══════════════════════════════════════════════════════════════════════
+// Rutas de la base de datos
+// ══════════════════════════════════════════════════════════════════════
+
+function TDM.GetDataDirectory: string;
+begin
+{$IFDEF WINDOWS}
+  Result := GetEnvironmentVariable('APPDATA');
+  if Result = '' then
+    Result := GetEnvironmentVariable('USERPROFILE');
+  Result := IncludeTrailingPathDelimiter(Result) + APP_DATA_FOLDER;
+{$ELSE}
+  {$IFDEF DARWIN}
+  Result := GetEnvironmentVariable('HOME') + '/Library/Application Support/' + APP_DATA_FOLDER;
+  {$ELSE}
+  Result := GetEnvironmentVariable('HOME') + '/.local/share/' + APP_DATA_FOLDER;
+  {$ENDIF}
+{$ENDIF}
+end;
+
+function TDM.GetDatabasePath: string;
+begin
+  Result := IncludeTrailingPathDelimiter(GetDataDirectory) + DB_FILE_NAME;
+end;
+
+function TDM.GetOldDatabasePath: string;
+begin
+  Result := ExtractFilePath(ParamStr(0)) + DB_FILE_NAME;
+end;
+
+function TDM.GetAppBundleParentDatabasePath: string;
+{$IFDEF DARWIN}
+var
+  ExePath: string;
+  i: Integer;
+{$ENDIF}
+begin
+  Result := '';
+{$IFDEF DARWIN}
+  ExePath := ParamStr(0);
+  i := Pos('.app/Contents/MacOS/', ExePath);
+  if i > 0 then
+    Result := ExtractFilePath(Copy(ExePath, 1, i - 1)) + DB_FILE_NAME;
+{$ENDIF}
+end;
+
+procedure TDM.EnsureDataDirectory;
+begin
+  if not DirectoryExists(GetDataDirectory) then
+    ForceDirectories(GetDataDirectory);
+end;
+
+procedure TDM.MigrateOldDatabase;
+var
+  OldPath, AppBundlePath, NewPath, SourcePath: string;
+begin
+  NewPath := GetDatabasePath;
+  if FileExists(NewPath) then Exit;
+
+  OldPath      := GetOldDatabasePath;
+  AppBundlePath := GetAppBundleParentDatabasePath;
+
+  SourcePath := '';
+  if FileExists(OldPath) then
+    SourcePath := OldPath
+  else if (AppBundlePath <> '') and FileExists(AppBundlePath) then
+    SourcePath := AppBundlePath;
+
+  if SourcePath = '' then Exit;
+
+  EnsureDataDirectory;
+  CopyFile(SourcePath, NewPath);
+end;
+
+procedure TDM.BackupDatabase;
+var
+  DBPath, BackupPath: string;
+begin
+  DBPath := GetDatabasePath;
+  if not FileExists(DBPath) then Exit;
+  BackupPath := IncludeTrailingPathDelimiter(GetDataDirectory) + BACKUP_FILE_NAME;
+  try
+    CopyFile(DBPath, BackupPath, [cffOverwriteFile]);
+  except
+    // El backup no debe bloquear el arranque
+  end;
+end;
+
+// ══════════════════════════════════════════════════════════════════════
+// Migraciones de esquema
+// ══════════════════════════════════════════════════════════════════════
+
+function TDM.ColumnaExiste(const NombreTabla, NombreColumna: string): Boolean;
+var
+  Q: TSQLQuery;
+begin
+  Result := False;
+  if not Conexion.Connected then Exit;
+
+  Q := TSQLQuery.Create(nil);
+  try
+    Q.DataBase    := Conexion;
+    Q.Transaction := Transaccion;
+    Q.SQL.Text    := 'PRAGMA table_info(' + NombreTabla + ')';
+    Q.Open;
+    while not Q.EOF do begin
+      if LowerCase(Q.FieldByName('name').AsString) = LowerCase(NombreColumna) then begin
+        Result := True;
+        Break;
+      end;
+      Q.Next;
+    end;
+  finally
+    Q.Close;
+    Q.Free;
+  end;
+end;
+
+procedure TDM.AplicarMigracionesEsquema;
+// ─────────────────────────────────────────────────────────────────────
+// IMPORTANTE: usa SafeStartTransaction para no chocar con la transacción
+// principal de InicializarBaseDatos. Cada migración tiene su propio
+// commit/rollback aislado.
+// ─────────────────────────────────────────────────────────────────────
+begin
+  if not Conexion.Connected then Exit;
+
+  // Migración 1: columna telefono en choferes
+  if not ColumnaExiste('choferes', 'telefono') then begin
+    SafeStartTransaction;
+    try
+      EjecutarSQL('ALTER TABLE choferes ADD COLUMN telefono TEXT');
+      SafeCommit;
+    except
+      SafeRollback;
+      // La columna puede ya existir en otra sesión; continuar sin bloquear
+    end;
+  end;
+
+  // Agregar aquí más migraciones futuras con el mismo patrón:
+  // if not ColumnaExiste('tabla', 'columna') then begin
+  //   SafeStartTransaction;
+  //   try
+  //     EjecutarSQL('ALTER TABLE tabla ADD COLUMN columna TEXT');
+  //     SafeCommit;
+  //   except SafeRollback; end;
+  // end;
+end;
+
+// ══════════════════════════════════════════════════════════════════════
+// DataModule lifecycle
+// ══════════════════════════════════════════════════════════════════════
 
 procedure TDM.DataModuleCreate(Sender: TObject);
 begin
-  Conexion.Transaction := Transaccion;
-  Transaccion.Database := Conexion;
-  Query.DataBase := Conexion;
-  Query.Transaction := Transaccion;
-
+  Conexion.Transaction  := Transaccion;
+  Transaccion.Database  := Conexion;
+  Query.DataBase        := Conexion;
+  Query.Transaction     := Transaccion;
   FPuertoSerial := nil;
 end;
 
@@ -74,24 +260,24 @@ procedure TDM.DataModuleDestroy(Sender: TObject);
 begin
   if Conexion.Connected then
     Conexion.Close;
-  if FPuertoSerial <> nil then
-  begin
+  if FPuertoSerial <> nil then begin
     DesconectarSerial;
     FPuertoSerial.Free;
   end;
 end;
 
+// ══════════════════════════════════════════════════════════════════════
+// Base de datos
+// ══════════════════════════════════════════════════════════════════════
+
 function TDM.ConectarBaseDatos: Boolean;
 begin
   try
-    Conexion.DatabaseName := DBPath;
+    Conexion.DatabaseName := GetDatabasePath;
     Conexion.Open;
     Result := Conexion.Connected;
   except
-    on E: Exception do
-    begin
-      Result := False;
-    end;
+    Result := False;
   end;
 end;
 
@@ -128,12 +314,26 @@ begin
   Query.Close;
 end;
 
+// ══════════════════════════════════════════════════════════════════════
+// Inicialización — crea tablas si no existen
+// ══════════════════════════════════════════════════════════════════════
+
 procedure TDM.InicializarBaseDatos;
 begin
-  if not ConectarBaseDatos then
-    Exit;
+  MigrateOldDatabase;
+  EnsureDataDirectory;
 
-  Transaccion.StartTransaction;
+  if not ConectarBaseDatos then Exit;
+
+  BackupDatabase;
+
+  // Las migraciones de esquema se ejecutan ANTES de la transacción
+  // principal, con sus propias transacciones internas, para evitar
+  // el error "Transaction already active".
+  AplicarMigracionesEsquema;
+
+  // Crear tablas base en una sola transacción
+  SafeStartTransaction;
   try
     EjecutarSQL('CREATE TABLE IF NOT EXISTS personas (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ' +
@@ -174,7 +374,7 @@ begin
     EjecutarSQL('CREATE TABLE IF NOT EXISTS choferes (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ' +
       'persona_id INTEGER NOT NULL UNIQUE REFERENCES personas(id) ON DELETE CASCADE, ' +
-       'licencia TEXT, ' +
+      'licencia TEXT, telefono TEXT, ' +
       'estado TEXT NOT NULL DEFAULT ''ACTIVO'', ' +
       'usuario_creacion INTEGER, usuario_modificacion INTEGER, ' +
       'fecha_creacion TEXT, fecha_modificacion TEXT)');
@@ -270,16 +470,16 @@ begin
       'posicion_longitud INTEGER NOT NULL DEFAULT 5, ' +
       'usuario_modificacion INTEGER, fecha_modificacion TEXT)');
 
-    Transaccion.Commit;
+    SafeCommit;
   except
     on E: Exception do
-      Transaccion.Rollback;
+      SafeRollback;
   end;
 end;
 
-// ====================================================================
-// SERIAL - Refactorizado desde UnitDashboard.pas (synaser)
-// ====================================================================
+// ══════════════════════════════════════════════════════════════════════
+// Serial (synaser) — compatible Windows 7-11 y macOS
+// ══════════════════════════════════════════════════════════════════════
 
 function TDM.ConectarSerial(const Puerto: string; BaudRate: Integer;
   Bits: Integer; Paridad: Char; StopBits: Integer): Boolean;
@@ -290,12 +490,10 @@ begin
       FPuertoSerial := TBlockSerial.Create;
 
     FPuertoSerial.Connect(Puerto);
-    if FPuertoSerial.LastError <> 0 then
-      Exit;
+    if FPuertoSerial.LastError <> 0 then Exit;
 
     FPuertoSerial.Config(BaudRate, Bits, Paridad, StopBits, False, False);
-    if FPuertoSerial.LastError <> 0 then
-    begin
+    if FPuertoSerial.LastError <> 0 then begin
       FPuertoSerial.CloseSocket;
       Exit;
     end;
@@ -308,8 +506,7 @@ end;
 
 procedure TDM.DesconectarSerial;
 begin
-  if FPuertoSerial <> nil then
-  begin
+  if FPuertoSerial <> nil then begin
     try
       FPuertoSerial.CloseSocket;
     except
@@ -320,19 +517,13 @@ end;
 function TDM.LeerPuertoSerial: string;
 var
   Buffer: string;
-  Timeout: Integer;
 begin
   Result := '';
-  if (FPuertoSerial = nil) or (not FPuertoSerial.InstanceActive) then
-    Exit;
-
-  Timeout := 50;
+  if (FPuertoSerial = nil) or (not FPuertoSerial.InstanceActive) then Exit;
   Buffer := '';
-  while FPuertoSerial.WaitingData > 0 do
-  begin
-    Buffer := Buffer + FPuertoSerial.RecvPacket(Timeout);
-    if Buffer <> '' then
-      Break;
+  while FPuertoSerial.WaitingData > 0 do begin
+    Buffer := Buffer + FPuertoSerial.RecvPacket(50);
+    if Buffer <> '' then Break;
   end;
   Result := Buffer;
 end;

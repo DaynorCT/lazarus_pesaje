@@ -58,6 +58,9 @@ fi
 if [ -f assets/fa-solid-900.ttf ]; then
     cp assets/fa-solid-900.ttf "$DIST_DIR/"
 fi
+# NOTA: NO se copia pesaje.db. La base de datos se crea en
+# %APPDATA%\SistemaPesaje para que los datos del usuario no se pierdan
+# al actualizar el portable.
 echo "  Archivos copiados a dist/Sistema_Pesaje_v${VERSION}/"
 echo ""
 
@@ -132,6 +135,11 @@ Archivos incluidos en este kit:
    - assets\fa-solid-900.ttf (fuente de iconos)
    - instalador.iss          (script de Inno Setup)
    - generar_instalador_windows.bat
+
+NOTA: la base de datos (pesaje.db) NO se incluye en el instalador.
+El programa la crea automaticamente en %APPDATA%\SistemaPesaje la primera
+vez que se ejecuta, para que los datos del usuario se conserven entre
+instalaciones.
 
 =====================================================================
 EOF

@@ -251,10 +251,10 @@ begin
         DrawW := MaxH * ImgAspect;
       end;
 
-      Page.DrawLine(XDer, 10, XDer + DrawW, 10, 0.2);
-      Page.DrawLine(XDer, 10, XDer, 10 + DrawH, 0.2);
-      Page.DrawLine(XDer + DrawW, 10, XDer + DrawW, 10 + DrawH, 0.2);
-      Page.DrawLine(XDer, 10 + DrawH, XDer + DrawW, 10 + DrawH, 0.2);
+      // Page.DrawLine(XDer, 10, XDer + DrawW, 10, 0.2);
+      // Page.DrawLine(XDer, 10, XDer, 10 + DrawH, 0.2);
+      // Page.DrawLine(XDer + DrawW, 10, XDer + DrawW, 10 + DrawH, 0.2);
+      // Page.DrawLine(XDer, 10 + DrawH, XDer + DrawW, 10 + DrawH, 0.2);
 
       Page.DrawImage(XDer, 10 + DrawH, DrawW, DrawH, LogoImgIdx);
     end;

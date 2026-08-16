@@ -40,8 +40,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="92"/>
-        <CursorPos Y="104"/>
+        <TopLine Value="278"/>
+        <CursorPos Y="287"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -77,13 +77,11 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="449"/>
-        <CursorPos X="5" Y="457"/>
+        <TopLine Value="456"/>
+        <CursorPos X="41" Y="457"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/DashboardFrame.pas"/>
@@ -193,8 +191,9 @@
       <Unit>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="15"/>
-        <TopLine Value="231"/>
+        <TopLine Value="232"/>
         <CursorPos X="20" Y="251"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -239,7 +238,7 @@
       <Unit>
         <Filename Value="../../Downloads/PesajeFrame.pas"/>
         <EditorIndex Value="13"/>
-        <UsageCount Value="90"/>
+        <UsageCount Value="97"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -247,7 +246,7 @@
         <HasResources Value="True"/>
         <EditorIndex Value="11"/>
         <CursorPos X="41" Y="17"/>
-        <UsageCount Value="45"/>
+        <UsageCount Value="52"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -258,15 +257,11 @@
         <EditorIndex Value="12"/>
         <TopLine Value="362"/>
         <CursorPos Y="374"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="30"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-        <Caret Line="347" Column="20" TopLine="336"/>
-      </Position>
       <Position>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <Caret Line="17" Column="13" TopLine="6"/>
@@ -381,7 +376,11 @@
       </Position>
       <Position>
         <Filename Value="src/forms/PesajeFrame.pas"/>
-        <Caret Line="457" Column="93" TopLine="445"/>
+        <Caret Line="457" Column="41" TopLine="456"/>
+      </Position>
+      <Position>
+        <Filename Value="src/database/DataModule.pas"/>
+        <Caret Line="445" Column="40" TopLine="423"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>

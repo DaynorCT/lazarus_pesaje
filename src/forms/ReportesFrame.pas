@@ -407,7 +407,7 @@ begin
         ShowMessage('No se pudo generar el reporte.');
         Exit;
       end;
-      Ruta := '/tmp/reporte-pesaje.pdf';
+      Ruta := RutaPDFTemporal('reporte-pesaje.pdf');
       Stream.SaveToFile(Ruta);
       OpenDocument(Ruta);
     finally Stream.Free; end;

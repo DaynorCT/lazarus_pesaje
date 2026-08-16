@@ -13,6 +13,7 @@ function FormatearPeso(const PesoKg: Integer): string;
 function FormatearMoneda(const MontoBs: Integer): string;
 function ConvertirFechaISO(const Input: string): string;
 function RegistrarFAFuente: Boolean;
+function RutaPDFTemporal(const NombreArchivo: string): string;
 
 implementation
 
@@ -73,6 +74,16 @@ begin
   {$ENDIF}
 
   FA_FONT_LOADED := Result;
+end;
+
+function RutaPDFTemporal(const NombreArchivo: string): string;
+var
+  DirTemp: string;
+begin
+  DirTemp := GetTempDir;
+  if not DirectoryExists(DirTemp) then
+    DirTemp := ExtractFilePath(ParamStr(0));
+  Result := IncludeTrailingPathDelimiter(DirTemp) + NombreArchivo;
 end;
 
 end.

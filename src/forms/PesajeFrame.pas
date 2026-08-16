@@ -1045,7 +1045,7 @@ begin
     Stream:=TMemoryStream.Create;
     try
       if not GenerarBoletaPDF(ID,Stream) then begin ShowMessage('No se pudo generar la boleta.'); Exit; end;
-      Ruta:='/tmp/boleta-pesaje-'+IntToStr(ID)+'.pdf';
+      Ruta := RutaPDFTemporal('boleta-pesaje-'+IntToStr(ID)+'.pdf');
       Stream.SaveToFile(Ruta); OpenDocument(Ruta);
     finally Stream.Free; end;
   finally Screen.Cursor:=crDefault; end;

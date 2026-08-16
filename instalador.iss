@@ -79,6 +79,10 @@ Source: "assets\fa-solid-900.ttf"; DestDir: "{app}"; Flags: ignoreversion
 ; Application icon used for shortcuts
 Source: "assets\logo_pesaje.ico"; DestDir: "{app}"; Flags: ignoreversion
 
+; IMPORTANTE: NO incluir pesaje.db aqui. La base de datos se crea/usa en
+; {userappdata}\SistemaPesaje para que los datos del usuario sobrevivan a
+; actualizaciones y reinstalaciones del programa.
+
 [Icons]
 ; Start Menu shortcuts
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\logo_pesaje.ico"
