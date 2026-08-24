@@ -31,7 +31,6 @@ type
     pnlMedio: TPanel;
     pnlRegistroCard: TPanel;
     pnlRegistro: TPanel;
-    pnlForm: TPanel;
 
     pnlDisplay: TPanel;
     lblPesoDisplay: TLabel;
@@ -48,23 +47,12 @@ type
     pnlSwitchConectar: TPanel;
     pnlCapturarPeso: TPanel;
     pnlCapturarTara: TPanel;
-    pnlGuardar: TPanel;
+    pnlEnviar: TPanel;
 
     pnlSincronizar: TPanel;
     pnlEngranaje: TPanel;
     FMenuEngranaje: TPanel;
     lblEstado: TLabel;
-
-    cmbVehiculo: TComboBox;
-    cmbChofer: TComboBox;
-    cmbProveedor: TComboBox;
-    cmbProducto: TComboBox;
-    cmbOrigen: TComboBox;
-    cmbDestino: TComboBox;
-    edtCosto: TEdit;
-    edtFlete: TEdit;
-
-    pnlSepForm: TPanel;
 
     procedure PaintRounded(Sender: TObject);
     procedure SwitchConectarPaint(Sender: TObject);
@@ -75,21 +63,19 @@ type
     procedure TimerEstadoTimer(Sender: TObject);
     procedure ProcesarTrama(const Trama: string);
     function ExtraerPeso(const Trama: string): string;
-    procedure GuardarClick(Sender: TObject);
+    procedure EnviarPesoClick(Sender: TObject);
     procedure SincronizarClick(Sender: TObject);
     procedure EngranajeClick(Sender: TObject);
     procedure MenuSistemaCompletoClick(Sender: TObject);
     procedure MenuSalirClick(Sender: TObject);
     procedure CerrarMenuEngranaje;
     procedure ContentClick(Sender: TObject);
-    procedure VehiculoChange(Sender: TObject);
-    procedure CargarCombos;
     procedure ActualizarResumenPesos;
     procedure ActualizarEstadoSync;
     procedure Limpiar;
     procedure FormShowHandler(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure AjustarFormLayout;
+    procedure AjustarLayout;
     function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer;
       const ACaption: string; AColor: TColor; AFontColor: TColor;
       ATag: Integer; AClick: TNotifyEvent): TPanel;
@@ -101,7 +87,7 @@ var
 implementation
 
 const
-  CREG_W   = 380;
+  CREG_W   = 420;
   CREG_PAD = 20;
 
 function PesoDesdeDisplay(const ACaption: string): Integer;
@@ -112,17 +98,6 @@ begin
   if EndsText(' kg', S) then
     Delete(S, Length(S) - 2, 3);
   Result := StrToIntDef(S, 0);
-end;
-
-function NuevoEventID: string;
-const
-  Hex = '0123456789abcdef';
-var
-  I: Integer;
-begin
-  Result := '';
-  for I := 1 to 32 do
-    Result := Result + Hex[Random(16) + 1];
 end;
 
 // ══════════════════════════════════════════════════════════════════
@@ -136,53 +111,6 @@ var
   YPos: Integer;
   InnerW: Integer;
   po, pi: TPanel;
-
-  procedure MakeLabel(ATop, ALeft, AWidth: Integer; const ACaption: string);
-  begin
-    Lbl := TLabel.Create(pnlForm);
-    Lbl.Parent := pnlForm;
-    Lbl.SetBounds(ALeft, ATop, AWidth, 14);
-    Lbl.Caption := ACaption;
-    Lbl.Font.Size := 10;
-    Lbl.Font.Style := [];
-    Lbl.Font.Color := CLR_TEXT_SLATE;
-  end;
-
-  function MakeEdit(ATop, ALeft, AWidth: Integer): TEdit;
-  var
-    ep, ip: TPanel;
-  begin
-    ep := TPanel.Create(pnlForm);
-    ep.Parent := pnlForm;
-    ep.SetBounds(ALeft, ATop, AWidth, 34);
-    ep.BevelOuter := bvNone;
-    ep.Color := CLR_BORDER;
-    ip := TPanel.Create(ep);
-    ip.Parent := ep;
-    ip.SetBounds(1, 1, AWidth - 2, 32);
-    ip.BevelOuter := bvNone;
-    ip.Color := CLR_WHITE;
-    ip.BorderWidth := 4;
-    Result := TEdit.Create(ip);
-    Result.Parent := ip;
-    Result.Align := alClient;
-    Result.BorderStyle := bsNone;
-    Result.Font.Size := 10;
-    Result.Font.Color := CLR_TEXT;
-    Result.Color := CLR_WHITE;
-  end;
-
-  procedure ConfigCombo(Cmb: TComboBox; ATop, ALeft, AWidth: Integer);
-  begin
-    Cmb.Parent := pnlForm;
-    Cmb.SetBounds(ALeft, ATop, AWidth, 34);
-    Cmb.AutoSize := False;
-    Cmb.Style := csDropDownList;
-    Cmb.Font.Size := 10;
-    Cmb.Color := CLR_WHITE;
-    Cmb.Font.Color := CLR_TEXT;
-  end;
-
 begin
   inherited CreateNew(AOwner);
 
@@ -292,19 +220,15 @@ begin
   pnlMedio := TPanel.Create(pnlContent);
   pnlMedio.Parent := pnlContent;
   pnlMedio.Align := alTop;
-  pnlMedio.Height := 400;
+  pnlMedio.Height := 430;
   pnlMedio.BevelOuter := bvNone;
   pnlMedio.Color := CLR_BG;
-  pnlMedio.BorderSpacing.Left := FRAME_MARGIN;
-  pnlMedio.BorderSpacing.Right := FRAME_MARGIN;
   pnlMedio.BorderSpacing.Top := FRAME_MARGIN;
 
-  // ── Card izquierdo: registro de peso ───────────────────────────
+  // ── Card registro de peso (centrado) ───────────────────────────
   pnlRegistroCard := TPanel.Create(pnlMedio);
   pnlRegistroCard.Parent := pnlMedio;
-  pnlRegistroCard.Align := alLeft;
-  pnlRegistroCard.Width := CREG_W;
-  pnlRegistroCard.BorderSpacing.Right := 16;
+  pnlRegistroCard.SetBounds(0, 0, CREG_W, 430);
   pnlRegistroCard.BevelOuter := bvNone;
   pnlRegistroCard.Color := CLR_CARD;
   pnlRegistroCard.OnPaint := @PaintRounded;
@@ -335,12 +259,12 @@ begin
 
   pnlDisplay := TPanel.Create(pnlRegistro);
   pnlDisplay.Parent := pnlRegistro;
-  pnlDisplay.SetBounds(CREG_PAD, YPos, InnerW, 100);
+  pnlDisplay.SetBounds(CREG_PAD, YPos, InnerW, 110);
   pnlDisplay.BevelOuter := bvNone;
   pnlDisplay.Color := CLR_PRIMARY;
   pi := TPanel.Create(pnlDisplay);
   pi.Parent := pnlDisplay;
-  pi.SetBounds(2, 2, InnerW - 4, 96);
+  pi.SetBounds(2, 2, InnerW - 4, 106);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   lblPesoDisplay := TLabel.Create(pi);
@@ -352,7 +276,7 @@ begin
   lblPesoDisplay.Font.Height := -28;
   lblPesoDisplay.Font.Style := [fsBold];
   lblPesoDisplay.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 108;
+  YPos := YPos + 118;
 
   Sep := TPanel.Create(pnlRegistro);
   Sep.Parent := pnlRegistro;
@@ -396,14 +320,14 @@ begin
 
   lblTaraTit := TLabel.Create(pnlRegistro);
   lblTaraTit.Parent := pnlRegistro;
-  lblTaraTit.SetBounds(CREG_PAD + 120, YPos, 90, 13);
+  lblTaraTit.SetBounds(CREG_PAD + 140, YPos, 90, 13);
   lblTaraTit.Caption := 'Peso tara';
   lblTaraTit.Font.Size := 9;
   lblTaraTit.Font.Color := CLR_TEXT_SLATE;
 
   lblNetoTit := TLabel.Create(pnlRegistro);
   lblNetoTit.Parent := pnlRegistro;
-  lblNetoTit.SetBounds(CREG_PAD + 236, YPos, 90, 13);
+  lblNetoTit.SetBounds(CREG_PAD + 276, YPos, 90, 13);
   lblNetoTit.Caption := 'Peso Neto';
   lblNetoTit.Font.Size := 9;
   lblNetoTit.Font.Color := CLR_TEXT_SLATE;
@@ -411,13 +335,13 @@ begin
 
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(CREG_PAD, YPos, 108, 32);
+  po.SetBounds(CREG_PAD, YPos, 120, 32);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
   pnlValBruto := po;
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 106, 30);
+  pi.SetBounds(1, 1, 118, 30);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 4;
@@ -433,13 +357,13 @@ begin
 
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(CREG_PAD + 114, YPos, 108, 32);
+  po.SetBounds(CREG_PAD + 126, YPos, 120, 32);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
   pnlValTara := po;
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, 106, 30);
+  pi.SetBounds(1, 1, 118, 30);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 4;
@@ -455,13 +379,13 @@ begin
 
   po := TPanel.Create(pnlRegistro);
   po.Parent := pnlRegistro;
-  po.SetBounds(CREG_PAD + 228, YPos, InnerW - 228, 32);
+  po.SetBounds(CREG_PAD + 252, YPos, InnerW - 252, 32);
   po.BevelOuter := bvNone;
   po.Color := CLR_BORDER;
   pnlValNeto := po;
   pi := TPanel.Create(po);
   pi.Parent := po;
-  pi.SetBounds(1, 1, InnerW - 230, 30);
+  pi.SetBounds(1, 1, InnerW - 254, 30);
   pi.BevelOuter := bvNone;
   pi.Color := CLR_WHITE;
   pi.BorderWidth := 4;
@@ -474,70 +398,10 @@ begin
   lblValNeto.Font.Size := 11;
   lblValNeto.Font.Style := [fsBold];
   lblValNeto.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 32 + 14;
+  YPos := YPos + 32 + 16;
 
-  pnlGuardar := CrearBoton(pnlRegistro, YPos, CREG_PAD, InnerW, 40,
-    'GUARDAR Y ENVIAR', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
-
-  // ── Card derecho: datos del pesaje ─────────────────────────────
-  pnlForm := TPanel.Create(pnlMedio);
-  pnlForm.Parent := pnlMedio;
-  pnlForm.Align := alClient;
-  pnlForm.BevelOuter := bvNone;
-  pnlForm.Color := CLR_CARD;
-  pnlForm.OnPaint := @PaintRounded;
-
-  YPos := 12;
-  Lbl := TLabel.Create(pnlForm);
-  Lbl.Parent := pnlForm;
-  Lbl.SetBounds(CREG_PAD, YPos, 300, 18);
-  Lbl.Caption := 'Datos del Pesaje';
-  Lbl.Font.Size := 12;
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 26;
-
-  pnlSepForm := TPanel.Create(pnlForm);
-  pnlSepForm.Parent := pnlForm;
-  pnlSepForm.SetBounds(CREG_PAD, YPos, 600, 1);
-  pnlSepForm.BevelOuter := bvNone;
-  pnlSepForm.Color := CLR_BORDER;
-  YPos := YPos + 10;
-
-  MakeLabel(YPos, CREG_PAD, 200, 'Vehiculo *');
-  MakeLabel(YPos, 360, 200, 'Chofer');
-  YPos := YPos + 16;
-  cmbVehiculo := TComboBox.Create(pnlForm);
-  ConfigCombo(cmbVehiculo, YPos, CREG_PAD, 300);
-  cmbVehiculo.OnChange := @VehiculoChange;
-  cmbChofer := TComboBox.Create(pnlForm);
-  ConfigCombo(cmbChofer, YPos, 360, 300);
-  YPos := YPos + 34 + 12;
-
-  MakeLabel(YPos, CREG_PAD, 200, 'Proveedor');
-  MakeLabel(YPos, 360, 200, 'Producto');
-  YPos := YPos + 16;
-  cmbProveedor := TComboBox.Create(pnlForm);
-  ConfigCombo(cmbProveedor, YPos, CREG_PAD, 300);
-  cmbProducto := TComboBox.Create(pnlForm);
-  ConfigCombo(cmbProducto, YPos, 360, 300);
-  YPos := YPos + 34 + 12;
-
-  MakeLabel(YPos, CREG_PAD, 200, 'Origen');
-  MakeLabel(YPos, 360, 200, 'Destino');
-  YPos := YPos + 16;
-  cmbOrigen := TComboBox.Create(pnlForm);
-  ConfigCombo(cmbOrigen, YPos, CREG_PAD, 300);
-  cmbDestino := TComboBox.Create(pnlForm);
-  ConfigCombo(cmbDestino, YPos, 360, 300);
-  YPos := YPos + 34 + 12;
-
-  MakeLabel(YPos, CREG_PAD, 200, 'Costo (Bs)');
-  MakeLabel(YPos, 360, 200, 'Flete pend. (Bs)');
-  YPos := YPos + 16;
-  edtCosto := MakeEdit(YPos, CREG_PAD, 300);
-  edtCosto.Text := '0';
-  edtFlete := MakeEdit(YPos, 360, 300);
-  edtFlete.Text := '0';
+  pnlEnviar := CrearBoton(pnlRegistro, YPos, CREG_PAD, InnerW, 44,
+    'ENVIAR PESO', CLR_PRIMARY, CLR_WHITE, 0, @EnviarPesoClick);
 
   // ── Timers ─────────────────────────────────────────────────────
   TimerLectura := TTimer.Create(Self);
@@ -553,9 +417,9 @@ begin
   OnShow := @FormShowHandler;
   OnResize := @FormResize;
 
-  CargarCombos;
   ActualizarResumenPesos;
   ActualizarEstadoSync;
+  AjustarLayout;
 end;
 
 destructor TfrmPesajeIntegrado.Destroy;
@@ -576,7 +440,7 @@ var
   Pnl: TPanel;
 begin
   Pnl := TPanel(Sender);
-  if (Pnl = pnlRegistroCard) or (Pnl = pnlForm) then
+  if Pnl = pnlRegistroCard then
   begin
     Pnl.Canvas.Brush.Color := CLR_CARD;
     Pnl.Canvas.Brush.Style := bsSolid;
@@ -628,8 +492,8 @@ begin
   Lbl.Alignment := taCenter;
   Lbl.Layout := tlCenter;
   Lbl.Caption := ACaption;
-  Lbl.Font.Size := 10;
-  Lbl.Font.Style := [];
+  Lbl.Font.Size := 11;
+  Lbl.Font.Style := [fsBold];
   Lbl.Font.Color := AFontColor;
   Lbl.Transparent := True;
   Lbl.Cursor := crHandPoint;
@@ -646,63 +510,20 @@ begin
     finally
       Screen.Cursor := crDefault;
     end;
-    CargarCombos;
   end;
   ActualizarEstadoSync;
 end;
 
 procedure TfrmPesajeIntegrado.FormResize(Sender: TObject);
 begin
-  AjustarFormLayout;
+  AjustarLayout;
 end;
 
-procedure TfrmPesajeIntegrado.AjustarFormLayout;
-var
-  W, ColW, Col2: Integer;
-
-  procedure AjustarEdit(AEdit: TEdit; ALeft, AWidth: Integer);
-  var
-    PnlOuter, PnlInner: TPanel;
-  begin
-    if AEdit = nil then Exit;
-    PnlInner := TPanel(AEdit.Parent);
-    PnlOuter := TPanel(PnlInner.Parent);
-    PnlOuter.Left := ALeft;
-    PnlOuter.Width := AWidth;
-    PnlInner.Width := AWidth - 2;
-  end;
-
+procedure TfrmPesajeIntegrado.AjustarLayout;
 begin
-  if pnlForm = nil then Exit;
-  W := pnlForm.ClientWidth;
-  if W < 400 then Exit;
-
-  ColW := (W - CREG_PAD * 2 - 8) div 2;
-  if ColW < 150 then ColW := 150;
-  Col2 := CREG_PAD + ColW + 8;
-
-  if pnlSepForm <> nil then
-    pnlSepForm.Width := W - CREG_PAD * 2;
-
-  if cmbVehiculo <> nil then
-  begin
-    cmbVehiculo.Left := CREG_PAD;
-    cmbVehiculo.Width := ColW;
-    cmbChofer.Left := Col2;
-    cmbChofer.Width := ColW;
-    cmbProveedor.Left := CREG_PAD;
-    cmbProveedor.Width := ColW;
-    cmbProducto.Left := Col2;
-    cmbProducto.Width := ColW;
-    cmbOrigen.Left := CREG_PAD;
-    cmbOrigen.Width := ColW;
-    cmbDestino.Left := Col2;
-    cmbDestino.Width := ColW;
-  end;
-  AjustarEdit(edtCosto, CREG_PAD, ColW);
-  AjustarEdit(edtFlete, Col2, ColW);
-
-  pnlForm.Invalidate;
+  if (pnlMedio = nil) or (pnlRegistroCard = nil) then Exit;
+  pnlRegistroCard.Left := (pnlMedio.ClientWidth - CREG_W) div 2;
+  if pnlRegistroCard.Left < 0 then pnlRegistroCard.Left := 0;
 end;
 
 // ══════════════════════════════════════════════════════════════════
@@ -747,7 +568,6 @@ begin
   Screen.Cursor := crHourGlass;
   try
     SyncSvc.SincronizarAhora;
-    CargarCombos;
   finally
     Screen.Cursor := crDefault;
   end;
@@ -830,66 +650,6 @@ begin
   begin
     ModalResult := mrCancel;
     Close;
-  end;
-end;
-
-// ══════════════════════════════════════════════════════════════════
-// Catálogos
-// ══════════════════════════════════════════════════════════════════
-
-procedure TfrmPesajeIntegrado.CargarCombos;
-var
-  Q: TSQLQuery;
-
-  procedure LlenarCombo(Cmb: TComboBox; const SQL, CV, CT: string);
-  begin
-    Cmb.Items.Clear;
-    Cmb.Items.Add('- Seleccione -');
-    Cmb.ItemIndex := 0;
-    Q := DM.AbrirQuery(SQL);
-    try
-      while not Q.EOF do
-      begin
-        Cmb.Items.AddObject(Q.FieldByName(CT).AsString,
-          TObject(PtrInt(Q.FieldByName(CV).AsInteger)));
-        Q.Next;
-      end;
-    finally
-      Q.Close;
-    end;
-  end;
-
-begin
-  if (DM = nil) or (not DM.Conexion.Connected) then Exit;
-  LlenarCombo(cmbVehiculo, 'SELECT id,placa FROM vehiculos WHERE estado=''ACTIVO'' ORDER BY placa', 'id', 'placa');
-  LlenarCombo(cmbChofer, 'SELECT c.id,p.nombre||'' ''||p.apellido_paterno AS nombre FROM choferes c INNER JOIN personas p ON p.id=c.persona_id WHERE c.estado=''ACTIVO'' AND p.estado=''ACTIVO'' ORDER BY p.nombre', 'id', 'nombre');
-  LlenarCombo(cmbProveedor, 'SELECT pr.id,p.nombre||'' ''||COALESCE(p.apellido_paterno,'''')||'' ''||COALESCE(p.apellido_materno,'''') AS nombre FROM proveedores pr INNER JOIN personas p ON p.id=pr.persona_id WHERE pr.estado=''ACTIVO'' AND p.estado=''ACTIVO'' ORDER BY p.nombre', 'id', 'nombre');
-  LlenarCombo(cmbProducto, 'SELECT id,nombre FROM productos WHERE estado=''ACTIVO'' ORDER BY nombre', 'id', 'nombre');
-  LlenarCombo(cmbOrigen, 'SELECT id,nombre FROM origenes WHERE estado=''ACTIVO'' ORDER BY nombre', 'id', 'nombre');
-  LlenarCombo(cmbDestino, 'SELECT id,nombre FROM destinos WHERE estado=''ACTIVO'' ORDER BY nombre', 'id', 'nombre');
-end;
-
-procedure TfrmPesajeIntegrado.VehiculoChange(Sender: TObject);
-var
-  Q: TSQLQuery;
-  Vid: Integer;
-begin
-  if cmbVehiculo.ItemIndex < 1 then
-  begin
-    FTara := 0;
-    ActualizarResumenPesos;
-    Exit;
-  end;
-  Vid := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
-  Q := DM.AbrirQuery('SELECT tara FROM vehiculos WHERE id=' + IntToStr(Vid));
-  try
-    if not Q.EOF then
-    begin
-      FTara := Q.Fields[0].AsInteger;
-      ActualizarResumenPesos;
-    end;
-  finally
-    Q.Close;
   end;
 end;
 
@@ -1084,7 +844,7 @@ begin
 end;
 
 // ══════════════════════════════════════════════════════════════════
-// Guardar y enviar
+// Enviar peso — envía únicamente el peso captado a la web
 // ══════════════════════════════════════════════════════════════════
 
 procedure TfrmPesajeIntegrado.Limpiar;
@@ -1094,28 +854,10 @@ begin
   FPesoNeto := 0;
   lblPesoDisplay.Caption := '0 kg';
   ActualizarResumenPesos;
-  cmbVehiculo.ItemIndex := 0;
-  cmbChofer.ItemIndex := 0;
-  cmbProveedor.ItemIndex := 0;
-  cmbProducto.ItemIndex := 0;
-  cmbOrigen.ItemIndex := 0;
-  cmbDestino.ItemIndex := 0;
-  edtCosto.Text := '0';
-  edtFlete.Text := '0';
 end;
 
-procedure TfrmPesajeIntegrado.GuardarClick(Sender: TObject);
-var
-  VehiculoID, ChoferID, ProveedorID, ProductoID, OrigenID, DestinoID: Integer;
-  Costo, Flete, ProximoID: Integer;
-  Guia, Anio, EventID: string;
-  Q: TSQLQuery;
+procedure TfrmPesajeIntegrado.EnviarPesoClick(Sender: TObject);
 begin
-  if cmbVehiculo.ItemIndex < 1 then
-  begin
-    ShowMessage('Seleccione un vehiculo');
-    Exit;
-  end;
   if FPesoBruto <= 0 then
   begin
     ShowMessage('Capture el peso bruto primero');
@@ -1123,7 +865,7 @@ begin
   end;
   if FTara <= 0 then
   begin
-    ShowMessage('Falta la tara. Seleccione un vehiculo con tara o capture la tara.');
+    ShowMessage('Capture la tara primero');
     Exit;
   end;
   if FPesoBruto < FTara then
@@ -1135,79 +877,29 @@ begin
   FPesoNeto := FPesoBruto - FTara;
   ActualizarResumenPesos;
 
-  if MessageDlg('Guardar pesaje',
-    Format('Bruto: %d kg | Tara: %d kg | Neto: %d kg. Confirmar?',
+  if MessageDlg('Enviar peso',
+    Format('Bruto: %d kg | Tara: %d kg | Neto: %d kg. Enviar a la web?',
     [FPesoBruto, FTara, FPesoNeto]), mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
 
-  VehiculoID := PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
-  ChoferID := 0;
-  ProveedorID := 0;
-  ProductoID := 0;
-  OrigenID := 0;
-  DestinoID := 0;
-  if cmbChofer.ItemIndex > 0 then ChoferID := PtrInt(cmbChofer.Items.Objects[cmbChofer.ItemIndex]);
-  if cmbProveedor.ItemIndex > 0 then ProveedorID := PtrInt(cmbProveedor.Items.Objects[cmbProveedor.ItemIndex]);
-  if cmbProducto.ItemIndex > 0 then ProductoID := PtrInt(cmbProducto.Items.Objects[cmbProducto.ItemIndex]);
-  if cmbOrigen.ItemIndex > 0 then OrigenID := PtrInt(cmbOrigen.Items.Objects[cmbOrigen.ItemIndex]);
-  if cmbDestino.ItemIndex > 0 then DestinoID := PtrInt(cmbDestino.Items.Objects[cmbDestino.ItemIndex]);
-  Costo := StrToIntDef(edtCosto.Text, 0);
-  Flete := StrToIntDef(edtFlete.Text, 0);
-
-  Q := DM.AbrirQuery('SELECT MAX(id) AS max_id FROM pesajes');
-  try
-    if Q.FieldByName('max_id').IsNull then ProximoID := 1
-    else ProximoID := Q.FieldByName('max_id').AsInteger + 1;
-  finally
-    Q.Close;
-  end;
-
-  Anio := FormatDateTime('yyyy', Now);
-  Guia := 'PESO-' + Anio + '-' + Format('%.6d', [ProximoID]);
-  EventID := NuevoEventID;
-
-  if DM.Transaccion.Active then DM.Transaccion.Rollback;
-  DM.Transaccion.StartTransaction;
-  try
-    DM.EjecutarSQL(
-      'INSERT INTO pesajes (guia, lote, vehiculo_id, chofer_id, proveedor_id, producto_id, ' +
-      'id_origen, id_destino, peso_bruto, tara, peso_neto, costo_bs, flete_bs_pendiente, ' +
-      'pesador_id, estado, estado_balanza, sincronizado, sync_event_id, ' +
-      'usuario_creacion, usuario_modificacion, fecha_creacion, fecha_modificacion) VALUES (' +
-      QuotedStr(Guia) + ','''',' + IntToStr(VehiculoID) + ',' +
-      IfThen(ChoferID > 0, IntToStr(ChoferID), 'NULL') + ',' +
-      IfThen(ProveedorID > 0, IntToStr(ProveedorID), 'NULL') + ',' +
-      IfThen(ProductoID > 0, IntToStr(ProductoID), 'NULL') + ',' +
-      IfThen(OrigenID > 0, IntToStr(OrigenID), 'NULL') + ',' +
-      IfThen(DestinoID > 0, IntToStr(DestinoID), 'NULL') + ',' +
-      IntToStr(FPesoBruto) + ',' + IntToStr(FTara) + ',' + IntToStr(FPesoNeto) + ',' +
-      IntToStr(Costo) + ',' + IntToStr(Flete) + ',' + IntToStr(UsuarioActual.PersonaID) + ',' +
-      '''ACTIVO'',''FINALIZADO'',0,' + QuotedStr(EventID) + ',' +
-      IntToStr(UsuarioActual.ID) + ',' + IntToStr(UsuarioActual.ID) + ',''' +
-      FechaHoraActual + ''',''' + FechaHoraActual + ''')');
-    DM.Transaccion.Commit;
-  except
-    DM.Transaccion.Rollback;
-    ShowMessage('Error al guardar pesaje');
+  if SyncSvc = nil then
+  begin
+    ShowMessage('Servicio de sincronizacion no disponible');
     Exit;
   end;
 
-  Limpiar;
-
-  if SyncSvc <> nil then
-  begin
-    Screen.Cursor := crHourGlass;
-    try
-      SyncSvc.PushPesajesPendientes;
-    finally
-      Screen.Cursor := crDefault;
-    end;
-    ActualizarEstadoSync;
+  Screen.Cursor := crHourGlass;
+  try
+    if SyncSvc.EnviarPeso(FPesoBruto, FTara) then
+    begin
+      ShowMessage('Peso enviado correctamente.');
+      Limpiar;
+    end
+    else
+      ShowMessage('No se pudo enviar el peso. Revise la conexion con el sistema web.');
+  finally
+    Screen.Cursor := crDefault;
   end;
-
-  if SyncSvc.Conectado then
-    ShowMessage('Pesaje guardado y enviado correctamente.')
-  else
-    ShowMessage('Pesaje guardado localmente. Se enviara automaticamente cuando haya conexion.');
+  ActualizarEstadoSync;
 end;
 
 end.

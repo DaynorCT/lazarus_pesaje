@@ -364,9 +364,9 @@ La aplicación tiene dos modos de operación, definidos por la clave `modo_opera
 
 ### Sincronización con el sistema web (modo integrado)
 
-- **PULL (web → escritorio):** descarga catálogos (vehículos, choferes, proveedores, productos, orígenes, destinos) usando el `id` de la web, para que los pesajes enviados referencien directamente los registros de la web. Los catálogos en modo integrado son de solo lectura (se administran en la web).
-- **PUSH (escritorio → web):** los pesajes guardados quedan con `sincronizado = 0` en SQLite y se envían a `POST /api/pesajes` (con token JWT obtenido con las mismas credenciales del login local). Al confirmar, se marcan `sincronizado = 1`. Si no hay conexión, quedan pendientes y se reintentan automáticamente (`autoenviar`).
-- El botón **Sincronizar ahora** fuerza el ciclo; la barra superior muestra el estado (conectado, pendientes, última sincronización).
-- Tabla `pesajes`: columnas nuevas `sincronizado`, `sync_event_id`, `sync_error` (migración automática al arrancar).
+En modo integrado el escritorio es un cliente mínimo de balanza:
+- **Solo captura el peso** (bruto y tara con la balanza RS232) y con el botón **ENVIAR PESO** lo manda a la web: `POST /api/pesajes` con `{ peso_bruto, tara, estado_balanza: FINALIZADO }`. Nada más.
+- La web recibe el peso, calcula el neto (`bruto - tara`) y guarda el pesaje (el vehículo es opcional; los datos del pesaje se completan en la web).
+- La sincronización automática (PULL de catálogos y PUSH de pesajes locales) sigue funcionando en segundo plano y en el modo autónomo.
 
-> Nota: hasta que el sistema web acepte `guia` como clave de idempotencia en `POST /api/pesajes`, un reintento tras un fallo de red podría duplicar el pesaje en la web. El escritorio ya envía `guia` y `estado_balanza` en el payload.
+> Modo autónomo: el sistema completo queda igual que siempre (pesajes con vehículo, catálogos, reportes, etc.), con la cola local `sincronizado`/`sync_event_id`/`sync_error` en `pesajes` para enviar a la web.

@@ -40,6 +40,7 @@ type
     function SincronizarAhora: Boolean;
     function SincronizarCatalogos: Boolean;
     function PushPesajesPendientes: Boolean;
+    function EnviarPeso(Bruto, Tara: Integer): Boolean;
     property Conectado: Boolean read FConectado;
     property Pendientes: Integer read FPendientes;
     property UltimaSync: string read FUltimaSync;
@@ -696,6 +697,53 @@ begin
     end;
   finally
     Q.Free;
+  end;
+end;
+
+// ══════════════════════════════════════════════════════════════════
+// Modo integrado: envía únicamente el peso captado.
+// La web recibe { peso_bruto, tara } y guarda el pesaje.
+// ══════════════════════════════════════════════════════════════════
+
+function TSyncService.EnviarPeso(Bruto, Tara: Integer): Boolean;
+var
+  Obj: TJSONObject;
+  Cuerpo: string;
+  Respuesta: string;
+  Codigo: Integer;
+begin
+  Result := False;
+  if not AsegurarToken then Exit;
+
+  Obj := TJSONObject.Create;
+  try
+    Obj.Add('peso_bruto', Bruto);
+    Obj.Add('tara', Tara);
+    Obj.Add('estado_balanza', 'FINALIZADO');
+    Cuerpo := Obj.AsJSON;
+  finally
+    Obj.Free;
+  end;
+
+  Codigo := HttpRequest('POST', '/api/pesajes', Cuerpo, Respuesta, nil);
+  if Codigo = 401 then
+  begin
+    FAccessToken := '';
+    if AsegurarToken then
+      Codigo := HttpRequest('POST', '/api/pesajes', Cuerpo, Respuesta, nil);
+  end;
+
+  if Codigo = 200 then
+  begin
+    FConectado := True;
+    FUltimaSync := FechaHoraActual;
+    FUltimoError := '';
+    Result := True;
+  end
+  else
+  begin
+    FConectado := Codigo <> 0;
+    FUltimoError := 'Envio fallo (' + IntToStr(Codigo) + ') ' + Copy(Respuesta, 1, 150);
   end;
 end;
 
