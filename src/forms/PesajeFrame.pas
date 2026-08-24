@@ -1294,29 +1294,39 @@ end;
 // ═══════ QUICK DIALOGS ═══════════════════════════════════════════════════════
 
 procedure TFramePesaje.QuickVehiculoClick(Sender: TObject);
-var F: TForm; ePlaca,eTipo,eTara: TEdit; Lbl,Ls: TLabel; YPos: Integer; pO,pI: TPanel;
+var F: TForm; ePlaca,eTipo,eTara: TEdit; Lbl,Ls: TLabel; YPos: Integer;
+
+  function MakeEditConBorde(ATop, ALeft, AWidth: Integer): TEdit;
+  var pO, pI: TPanel;
+  begin
+    pO := TPanel.Create(F); pO.Parent := F;
+    pO.SetBounds(ALeft, ATop, AWidth, 40);
+    pO.BevelOuter := bvNone; pO.Color := CLR_BORDER;
+    pI := TPanel.Create(pO); pI.Parent := pO;
+    pI.SetBounds(1, 1, AWidth - 2, 38);
+    pI.BevelOuter := bvNone; pI.Color := CLR_WHITE; pI.BorderWidth := 6;
+    Result := TEdit.Create(pI); Result.Parent := pI;
+    Result.Align := alClient; Result.BorderStyle := bsNone;
+    Result.Font.Size := 11; Result.Font.Color := CLR_TEXT;
+    Result.CharCase := ecUpperCase; Result.Color := CLR_WHITE;
+  end;
+
 begin
   F:=TForm.Create(nil);
   try
     F.Caption:=''; F.Width:=600; F.Position:=poOwnerFormCenter; F.BorderStyle:=bsDialog; F.Color:=CLR_WHITE;
-    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=56; BevelOuter:=bvNone; Color:=CLR_WHITE;
-      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); SetBounds(24,12,400,22); Caption:='Nuevo vehículo'; Font.Size:=13; Font.Color:=CLR_TEXT_HEADING; end;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end; end; YPos:=72;
-    Ls:=TLabel.Create(F); Ls.Parent:=F; Ls.SetBounds(24,YPos,300,16); Ls.Caption:='Datos del Vehículo'; Ls.Font.Size:=10; Ls.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,280,14); Lbl.Caption:='Placa *'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,260,14); Lbl.Caption:='Tipo de vehículo'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(24,YPos,280,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER;
-    pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,278,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    ePlaca:=TEdit.Create(pI); ePlaca.Parent:=pI; ePlaca.Align:=alClient; ePlaca.BorderStyle:=bsNone; ePlaca.Font.Size:=10; ePlaca.CharCase:=ecUpperCase;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(314,YPos,260,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER;
-    pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,258,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    eTipo:=TEdit.Create(pI); eTipo.Parent:=pI; eTipo.Align:=alClient; eTipo.BorderStyle:=bsNone; eTipo.Font.Size:=10; eTipo.CharCase:=ecUpperCase; YPos:=YPos+44;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,280,14); Lbl.Caption:='Tara (kg)'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(24,YPos,160,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER;
-    pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,158,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    eTara:=TEdit.Create(pI); eTara.Parent:=pI; eTara.Align:=alClient; eTara.BorderStyle:=bsNone; eTara.Font.Size:=10; eTara.Text:='0'; YPos:=YPos+50;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end; YPos:=YPos+14;
-    F.Height:=YPos+64;
+    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); SetBounds(24,14,400,24); Caption:='Nuevo vehículo'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end; end; YPos:=80;
+    Ls:=TLabel.Create(F); Ls.Parent:=F; Ls.SetBounds(24,YPos,300,20); Ls.Caption:='Datos del Vehículo'; Ls.Font.Size:=11; Ls.Font.Style:=[]; Ls.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+33;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,280,16); Lbl.Caption:='Placa *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(314,YPos,260,16); Lbl.Caption:='Tipo de vehículo'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    ePlaca:=MakeEditConBorde(YPos, 24, 280);
+    eTipo:=MakeEditConBorde(YPos, 314, 260); YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,280,16); Lbl.Caption:='Tara (kg)'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    eTara:=MakeEditConBorde(YPos, 24, 160); eTara.Text:='0'; YPos:=YPos+56;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end; YPos:=YPos+16;
+    F.Height:=YPos+70;
     with TPanel.Create(F) do begin Parent:=F; SetBounds(310,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient; Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=11; Font.Color:=CLR_PRIMARY; OnClick:=@QuickCancelarClick; end; end;
     with TPanel.Create(F) do begin Parent:=F; SetBounds(440,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
@@ -1335,35 +1345,46 @@ begin
 end;
 
 procedure TFramePesaje.QuickChoferClick(Sender: TObject);
-var F: TForm; eNom,ePat,eMat,eCI,eLic,eTel: TEdit; Lbl,Ls: TLabel; YPos: Integer; pO,pI: TPanel;
+var F: TForm; eNom,ePat,eMat,eCI,eLic,eTel: TEdit; Lbl,Ls: TLabel; YPos: Integer;
+
+  function MakeEditConBorde(ATop, ALeft, AWidth: Integer): TEdit;
+  var pO, pI: TPanel;
+  begin
+    pO := TPanel.Create(F); pO.Parent := F;
+    pO.SetBounds(ALeft, ATop, AWidth, 40);
+    pO.BevelOuter := bvNone; pO.Color := CLR_BORDER;
+    pI := TPanel.Create(pO); pI.Parent := pO;
+    pI.SetBounds(1, 1, AWidth - 2, 38);
+    pI.BevelOuter := bvNone; pI.Color := CLR_WHITE; pI.BorderWidth := 6;
+    Result := TEdit.Create(pI); Result.Parent := pI;
+    Result.Align := alClient; Result.BorderStyle := bsNone;
+    Result.Font.Size := 11; Result.Font.Color := CLR_TEXT;
+    Result.CharCase := ecUpperCase; Result.Color := CLR_WHITE;
+  end;
+
 begin
   F:=TForm.Create(nil);
   try
     F.Caption:=''; F.Width:=600; F.Position:=poOwnerFormCenter; F.BorderStyle:=bsDialog; F.Color:=CLR_WHITE;
-    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=56; BevelOuter:=bvNone; Color:=CLR_WHITE;
-      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); SetBounds(24,12,400,22); Caption:='Nuevo chofer'; Font.Size:=13; Font.Color:=CLR_TEXT_HEADING; end;
-      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end; end; YPos:=72;
-    Ls:=TLabel.Create(F); Ls.Parent:=F; Ls.SetBounds(24,YPos,300,16); Ls.Caption:='Datos del Chofer'; Ls.Font.Size:=10; Ls.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,180,14); Lbl.Caption:='Nombre *'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,180,14); Lbl.Caption:='Apellido paterno'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(400,YPos,180,14); Lbl.Caption:='Apellido materno'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(24,YPos,180,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,178,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    eNom:=TEdit.Create(pI); eNom.Parent:=pI; eNom.Align:=alClient; eNom.BorderStyle:=bsNone; eNom.Font.Size:=10; eNom.CharCase:=ecUpperCase;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(212,YPos,180,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,178,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    ePat:=TEdit.Create(pI); ePat.Parent:=pI; ePat.Align:=alClient; ePat.BorderStyle:=bsNone; ePat.Font.Size:=10; ePat.CharCase:=ecUpperCase;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(400,YPos,180,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,178,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    eMat:=TEdit.Create(pI); eMat.Parent:=pI; eMat.Align:=alClient; eMat.BorderStyle:=bsNone; eMat.Font.Size:=10; eMat.CharCase:=ecUpperCase; YPos:=YPos+44;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,180,14); Lbl.Caption:='Nro. Documento'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,180,14); Lbl.Caption:='Teléfono'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(400,YPos,180,14); Lbl.Caption:='Licencia'; Lbl.Font.Size:=10; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+20;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(24,YPos,180,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,178,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    eCI:=TEdit.Create(pI); eCI.Parent:=pI; eCI.Align:=alClient; eCI.BorderStyle:=bsNone; eCI.Font.Size:=10; eCI.CharCase:=ecUpperCase;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(212,YPos,180,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,178,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    eTel:=TEdit.Create(pI); eTel.Parent:=pI; eTel.Align:=alClient; eTel.BorderStyle:=bsNone; eTel.Font.Size:=10; eTel.CharCase:=ecUpperCase;
-    pO:=TPanel.Create(F); pO.Parent:=F; pO.SetBounds(400,YPos,180,36); pO.BevelOuter:=bvNone; pO.Color:=CLR_BORDER; pI:=TPanel.Create(pO); pI.Parent:=pO; pI.SetBounds(1,1,178,34); pI.BevelOuter:=bvNone; pI.Color:=CLR_WHITE; pI.BorderWidth:=4;
-    eLic:=TEdit.Create(pI); eLic.Parent:=pI; eLic.Align:=alClient; eLic.BorderStyle:=bsNone; eLic.Font.Size:=10; YPos:=YPos+50;
-    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end; YPos:=YPos+14;
-    F.Height:=YPos+64;
+    with TPanel.Create(F) do begin Parent:=F; Align:=alTop; Height:=60; BevelOuter:=bvNone; Color:=CLR_WHITE;
+      with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); SetBounds(24,14,400,24); Caption:='Nuevo chofer'; Font.Size:=14; Font.Style:=[]; Font.Color:=CLR_TEXT_HEADING; end;
+      with TPanel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alBottom; Height:=1; BevelOuter:=bvNone; Color:=CLR_BORDER; end; end; YPos:=80;
+    Ls:=TLabel.Create(F); Ls.Parent:=F; Ls.SetBounds(24,YPos,300,20); Ls.Caption:='Datos del Chofer'; Ls.Font.Size:=11; Ls.Font.Style:=[]; Ls.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+33;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,180,16); Lbl.Caption:='Nombre *'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,180,16); Lbl.Caption:='Apellido paterno'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(400,YPos,180,16); Lbl.Caption:='Apellido materno'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    eNom:=MakeEditConBorde(YPos, 24, 180);
+    ePat:=MakeEditConBorde(YPos, 212, 180);
+    eMat:=MakeEditConBorde(YPos, 400, 180); YPos:=YPos+48;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(24,YPos,180,16); Lbl.Caption:='Nro. Documento'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(212,YPos,180,16); Lbl.Caption:='Teléfono'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING;
+    Lbl:=TLabel.Create(F); Lbl.Parent:=F; Lbl.SetBounds(400,YPos,180,16); Lbl.Caption:='Licencia'; Lbl.Font.Size:=11; Lbl.Font.Style:=[]; Lbl.Font.Color:=CLR_TEXT_HEADING; YPos:=YPos+28;
+    eCI:=MakeEditConBorde(YPos, 24, 180);
+    eTel:=MakeEditConBorde(YPos, 212, 180);
+    eLic:=MakeEditConBorde(YPos, 400, 180);
+    eLic.CharCase:=ecNormal; YPos:=YPos+56;
+    with TPanel.Create(F) do begin Parent:=F; SetBounds(24,YPos,556,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end; YPos:=YPos+16;
+    F.Height:=YPos+70;
     with TPanel.Create(F) do begin Parent:=F; SetBounds(310,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_WHITE; Tag:=1; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickCancelarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient; Alignment:=taCenter; Layout:=tlCenter; Caption:='CANCELAR'; Font.Size:=11; Font.Color:=CLR_PRIMARY; OnClick:=@QuickCancelarClick; end; end;
     with TPanel.Create(F) do begin Parent:=F; SetBounds(440,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
