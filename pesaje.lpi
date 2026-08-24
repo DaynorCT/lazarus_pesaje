@@ -39,9 +39,8 @@
         <ComponentName Value="DM"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="431"/>
+        <TopLine Value="432"/>
         <CursorPos X="40" Y="445"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
@@ -68,6 +67,7 @@
         <ComponentName Value="frmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
@@ -262,7 +262,7 @@
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="28">
+    <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <Caret Line="240" Column="38" TopLine="229"/>

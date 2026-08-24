@@ -54,6 +54,7 @@ type
     procedure LoadFrame(FrameClass: TFrameClass; const Title: string);
     procedure LoadFrameInstance(NewFrame: TFrame; const Title: string);
     procedure LogoutClick(Sender: TObject);
+    procedure VolverPesajeClick(Sender: TObject);
   public
     procedure CargarLogo;
   end;
@@ -172,7 +173,7 @@ begin
   FUserMenu.BevelOuter := bvNone;
   FUserMenu.BorderStyle := bsSingle;
   FUserMenu.Width := 200;
-  FUserMenu.Height := 130;
+  FUserMenu.Height := 176;
 end;
 
 function TfrmMain.CrearNavItem(AIconCode: Word; const ATitle: string; ATag: Integer; X: Integer): TPanel;
@@ -465,9 +466,21 @@ begin
   YPos := YPos + 8;
 
   Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
-  Lbl.SetBounds(12, YPos, 176, 14);
+  Lbl.SetBounds(12, YPos, 176, 16);
   Lbl.Caption := 'Rol: ' + UsuarioActual.Rol;
   Lbl.Font.Size := 10; Lbl.Font.Color := CLR_TEXT_SLATE;
+  YPos := YPos + 22;
+
+  Sep := TPanel.Create(FUserMenu); Sep.Parent := FUserMenu;
+  Sep.SetBounds(8, YPos, 184, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
+  YPos := YPos + 8;
+
+  Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
+  Lbl.SetBounds(12, YPos, 176, 16);
+  Lbl.Caption := 'Volver a pesaje';
+  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_HEADING;
+  Lbl.Cursor := crHandPoint;
+  Lbl.OnClick := @VolverPesajeClick;
   YPos := YPos + 22;
 
   Sep := TPanel.Create(FUserMenu); Sep.Parent := FUserMenu;
@@ -551,6 +564,16 @@ begin
     mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     ModalResult := mrCancel;
+    Close;
+  end;
+end;
+
+procedure TfrmMain.VolverPesajeClick(Sender: TObject);
+begin
+  CerrarSubmenus;
+  if ConfirmarContrasenaActual('Volver al modo pesaje') then
+  begin
+    ModalResult := mrYes;
     Close;
   end;
 end;

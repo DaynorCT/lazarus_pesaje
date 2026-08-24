@@ -233,6 +233,38 @@ begin
     end;
   end;
 
+  // Migración 2: columnas de sincronización en pesajes
+  //   sincronizado  = 0 pendiente de envío, 1 ya enviado a la web
+  //   sync_event_id = identificador único del evento de envío
+  //   sync_error    = último error al intentar enviar
+  if not ColumnaExiste('pesajes', 'sincronizado') then begin
+    SafeStartTransaction;
+    try
+      EjecutarSQL('ALTER TABLE pesajes ADD COLUMN sincronizado INTEGER NOT NULL DEFAULT 0');
+      SafeCommit;
+    except
+      SafeRollback;
+    end;
+  end;
+  if not ColumnaExiste('pesajes', 'sync_event_id') then begin
+    SafeStartTransaction;
+    try
+      EjecutarSQL('ALTER TABLE pesajes ADD COLUMN sync_event_id TEXT');
+      SafeCommit;
+    except
+      SafeRollback;
+    end;
+  end;
+  if not ColumnaExiste('pesajes', 'sync_error') then begin
+    SafeStartTransaction;
+    try
+      EjecutarSQL('ALTER TABLE pesajes ADD COLUMN sync_error TEXT');
+      SafeCommit;
+    except
+      SafeRollback;
+    end;
+  end;
+
   // Agregar aquí más migraciones futuras con el mismo patrón:
   // if not ColumnaExiste('tabla', 'columna') then begin
   //   SafeStartTransaction;
@@ -437,6 +469,8 @@ begin
       'pesador_id INTEGER REFERENCES personas(id) ON DELETE SET NULL, ' +
       'estado TEXT NOT NULL DEFAULT ''ACTIVO'', ' +
       'estado_balanza TEXT NOT NULL DEFAULT ''EN_PROCESO'', ' +
+      'sincronizado INTEGER NOT NULL DEFAULT 0, ' +
+      'sync_event_id TEXT, sync_error TEXT, ' +
       'usuario_creacion INTEGER, usuario_modificacion INTEGER, ' +
       'fecha_creacion TEXT, fecha_modificacion TEXT)');
 

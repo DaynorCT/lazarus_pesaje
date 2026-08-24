@@ -21,6 +21,7 @@ type
     class function VerifyPassword(const Password, Hash: string): Boolean;
     class function Login(const Email, Password: string;
       out User: TUserRecord): TAuthResult;
+    class function VerificarContrasena(const Email, Password: string): Boolean;
     class function SeedAdminUser: Boolean;
   end;
 
@@ -219,6 +220,34 @@ begin
     );
 
     Result := arSuccess;
+  finally
+    Q.Close;
+  end;
+end;
+
+class function TAuthService.VerificarContrasena(const Email, Password: string): Boolean;
+var
+  SQL: string;
+  HashDB: string;
+  Estado: string;
+  Q: TSQLQuery;
+begin
+  Result := False;
+  if DM = nil then Exit;
+  if not DM.Conexion.Connected then Exit;
+
+  SQL := 'SELECT u.password_hash, u.estado FROM usuarios u ' +
+    'WHERE u.email = ''' + StringReplace(Email, '''', '''''', [rfReplaceAll]) + '''';
+
+  Q := DM.AbrirQuery(SQL);
+  try
+    if Q.EOF then Exit;
+
+    Estado := Q.FieldByName('estado').AsString;
+    if Estado <> 'ACTIVO' then Exit;
+
+    HashDB := Q.FieldByName('password_hash').AsString;
+    Result := VerifyPassword(Password, HashDB);
   finally
     Q.Close;
   end;

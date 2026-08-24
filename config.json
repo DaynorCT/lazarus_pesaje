@@ -4,5 +4,6 @@
   "url": "http://localhost:3000",
   "apikey": "",
   "autoenviar": true,
-  "alwaysontop": false
+  "alwaysontop": false,
+  "modo_operacion": "INTEGRADO"
 }

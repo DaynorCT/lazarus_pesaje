@@ -338,3 +338,35 @@ Todos los colores están centralizados en `src/utils/Theme.pas`:
 - En Windows la BD se crea en `%APPDATA%\SistemaPesaje`; en macOS en `~/Library/Application Support/SistemaPesaje`
 - Si se ejecuta desde el .app bundle, `DBPath` resuelve al directorio del proyecto
 - No depende de archivos .lfm para el diseño de frames
+
+## Modo de operación (config.json)
+
+La aplicación tiene dos modos de operación, definidos por la clave `modo_operacion` en `config.json` (junto al ejecutable):
+
+| Valor | Comportamiento tras el login |
+|---|---|
+| `INTEGRADO` | Abre solo la pantalla de registro de peso (captura bruto/tara y envía a la web) — **modo por defecto** |
+| `AUTONOMO` | Abre el sistema completo (Dashboard + todos los módulos) |
+
+```json
+{
+  "url": "http://localhost:3000",
+  "apikey": "",
+  "autoenviar": true,
+  "modo_operacion": "INTEGRADO"
+}
+```
+
+- **Cambio de modo con contraseña (bidireccional):**
+  - En modo integrado, el botón **engranaje** (barra superior derecha) abre un menú con **Acceder al sistema completo** (pide la contraseña del usuario local) y **Cerrar sesión**.
+  - En el sistema completo, la opción **Volver a pesaje** del menú de usuario (arriba a la derecha) pide la contraseña y vuelve al modo pesaje.
+  - El modo elegido se guarda en `config.json` y será el inicial en el próximo inicio.
+
+### Sincronización con el sistema web (modo integrado)
+
+- **PULL (web → escritorio):** descarga catálogos (vehículos, choferes, proveedores, productos, orígenes, destinos) usando el `id` de la web, para que los pesajes enviados referencien directamente los registros de la web. Los catálogos en modo integrado son de solo lectura (se administran en la web).
+- **PUSH (escritorio → web):** los pesajes guardados quedan con `sincronizado = 0` en SQLite y se envían a `POST /api/pesajes` (con token JWT obtenido con las mismas credenciales del login local). Al confirmar, se marcan `sincronizado = 1`. Si no hay conexión, quedan pendientes y se reintentan automáticamente (`autoenviar`).
+- El botón **Sincronizar ahora** fuerza el ciclo; la barra superior muestra el estado (conectado, pendientes, última sincronización).
+- Tabla `pesajes`: columnas nuevas `sincronizado`, `sync_event_id`, `sync_error` (migración automática al arrancar).
+
+> Nota: hasta que el sistema web acepte `guia` como clave de idempotencia en `POST /api/pesajes`, un reintento tras un fallo de red podría duplicar el pesaje en la web. El escritorio ya envía `guia` y `estado_balanza` en el payload.
