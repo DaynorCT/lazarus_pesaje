@@ -638,7 +638,6 @@ begin
   if ConfirmarContrasenaActual('Acceso al sistema completo') then
   begin
     ModalResult := mrYes;
-    Close;
   end;
 end;
 
@@ -649,7 +648,6 @@ begin
     mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     ModalResult := mrCancel;
-    Close;
   end;
 end;
 

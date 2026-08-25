@@ -564,7 +564,6 @@ begin
     mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     ModalResult := mrCancel;
-    Close;
   end;
 end;
 
@@ -574,7 +573,6 @@ begin
   if ConfirmarContrasenaActual('Volver al modo pesaje') then
   begin
     ModalResult := mrYes;
-    Close;
   end;
 end;
 

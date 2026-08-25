@@ -1,9 +1,7 @@
 {
-  "puerto": "COM1",
-  "baudrate": 9600,
-  "url": "http://localhost:3000",
-  "apikey": "",
-  "autoenviar": true,
-  "alwaysontop": false,
-  "modo_operacion": "INTEGRADO"
+  "url" : "http://localhost:3000",
+  "apikey" : "",
+  "autoenviar" : true,
+  "modo_operacion" : "AUTONOMO",
+  "alwaysontop" : false
 }
