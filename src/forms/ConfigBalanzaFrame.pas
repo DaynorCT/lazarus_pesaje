@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  sqldb, DataModule, Theme, LoginForm;
+  sqldb, DataModule, Theme, LoginForm, AppDialog;
 
 type
 
@@ -569,7 +569,7 @@ begin
     IntToStr(UsuarioActual.ID) + ', ' +
     QuotedStr(FormatDateTime('yyyy-mm-dd hh:nn:ss', Now)) + ')');
 
-  ShowMessage('Configuración guardada correctamente.');
+  MostrarInfoDialogo('Configuracion', 'Configuracion guardada correctamente.', dtExito);
 end;
 
 // ═══════════════════════════════════════════════
@@ -623,7 +623,7 @@ begin
   begin
     FConectado := False;
     LogDato('Error al conectar a ' + cbPuerto.Text);
-    ShowMessage('No se pudo conectar al puerto ' + cbPuerto.Text);
+    MostrarInfoDialogo('Balanza', 'No se pudo conectar al puerto ' + cbPuerto.Text, dtError);
   end;
 end;
 

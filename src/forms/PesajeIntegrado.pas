@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, sqldb, DataModule, Theme, LoginForm, SyncService, LMessages,
-  ConfigBalanzaFrame;
+  ConfigBalanzaFrame, AppDialog;
 
 type
   { TfrmPesajeIntegrado }
@@ -673,8 +673,7 @@ end;
 procedure TfrmPesajeIntegrado.MenuSalirClick(Sender: TObject);
 begin
   CerrarMenuEngranaje;
-  if MessageDlg('Cerrar sesion', 'Seguro que desea cerrar sesion?',
-    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  if ConfirmarDialogo('Cerrar sesion', 'Seguro que desea cerrar sesion?') then
   begin
     ModalResult := mrCancel;
   end;
@@ -756,7 +755,7 @@ begin
       TimerLectura.Enabled := True;
       if lblConexion <> nil then lblConexion.Caption := 'Prueba';
       pnlSwitchConectar.Invalidate;
-      ShowMessage('No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.');
+      MostrarInfoDialogo('Balanza', 'No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.');
       Exit;
     end;
     Puerto := Q.Fields[0].AsString;
@@ -788,7 +787,7 @@ begin
     pnlCapturarPeso.Enabled := True;
     TimerLectura.Enabled := True;
     if lblConexion <> nil then lblConexion.Caption := 'Prueba';
-    ShowMessage('No se pudo conectar al puerto ' + Puerto +
+    MostrarInfoDialogo('Balanza', 'No se pudo conectar al puerto ' + Puerto +
       '. Se activa MODO PRUEBA con pesos simulados.');
   end;
   pnlSwitchConectar.Invalidate;
@@ -875,13 +874,13 @@ var
 begin
   if not FConectado then
   begin
-    ShowMessage('Conecte la balanza primero');
+    MostrarInfoDialogo('Balanza', 'Conecte la balanza primero');
     Exit;
   end;
   Peso := PesoDesdeDisplay(lblPesoDisplay.Caption);
   if Peso <= 0 then
   begin
-    ShowMessage('Peso invalido');
+    MostrarInfoDialogo('Peso', 'Peso invalido');
     Exit;
   end;
   FPesoCapturado := Peso;
@@ -896,21 +895,21 @@ procedure TfrmPesajeIntegrado.EnviarPesoClick(Sender: TObject);
 begin
   if FPesoCapturado <= 0 then
   begin
-    ShowMessage('Capture el peso primero');
+    MostrarInfoDialogo('Peso', 'Capture el peso primero');
     Exit;
   end;
   if SyncSvc = nil then
   begin
-    ShowMessage('Servicio de sincronizacion no disponible');
+    MostrarInfoDialogo('Sincronizacion', 'Servicio de sincronizacion no disponible');
     Exit;
   end;
 
   Screen.Cursor := crHourGlass;
   try
     if SyncSvc.EnviarPesoVivo(FPesoCapturado) then
-      ShowMessage('Peso ' + IntToStr(FPesoCapturado) + ' kg enviado a la web.')
+      MostrarInfoDialogo('Envio', 'Peso ' + IntToStr(FPesoCapturado) + ' kg enviado a la web.', dtExito)
     else
-      ShowMessage('No se pudo enviar el peso. Revise la conexion con el sistema web.');
+      MostrarInfoDialogo('Envio', 'No se pudo enviar el peso. Revise la conexion con el sistema web.', dtError);
   finally
     Screen.Cursor := crDefault;
   end;

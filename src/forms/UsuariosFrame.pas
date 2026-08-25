@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme, LoginForm, AuthService;
+  Grids, sqldb, DataModule, Utils, Theme, LoginForm, AuthService, AppDialog;
 
 type
   { TFrameUsuarios }
@@ -689,14 +689,14 @@ begin
     end;
 
     if F.ShowModal = mrOK then begin
-      if Trim(eNom.Text) = '' then begin ShowMessage('Nombre obligatorio'); Exit; end;
-      if Trim(eEmail.Text) = '' then begin ShowMessage('Email obligatorio'); Exit; end;
+      if Trim(eNom.Text) = '' then begin MostrarInfoDialogo('Usuario', 'Nombre obligatorio'); Exit; end;
+      if Trim(eEmail.Text) = '' then begin MostrarInfoDialogo('Usuario', 'Email obligatorio'); Exit; end;
       PassStr := Trim(ePass.Text);
       if IsNew and (PassStr = '') then begin
-        ShowMessage('Contraseña obligatoria (mínimo 8 caracteres)'); Exit;
+        MostrarInfoDialogo('Usuario', 'Contraseña obligatoria (mínimo 8 caracteres)'); Exit;
       end;
       if (PassStr <> '') and (Length(PassStr) < 8) then begin
-        ShowMessage('La contraseña debe tener al menos 8 caracteres'); Exit;
+        MostrarInfoDialogo('Usuario', 'La contraseña debe tener al menos 8 caracteres'); Exit;
       end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback;
       DM.Transaccion.StartTransaction;
@@ -734,7 +734,7 @@ begin
         Refrescar(nil);
       except
         DM.Transaccion.Rollback;
-        ShowMessage('Error al guardar usuario');
+        MostrarInfoDialogo('Usuario', 'Error al guardar usuario', dtError);
       end;
     end;
   finally

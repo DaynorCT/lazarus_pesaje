@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, LCLIntf, DataModule, Utils, Theme, ReportePesaje;
+  Grids, sqldb, LCLIntf, DataModule, Utils, Theme, ReportePesaje, AppDialog;
 
 type
   TFrameReportes = class(TFrame)
@@ -396,7 +396,7 @@ procedure TFrameReportes.btnPDFClick(Sender: TObject);
 var Stream: TMemoryStream; Ruta: string;
 begin
   if Grid.RowCount <= 1 then begin
-    ShowMessage('No hay resultados para generar el reporte.');
+    MostrarInfoDialogo('Reporte', 'No hay resultados para generar el reporte.');
     Exit;
   end;
   Screen.Cursor := crHourGlass;
@@ -404,7 +404,7 @@ begin
     Stream := TMemoryStream.Create;
     try
       if not GenerarReportePDF(edtFechaDesde.Text, edtFechaHasta.Text, edtPlaca.Text, Stream) then begin
-        ShowMessage('No se pudo generar el reporte.');
+        MostrarInfoDialogo('Reporte', 'No se pudo generar el reporte.', dtError);
         Exit;
       end;
       Ruta := RutaPDFTemporal('reporte-pesaje.pdf');

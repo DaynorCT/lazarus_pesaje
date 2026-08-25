@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme;
+  Grids, sqldb, DataModule, Utils, Theme, AppDialog;
 
 type
   { TFrameBoletaConfig }
@@ -497,7 +497,7 @@ begin
           Refrescar(nil);
         except
           DM.Transaccion.Rollback;
-          ShowMessage('Error al guardar configuración.');
+          MostrarInfoDialogo('Boleta', 'Error al guardar configuracion.', dtError);
         end;
       end;
     finally

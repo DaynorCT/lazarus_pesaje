@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme, base64;
+  Grids, sqldb, DataModule, Utils, Theme, base64, AppDialog;
 
 type
   { TFrameEmpresas }
@@ -499,7 +499,7 @@ begin
       try
         Stream.LoadFromFile(dlgLogo.FileName);
         if Stream.Size > 2 * 1024 * 1024 then begin
-          ShowMessage('El archivo debe ser menor a 2MB');
+          MostrarInfoDialogo('Logo', 'El archivo debe ser menor a 2MB');
           Exit;
         end;
         SetLength(RawBytes, Stream.Size);
@@ -745,7 +745,7 @@ begin
     if F.ShowModal = mrOK then begin
       // Validación con Exit correcto
       if (Trim(eNom.Text) = '') or (Trim(eAct.Text) = '') then begin
-        ShowMessage('Nombre de empresa y actividad económica son obligatorios');
+        MostrarInfoDialogo('Empresa', 'Nombre de empresa y actividad económica son obligatorios');
         Exit;
       end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback;
@@ -770,7 +770,7 @@ begin
         if Assigned(frmMain) then frmMain.CargarLogo;
       except
         DM.Transaccion.Rollback;
-        ShowMessage('Error al guardar empresa');
+        MostrarInfoDialogo('Empresa', 'Error al guardar empresa', dtError);
       end;
     end;
   finally

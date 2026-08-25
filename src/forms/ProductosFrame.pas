@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme;
+  Grids, sqldb, DataModule, Utils, Theme, AppDialog;
 
 type
   { TFrameProductos }
@@ -588,7 +588,7 @@ begin
     end;
 
     if F.ShowModal = mrOK then begin
-      if Trim(eNom.Text) = '' then begin ShowMessage('El nombre es obligatorio'); Exit; end;
+      if Trim(eNom.Text) = '' then begin MostrarInfoDialogo('Producto', 'El nombre es obligatorio'); Exit; end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback;
       DM.Transaccion.StartTransaction;
       try
@@ -607,7 +607,7 @@ begin
         Refrescar(nil);
       except
         DM.Transaccion.Rollback;
-        ShowMessage('Error al guardar producto');
+        MostrarInfoDialogo('Producto', 'Error al guardar producto', dtError);
       end;
     end;
   finally

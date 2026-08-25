@@ -10,7 +10,7 @@ uses
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
   ProveedoresFrame, UsuariosFrame, EmpresasFrame, ProductosFrame,
   OrigenesFrame, DestinosFrame, AbmSimpleFrame, ReportesFrame,
-  BoletaConfigFrame, Theme, base64, SQLDB, ConfigBalanzaFrame;
+  BoletaConfigFrame, Theme, base64, SQLDB, ConfigBalanzaFrame, AppDialog;
 
 type
   TFrameClass = class of TFrame;
@@ -538,7 +538,7 @@ begin
     11: LoadFrame(TFrameReportes,      'Reportes');
     12: LoadFrame(TFrameBoletaConfig,  'Configuracion Boleta');
     13: LoadFrame(TFrameConfigBalanza, 'Configuracion Balanza');
-    else ShowMessage('Modulo en desarrollo');
+    else MostrarInfoDialogo('Modulo', 'Modulo en desarrollo');
   end;
 end;
 
@@ -562,8 +562,7 @@ end;
 
 procedure TfrmMain.LogoutClick(Sender: TObject);
 begin
-  if MessageDlg('Cerrar sesion', 'Seguro que desea cerrar sesion?',
-    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  if ConfirmarDialogo('Cerrar sesion', 'Seguro que desea cerrar sesion?') then
   begin
     ModalResult := mrCancel;
   end;

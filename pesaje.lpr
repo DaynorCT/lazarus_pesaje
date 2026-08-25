@@ -19,6 +19,7 @@ uses
   ConfigService in 'src/utils/ConfigService.pas',
   SyncService in 'src/utils/SyncService.pas',
   PesajeIntegrado in 'src/forms/PesajeIntegrado.pas' {frmPesajeIntegrado: TfrmPesajeIntegrado},
+  AppDialog in 'src/forms/AppDialog.pas',
   BoletaPesaje in 'src/reports/BoletaPesaje.pas',
   ReportePesaje in 'src/reports/ReportePesaje.pas',
   ReportesFrame in 'src/forms/ReportesFrame.pas' {FrameReportes: TFrameReportes},

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme;
+  Grids, sqldb, DataModule, Utils, Theme, AppDialog;
 
 type
   { TFrameVehiculos }
@@ -597,7 +597,7 @@ begin
     end;
 
     if F.ShowModal = mrOK then begin
-      if Trim(ePlaca.Text) = '' then begin ShowMessage('La placa es obligatoria'); Exit; end;
+      if Trim(ePlaca.Text) = '' then begin MostrarInfoDialogo('Vehiculo', 'La placa es obligatoria'); Exit; end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback;
       DM.Transaccion.StartTransaction;
       try
@@ -617,7 +617,7 @@ begin
         Refrescar(nil);
       except
         DM.Transaccion.Rollback;
-        ShowMessage('Error al guardar vehículo');
+        MostrarInfoDialogo('Vehiculo', 'Error al guardar vehiculo', dtError);
       end;
     end;
   finally

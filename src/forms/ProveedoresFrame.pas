@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme;
+  Grids, sqldb, DataModule, Utils, Theme, AppDialog;
 
 type
   { TFrameProveedores }
@@ -657,7 +657,7 @@ begin
 
     if F.ShowModal = mrOK then begin
       if Trim(eNom.Text) = '' then begin
-        ShowMessage('El nombre es obligatorio');
+        MostrarInfoDialogo('Proveedor', 'El nombre es obligatorio');
         Exit;
       end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback;
@@ -693,7 +693,7 @@ begin
         Refrescar(nil);
       except
         DM.Transaccion.Rollback;
-        ShowMessage('Error al guardar proveedor');
+        MostrarInfoDialogo('Proveedor', 'Error al guardar proveedor', dtError);
       end;
     end;
   finally

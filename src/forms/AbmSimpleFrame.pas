@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, DataModule, Utils, Theme, LoginForm;
+  Grids, sqldb, DataModule, Utils, Theme, LoginForm, AppDialog;
 
 type
   TTablaConfig = record
@@ -306,7 +306,7 @@ begin
     Msg := 'Reactivar registro #' + IntToStr(ID) + '?';
   end;
 
-  if MessageDlg('Confirmar', Msg, mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
+  if not ConfirmarDialogo('Confirmar', Msg) then Exit;
 
   DM.EjecutarSQL('UPDATE ' + FConfig.Nombre + ' SET estado = ''' + NuevoEstado +
     ''', fecha_modificacion = ''' + FechaHoraActual + ''' WHERE id = ' + IntToStr(ID));
@@ -380,7 +380,7 @@ begin
     for i := 0 to High(Edits) do
       if Trim(Edits[i].Text) = '' then
       begin
-        ShowMessage('"' + FConfig.LabelsEdit[i] + '" es obligatorio');
+        MostrarInfoDialogo('Datos', '"' + FConfig.LabelsEdit[i] + '" es obligatorio');
         Edits[i].SetFocus;
         Exit;
       end;
@@ -423,7 +423,7 @@ begin
       on E: Exception do
       begin
         DM.Transaccion.Rollback;
-        ShowMessage('Error: ' + E.Message);
+        MostrarInfoDialogo('Error', 'Error: ' + E.Message, dtError);
         Exit;
       end;
     end;

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, sqldb, LCLIntf, DataModule, Utils, Theme, LoginForm, BoletaPesaje;
+  Grids, sqldb, LCLIntf, DataModule, Utils, Theme, LoginForm, BoletaPesaje, AppDialog;
 
 type
   { TFramePesaje }
@@ -86,7 +86,6 @@ type
     procedure ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
     procedure PaintRounded(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure DialogFinalizarOk(Sender: TObject);
     function MostrarDialogFinalizar(PesajeID, Bruto, Tara, Neto: Integer): Boolean;
     function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer; const ACaption: string;
       AColor: TColor; AFontColor: TColor; ATag: Integer; AClick: TNotifyEvent): TPanel;
@@ -746,9 +745,9 @@ begin ConectarClick(Sender); end;
 
 procedure TFramePesaje.CapturarPesoClick(Sender: TObject);
 begin
-  if not FConectado then begin ShowMessage('Conecte la balanza primero'); Exit; end;
+  if not FConectado then begin MostrarInfoDialogo('Balanza', 'Conecte la balanza primero'); Exit; end;
   FPesoBruto := PesoDesdeDisplay(lblPesoDisplay.Caption);
-  if FPesoBruto <= 0 then begin ShowMessage('Peso invalido'); Exit; end;
+  if FPesoBruto <= 0 then begin MostrarInfoDialogo('Peso', 'Peso invalido'); Exit; end;
   FPesoNeto := FPesoBruto - FTara; ActualizarResumenPesos;
 end;
 
@@ -1044,7 +1043,7 @@ begin
   try
     Stream:=TMemoryStream.Create;
     try
-      if not GenerarBoletaPDF(ID,Stream) then begin ShowMessage('No se pudo generar la boleta.'); Exit; end;
+      if not GenerarBoletaPDF(ID,Stream) then begin MostrarInfoDialogo('Boleta', 'No se pudo generar la boleta.', dtError); Exit; end;
       Ruta := RutaPDFTemporal('boleta-pesaje-'+IntToStr(ID)+'.pdf');
       Stream.SaveToFile(Ruta); OpenDocument(Ruta);
     finally Stream.Free; end;
@@ -1086,7 +1085,7 @@ begin
   Q:=DM.AbrirQuery('SELECT peso_bruto,tara,peso_neto FROM pesajes WHERE id='+IntToStr(ID));
   try Bruto:=Q.FieldByName('peso_bruto').AsInteger; Tara:=Q.FieldByName('tara').AsInteger; Neto:=Q.FieldByName('peso_neto').AsInteger;
   finally Q.Close; end;
-  if (Bruto<=0) or (Tara<=0) then begin ShowMessage('No se puede finalizar. Falta el peso bruto o la tara.'); Exit; end;
+  if (Bruto<=0) or (Tara<=0) then begin MostrarInfoDialogo('Pesaje', 'No se puede finalizar. Falta el peso bruto o la tara.'); Exit; end;
   if not MostrarDialogFinalizar(ID,Bruto,Tara,Neto) then Exit;
   if DM.Transaccion.Active then DM.Transaccion.Rollback;
   DM.Transaccion.StartTransaction;
@@ -1095,12 +1094,12 @@ begin
       IntToStr(UsuarioActual.ID)+',fecha_modificacion='''+FechaHoraActual+
       ''' WHERE id='+IntToStr(ID)+' AND estado_balanza=''EN_PROCESO''');
     DM.Transaccion.Commit; RefrescarPesajes(nil);
-  except DM.Transaccion.Rollback; ShowMessage('Error al finalizar el pesaje'); end;
+  except DM.Transaccion.Rollback; MostrarInfoDialogo('Pesaje', 'Error al finalizar el pesaje', dtError); end;
 end;
 
 procedure TFramePesaje.AnularPesaje(ID: Integer);
 begin
-  if MessageDlg('Anular pesaje','Se cambiara el estado a INACTIVO. Continuar?',mtConfirmation,[mbYes,mbNo],0)<>mrYes then Exit;
+  if not ConfirmarDialogo('Anular pesaje', 'Se cambiara el estado a INACTIVO. Continuar?') then Exit;
   if DM.Transaccion.Active then DM.Transaccion.Rollback;
   DM.Transaccion.StartTransaction;
   try
@@ -1138,10 +1137,9 @@ end;
 
 procedure TFramePesaje.TaraClick(Sender: TObject);
 begin
-  if not FConectado then begin ShowMessage('Conecte la balanza primero'); Exit; end;
-  if not FUsarTaraManual then begin ShowMessage('Active el modo manual de tara para capturar'); Exit; end;
-  FTara:=PesoDesdeDisplay(lblPesoDisplay.Caption);
-  if FTara<=0 then begin ShowMessage('Peso invalido'); Exit; end;
+if not FConectado then begin MostrarInfoDialogo('Balanza', 'Conecte la balanza primero'); Exit; end;
+  if not FUsarTaraManual then begin MostrarInfoDialogo('Tara', 'Active el modo manual de tara para capturar'); Exit; end;
+  if FTara<=0 then begin MostrarInfoDialogo('Peso', 'Peso invalido'); Exit; end;
   FTaraCapturada:=FTara; FTaraManual:=IntToStr(FTara);
   edtTaraManual.Text:=FTaraManual; edtTaraManual.ReadOnly:=True;
   FPesoBruto:=0; FPesoNeto:=0; ActualizarResumenPesos;
@@ -1183,22 +1181,22 @@ end;
 procedure TFramePesaje.GuardarTaraClick(Sender: TObject);
 var VehiculoID,NuevaTara: Integer;
 begin
-  if cmbVehiculo.ItemIndex<1 then begin ShowMessage('Seleccione un vehiculo primero'); Exit; end;
+  if cmbVehiculo.ItemIndex<1 then begin MostrarInfoDialogo('Vehiculo', 'Seleccione un vehiculo primero'); Exit; end;
   NuevaTara:=StrToIntDef(FTaraManual,0);
   VehiculoID:=PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
   if DM.Transaccion.Active then DM.Transaccion.Rollback; DM.Transaccion.StartTransaction;
   try
     DM.EjecutarSQL('UPDATE vehiculos SET tara='+IntToStr(NuevaTara)+',usuario_modificacion='+IntToStr(UsuarioActual.ID)+',fecha_modificacion='''+FechaHoraActual+''' WHERE id='+IntToStr(VehiculoID));
     DM.Transaccion.Commit; FTara:=NuevaTara; FPesoNeto:=FPesoBruto-FTara; ActualizarResumenPesos;
-  except DM.Transaccion.Rollback; ShowMessage('Error al guardar tara'); end;
+  except DM.Transaccion.Rollback; MostrarInfoDialogo('Tara', 'Error al guardar tara', dtError); end;
 end;
 
 procedure TFramePesaje.GuardarClick(Sender: TObject);
 var VehiculoID,ChoferID,ProveedorID,ProductoID,OrigenID,DestinoID,Costo,Flete,ProximoID: Integer;
   Guia,Anio: string; Q: TSQLQuery;
 begin
-  if cmbVehiculo.ItemIndex<1 then begin ShowMessage('Seleccione un vehiculo'); Exit; end;
-  if FPesoBruto<FTara then begin ShowMessage('El peso bruto no puede ser menor que la tara'); Exit; end;
+  if cmbVehiculo.ItemIndex<1 then begin MostrarInfoDialogo('Vehiculo', 'Seleccione un vehiculo'); Exit; end;
+  if FPesoBruto<FTara then begin MostrarInfoDialogo('Peso', 'El peso bruto no puede ser menor que la tara'); Exit; end;
   VehiculoID:=PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
   ChoferID:=0; ProveedorID:=0; ProductoID:=0; OrigenID:=0; DestinoID:=0;
   if cmbChofer.ItemIndex>0    then ChoferID   :=PtrInt(cmbChofer.Items.Objects[cmbChofer.ItemIndex]);
@@ -1209,11 +1207,11 @@ begin
   Costo:=StrToIntDef(edtCosto.Text,0); Flete:=StrToIntDef(edtFlete.Text,0);
   if not FEditMode then begin
     Q:=DM.AbrirQuery('SELECT id FROM pesajes WHERE vehiculo_id='+IntToStr(VehiculoID)+' AND estado_balanza=''EN_PROCESO'' AND estado=''ACTIVO''');
-    try if not Q.EOF then begin ShowMessage('Ya existe un pesaje en proceso para este vehiculo (#'+Q.Fields[0].AsString+')'); Exit; end;
+    try if not Q.EOF then begin MostrarInfoDialogo('Pesaje', 'Ya existe un pesaje en proceso para este vehiculo (#'+Q.Fields[0].AsString+')'); Exit; end;
     finally Q.Close; end;
   end;
   if not FEditMode then
-    if MessageDlg('Guardar pesaje',Format('Bruto: %d kg | Tara: %d kg | Neto: %d kg. Confirmar?',[FPesoBruto,FTara,FPesoNeto]),mtConfirmation,[mbYes,mbNo],0)<>mrYes then Exit;
+    if not ConfirmarDialogo('Guardar pesaje', Format('Bruto: %d kg | Tara: %d kg | Neto: %d kg. Confirmar?',[FPesoBruto,FTara,FPesoNeto])) then Exit;
   if DM.Transaccion.Active then DM.Transaccion.Rollback; DM.Transaccion.StartTransaction;
   try
     if FEditMode then begin
@@ -1236,9 +1234,9 @@ begin
         IntToStr(FPesoBruto)+','+IntToStr(FTara)+','+IntToStr(FPesoNeto)+','+IntToStr(Costo)+','+IntToStr(Flete)+','+IntToStr(UsuarioActual.PersonaID)+',''ACTIVO'',''EN_PROCESO'','+IntToStr(UsuarioActual.ID)+','+IntToStr(UsuarioActual.ID)+','''+FechaHoraActual+''','''+FechaHoraActual+''')');
     end;
     DM.Transaccion.Commit; RefrescarPesajes(nil);
-    ShowMessage(IfThen(FEditMode,'Pesaje actualizado','Pesaje guardado correctamente'));
+    MostrarInfoDialogo('Pesaje', IfThen(FEditMode,'Pesaje actualizado','Pesaje guardado correctamente'), dtExito);
     CancelEditClick(nil);
-  except DM.Transaccion.Rollback; ShowMessage('Error al guardar pesaje'); end;
+  except DM.Transaccion.Rollback; MostrarInfoDialogo('Pesaje', 'Error al guardar pesaje', dtError); end;
 end;
 
 procedure TFramePesaje.CancelEditClick(Sender: TObject);
@@ -1332,14 +1330,14 @@ begin
     with TPanel.Create(F) do begin Parent:=F; SetBounds(440,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient; Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=11; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
     if F.ShowModal=mrOK then begin
-      if Trim(ePlaca.Text)='' then begin ShowMessage('Placa obligatoria'); Exit; end;
+      if Trim(ePlaca.Text)='' then begin MostrarInfoDialogo('Vehiculo', 'Placa obligatoria'); Exit; end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback; DM.Transaccion.StartTransaction;
       try
         DM.EjecutarSQL('INSERT INTO vehiculos (placa,tipo_vehiculo,tara,estado,usuario_creacion,usuario_modificacion,fecha_creacion,fecha_modificacion) VALUES ('+
           QuotedStr(UpperCase(Trim(ePlaca.Text)))+','+QuotedStr(Trim(eTipo.Text))+','+IntToStr(StrToIntDef(Trim(eTara.Text),0))+',''ACTIVO'','+
           IntToStr(UsuarioActual.ID)+','+IntToStr(UsuarioActual.ID)+','''+FechaHoraActual+''','''+FechaHoraActual+''')');
-        DM.Transaccion.Commit; CargarCombos; ShowMessage('Vehículo creado correctamente');
-      except DM.Transaccion.Rollback; ShowMessage('Error al guardar vehículo'); end;
+        DM.Transaccion.Commit; CargarCombos; MostrarInfoDialogo('Vehiculo', 'Vehiculo creado correctamente', dtExito);
+      except DM.Transaccion.Rollback; MostrarInfoDialogo('Vehiculo', 'Error al guardar vehiculo', dtError); end;
     end;
   finally F.Free; end;
 end;
@@ -1390,14 +1388,14 @@ begin
     with TPanel.Create(F) do begin Parent:=F; SetBounds(440,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient; Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=11; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
     if F.ShowModal=mrOK then begin
-      if Trim(eNom.Text)='' then begin ShowMessage('Nombre obligatorio'); Exit; end;
+      if Trim(eNom.Text)='' then begin MostrarInfoDialogo('Chofer', 'Nombre obligatorio'); Exit; end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback; DM.Transaccion.StartTransaction;
       try
         DM.EjecutarSQL('INSERT INTO personas (nombre,apellido_paterno,apellido_materno,ci,telefono,estado,fecha_creacion,fecha_modificacion) VALUES ('+
           QuotedStr(Trim(eNom.Text))+','+QuotedStr(Trim(ePat.Text))+','+QuotedStr(Trim(eMat.Text))+','+QuotedStr(Trim(eCI.Text))+','+QuotedStr(Trim(eTel.Text))+',''ACTIVO'','''+FechaHoraActual+''','''+FechaHoraActual+''')');
         DM.EjecutarSQL('INSERT INTO choferes (persona_id,licencia,estado,fecha_creacion,fecha_modificacion) VALUES ('+IntToStr(DM.ObtenerUltimoID)+','+QuotedStr(Trim(eLic.Text))+',''ACTIVO'','''+FechaHoraActual+''','''+FechaHoraActual+''')');
         DM.Transaccion.Commit; CargarCombos;
-      except DM.Transaccion.Rollback; ShowMessage('Error al crear chofer'); end;
+      except DM.Transaccion.Rollback; MostrarInfoDialogo('Chofer', 'Error al crear chofer', dtError); end;
     end;
   finally F.Free; end;
 end;
@@ -1428,13 +1426,13 @@ begin
     with TPanel.Create(F) do begin Parent:=F; SetBounds(440,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient; Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=11; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
     if F.ShowModal=mrOK then begin
-      if Trim(eNom.Text)='' then begin ShowMessage('Nombre obligatorio'); Exit; end;
+      if Trim(eNom.Text)='' then begin MostrarInfoDialogo('Proveedor', 'Nombre obligatorio'); Exit; end;
       if DM.Transaccion.Active then DM.Transaccion.Rollback; DM.Transaccion.StartTransaction;
       try
         DM.EjecutarSQL('INSERT INTO personas (nombre,telefono,estado,fecha_creacion,fecha_modificacion) VALUES ('+QuotedStr(Trim(eNom.Text))+','+QuotedStr(Trim(eTel.Text))+',''ACTIVO'','''+FechaHoraActual+''','''+FechaHoraActual+''')');
         DM.EjecutarSQL('INSERT INTO proveedores (persona_id,nombre_empresa,estado,fecha_creacion,fecha_modificacion) VALUES ('+IntToStr(DM.ObtenerUltimoID)+','+QuotedStr(Trim(eEmp.Text))+',''ACTIVO'','''+FechaHoraActual+''','''+FechaHoraActual+''')');
         DM.Transaccion.Commit; CargarCombos;
-      except DM.Transaccion.Rollback; ShowMessage('Error al crear proveedor'); end;
+      except DM.Transaccion.Rollback; MostrarInfoDialogo('Proveedor', 'Error al crear proveedor', dtError); end;
     end;
   finally F.Free; end;
 end;
@@ -1470,7 +1468,7 @@ begin
     with TPanel.Create(F) do begin Parent:=F; SetBounds(440,YPos,120,32); BevelOuter:=bvNone; Color:=CLR_PRIMARY; Cursor:=crHandPoint; OnPaint:=@PaintRounded; OnClick:=@QuickGuardarClick;
       with TLabel.Create(F) do begin Parent:=TPanel(F.Controls[F.ControlCount-1]); Align:=alClient; Alignment:=taCenter; Layout:=tlCenter; Caption:='GUARDAR'; Font.Size:=11; Font.Color:=CLR_WHITE; OnClick:=@QuickGuardarClick; end; end;
     if F.ShowModal=mrOK then begin
-      if Trim(eNom.Text)='' then begin ShowMessage('Nombre obligatorio'); Exit; end;
+      if Trim(eNom.Text)='' then begin MostrarInfoDialogo('Datos', 'Nombre obligatorio'); Exit; end;
       DM.EjecutarSQL('INSERT INTO '+Tabla+' (nombre,descripcion,estado,fecha_creacion,fecha_modificacion) VALUES ('+
         QuotedStr(Trim(eNom.Text))+','+QuotedStr(Trim(eDes.Text))+',''ACTIVO'','''+FechaHoraActual+''','''+FechaHoraActual+''')');
       CargarCombos;
@@ -1479,45 +1477,8 @@ begin
 end;
 
 function TFramePesaje.MostrarDialogFinalizar(PesajeID,Bruto,Tara,Neto: Integer): Boolean;
-var F: TForm; pnlWrap,pnlDatos: TPanel; Lbl: TLabel; YPos,W: Integer;
-const DIALOG_W=420;
 begin
-  Result:=False; F:=TForm.Create(nil);
-  try
-    F.Caption:=''; F.Width:=DIALOG_W; F.Position:=poMainFormCenter; F.BorderStyle:=bsDialog; F.Color:=CLR_BG;
-    F.Constraints.MinWidth:=DIALOG_W; F.Constraints.MaxWidth:=DIALOG_W;
-    F.Constraints.MinHeight:=300; F.Constraints.MaxHeight:=300;
-    pnlWrap:=TPanel.Create(F); pnlWrap.Parent:=F; pnlWrap.Align:=alClient;
-    pnlWrap.BevelOuter:=bvNone; pnlWrap.Color:=CLR_CARD; pnlWrap.BorderSpacing.Around:=14;
-    with TLabel.Create(F) do begin Parent:=pnlWrap; SetBounds(20,20,DIALOG_W-40,24);
-      Caption:='Finalizar Pesaje #'+IntToStr(PesajeID); Font.Size:=13; Font.Style:=[fsBold]; Font.Color:=CLR_TEXT_HEADING; end;
-    with TLabel.Create(F) do begin Parent:=pnlWrap; SetBounds(20,48,DIALOG_W-40,16);
-      Caption:='Verifique los pesos antes de finalizar'; Font.Size:=10; Font.Color:=CLR_TEXT_SLATE; end;
-    pnlDatos:=TPanel.Create(F); pnlDatos.Parent:=pnlWrap; pnlDatos.SetBounds(20,70,DIALOG_W-40,112);
-    pnlDatos.BevelOuter:=bvNone; pnlDatos.Color:=CLR_SIDEBAR_ACTIVE;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=pnlDatos; Lbl.SetBounds(16,14,100,18); Lbl.Caption:='Peso Bruto'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_SLATE;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=pnlDatos; Lbl.SetBounds(190,14,140,18); Lbl.Caption:=FormatFloat('#,##0',Bruto)+' kg'; Lbl.Font.Size:=12; Lbl.Font.Color:=CLR_TEXT; Lbl.Font.Style:=[fsBold]; Lbl.Alignment:=taRightJustify;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=pnlDatos; Lbl.SetBounds(16,38,100,18); Lbl.Caption:='Tara'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_SLATE;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=pnlDatos; Lbl.SetBounds(190,38,140,18); Lbl.Caption:=FormatFloat('#,##0',Tara)+' kg'; Lbl.Font.Size:=12; Lbl.Font.Color:=CLR_TEXT; Lbl.Font.Style:=[fsBold]; Lbl.Alignment:=taRightJustify;
-    with TPanel.Create(F) do begin Parent:=pnlDatos; SetBounds(16,66,pnlDatos.Width-32,1); BevelOuter:=bvNone; Color:=CLR_BORDER; end;
-    Lbl:=TLabel.Create(F); Lbl.Parent:=pnlDatos; Lbl.SetBounds(16,74,100,22); Lbl.Caption:='Peso Neto'; Lbl.Font.Size:=11; Lbl.Font.Color:=CLR_TEXT_HEADING; Lbl.Font.Style:=[fsBold];
-    Lbl:=TLabel.Create(F); Lbl.Parent:=pnlDatos; Lbl.SetBounds(190,70,140,26); Lbl.Caption:=FormatFloat('#,##0',Neto)+' kg'; Lbl.Font.Size:=14; Lbl.Font.Color:=CLR_PRIMARY; Lbl.Font.Style:=[fsBold]; Lbl.Alignment:=taRightJustify;
-    YPos:=196;
-    with TLabel.Create(F) do begin Parent:=pnlWrap; SetBounds(20,YPos,DIALOG_W-40,16);
-      Caption:='Confirme la finalizacion del pesaje'; Font.Size:=10; Font.Color:=CLR_TEXT_SLATE; end;
-    YPos:=224; W:=DIALOG_W-28;
-    CrearBoton(pnlWrap,YPos,W-210,96,30,'Cancelar',CLR_CARD,CLR_TEXT,1,@QuickCancelarClick);
-    CrearBoton(pnlWrap,YPos,W-106,96,30,'Finalizar',CLR_PRIMARY,CLR_PRIMARY_FG,0,@DialogFinalizarOk);
-    Result:=F.ShowModal=mrOk;
-  finally F.Free; end;
-end;
-
-procedure TFramePesaje.DialogFinalizarOk(Sender: TObject);
-var Pnl: TWinControl; Frm: TCustomForm;
-begin
-  if Sender is TLabel then Pnl:=TLabel(Sender).Parent
-  else if Sender is TPanel then Pnl:=TPanel(Sender) else Exit;
-  Frm:=GetParentForm(Pnl); if Frm<>nil then Frm.ModalResult:=mrOk;
+  Result := AppDialog.MostrarDialogoFinalizar(PesajeID, Bruto, Tara, Neto);
 end;
 
 end.
