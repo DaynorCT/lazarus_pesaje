@@ -5,7 +5,7 @@ unit PesajeIntegrado;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Classes, SysUtils, StrUtils, Math, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, sqldb, DataModule, Utils, Theme, LoginForm, SyncService, LMessages,
   ConfigBalanzaFrame;
 
@@ -37,6 +37,9 @@ type
 
     pnlDisplay: TPanel;
     lblPesoDisplay: TLabel;
+    lblRegistroTitle: TLabel;
+    pnlSep1, pnlSep2: TPanel;
+    lblConexion: TLabel;
     lblValBruto: TLabel;
     lblValTara: TLabel;
     lblValNeto: TLabel;
@@ -223,11 +226,10 @@ begin
 
   pnlMedio := TPanel.Create(pnlContent);
   pnlMedio.Parent := pnlContent;
-  pnlMedio.Align := alTop;
-  pnlMedio.Height := 430;
+  pnlMedio.Align := alClient;
   pnlMedio.BevelOuter := bvNone;
   pnlMedio.Color := CLR_BG;
-  pnlMedio.BorderSpacing.Top := FRAME_MARGIN;
+  pnlMedio.BorderSpacing.Around := FRAME_MARGIN;
 
   // ── Card registro de peso (centrado) ───────────────────────────
   pnlRegistroCard := TPanel.Create(pnlMedio);
@@ -252,6 +254,7 @@ begin
   Lbl.Caption := 'Registro de peso';
   Lbl.Font.Size := 12;
   Lbl.Font.Color := CLR_TEXT_HEADING;
+  lblRegistroTitle := Lbl;
   YPos := YPos + 26;
 
   Sep := TPanel.Create(pnlRegistro);
@@ -259,6 +262,7 @@ begin
   Sep.SetBounds(CREG_PAD, YPos, InnerW, 1);
   Sep.BevelOuter := bvNone;
   Sep.Color := CLR_BORDER;
+  pnlSep1 := Sep;
   YPos := YPos + 10;
 
   pnlDisplay := TPanel.Create(pnlRegistro);
@@ -287,6 +291,7 @@ begin
   Sep.SetBounds(CREG_PAD, YPos, InnerW, 1);
   Sep.BevelOuter := bvNone;
   Sep.Color := CLR_BORDER;
+  pnlSep2 := Sep;
   YPos := YPos + 8;
 
   pnlSwitchConectar := TPanel.Create(pnlRegistro);
@@ -305,6 +310,7 @@ begin
   Lbl.Font.Size := 9;
   Lbl.Font.Color := CLR_TEXT_SLATE;
   Lbl.Alignment := taCenter;
+  lblConexion := Lbl;
 
   pnlCapturarPeso := CrearBoton(pnlRegistro, YPos, CREG_PAD + 84,
     (InnerW - 84 - 6) div 2, 30, 'Cap. peso', CLR_PRIMARY, CLR_WHITE, 0, @CapturarPesoClick);
@@ -524,10 +530,108 @@ begin
 end;
 
 procedure TfrmPesajeIntegrado.AjustarLayout;
+var
+  W, H, P, YPos, InnerW, Gap, DisplayH, BoxH, BtnH, BtnW, BoxW, RowY: Integer;
 begin
-  if (pnlMedio = nil) or (pnlRegistroCard = nil) then Exit;
-  pnlRegistroCard.Left := (pnlMedio.ClientWidth - CREG_W) div 2;
-  if pnlRegistroCard.Left < 0 then pnlRegistroCard.Left := 0;
+  if (pnlMedio = nil) or (pnlRegistroCard = nil) or (pnlRegistro = nil) then Exit;
+
+  W := pnlMedio.ClientWidth;
+  H := pnlMedio.ClientHeight;
+  if (W < 320) or (H < 260) then Exit;
+
+  // El card llena todo el area de contenido
+  pnlRegistroCard.SetBounds(0, 0, W, H);
+
+  P := 24;
+  Gap := 10;
+  InnerW := W - P * 2;
+
+  // ── Titulo ──
+  YPos := 14;
+  if lblRegistroTitle <> nil then
+  begin
+    lblRegistroTitle.SetBounds(P, YPos, InnerW, 28);
+    lblRegistroTitle.Font.Size := Max(14, H div 55);
+    YPos := YPos + 28 + 8;
+  end;
+  if pnlSep1 <> nil then begin pnlSep1.SetBounds(P, YPos, InnerW, 1); YPos := YPos + 10; end;
+
+  // ── Display grande (rellena espacio) ──
+  DisplayH := H * 34 div 100;
+  if DisplayH < 120 then DisplayH := 120;
+  if pnlDisplay <> nil then
+  begin
+    pnlDisplay.SetBounds(P, YPos, InnerW, DisplayH);
+    if pnlDisplay.ControlCount > 0 then
+      TPanel(pnlDisplay.Controls[0]).SetBounds(2, 2, InnerW - 4, DisplayH - 4);
+    if lblPesoDisplay <> nil then
+      lblPesoDisplay.Font.Height := -Max(28, DisplayH * 45 div 100);
+    YPos := YPos + DisplayH + 12;
+  end;
+  if pnlSep2 <> nil then begin pnlSep2.SetBounds(P, YPos, InnerW, 1); YPos := YPos + 10; end;
+
+  // ── Fila conexion: switch + Cap. peso + Cap. tara ──
+  RowY := YPos;
+  if pnlSwitchConectar <> nil then
+  begin
+    pnlSwitchConectar.SetBounds(P, RowY, 88, 44);
+    if lblConexion <> nil then
+    begin
+      lblConexion.SetBounds(P, RowY + 44, 88, 16);
+      lblConexion.Font.Size := Max(10, H div 130);
+    end;
+  end;
+  BtnW := (InnerW - 88 - Gap * 2) div 2;
+  if BtnW < 130 then BtnW := 130;
+  if pnlCapturarPeso <> nil then pnlCapturarPeso.SetBounds(P + 88 + Gap, RowY, BtnW, 44);
+  if pnlCapturarTara <> nil then
+    pnlCapturarTara.SetBounds(P + 88 + Gap + BtnW + Gap, RowY, InnerW - 88 - Gap * 2 - BtnW, 44);
+  if (pnlCapturarPeso <> nil) and (pnlCapturarPeso.ControlCount > 0) then
+    TLabel(pnlCapturarPeso.Controls[0]).Font.Size := Max(12, H div 80);
+  if (pnlCapturarTara <> nil) and (pnlCapturarTara.ControlCount > 0) then
+    TLabel(pnlCapturarTara.Controls[0]).Font.Size := Max(12, H div 80);
+  YPos := RowY + 44 + 24;
+
+  // ── Cuadros Peso Bruto | Peso tara | Peso Neto ──
+  if (pnlValBruto <> nil) and (pnlValTara <> nil) and (pnlValNeto <> nil) then
+  begin
+    BoxH := H * 26 div 100;
+    if BoxH < 80 then BoxH := 80;
+    BoxW := (InnerW - Gap * 2) div 3;
+    if BoxW < 120 then BoxW := 120;
+
+    if lblBrutoTit <> nil then lblBrutoTit.SetBounds(P + 4, YPos, BoxW - 4, 18);
+    if lblTaraTit <> nil then lblTaraTit.SetBounds(P + BoxW + Gap + 4, YPos, BoxW - 4, 18);
+    if lblNetoTit <> nil then lblNetoTit.SetBounds(P + (BoxW + Gap) * 2 + 4, YPos, BoxW - 4, 18);
+    if lblBrutoTit <> nil then lblBrutoTit.Font.Size := Max(11, H div 110);
+    if lblTaraTit <> nil then lblTaraTit.Font.Size := Max(11, H div 110);
+    if lblNetoTit <> nil then lblNetoTit.Font.Size := Max(11, H div 110);
+    YPos := YPos + 22;
+
+    pnlValBruto.SetBounds(P, YPos, BoxW, BoxH);
+    pnlValTara.SetBounds(P + BoxW + Gap, YPos, BoxW, BoxH);
+    pnlValNeto.SetBounds(P + (BoxW + Gap) * 2, YPos, BoxW, BoxH);
+
+    if pnlValBruto.ControlCount > 0 then TPanel(pnlValBruto.Controls[0]).SetBounds(1, 1, BoxW - 2, BoxH - 2);
+    if pnlValTara.ControlCount > 0 then TPanel(pnlValTara.Controls[0]).SetBounds(1, 1, BoxW - 2, BoxH - 2);
+    if pnlValNeto.ControlCount > 0 then TPanel(pnlValNeto.Controls[0]).SetBounds(1, 1, BoxW - 2, BoxH - 2);
+
+    if lblValBruto <> nil then lblValBruto.Font.Size := Max(13, BoxH * 30 div 100);
+    if lblValTara <> nil then lblValTara.Font.Size := Max(13, BoxH * 30 div 100);
+    if lblValNeto <> nil then lblValNeto.Font.Size := Max(13, BoxH * 30 div 100);
+
+    YPos := YPos + BoxH + 12;
+  end;
+
+  // ── Boton ENVIAR (rellena el espacio restante) ──
+  if pnlEnviar <> nil then
+  begin
+    BtnH := H - YPos - P;
+    if BtnH < 52 then BtnH := 52;
+    pnlEnviar.SetBounds(P, YPos, InnerW, BtnH);
+    if pnlEnviar.ControlCount > 0 then
+      TLabel(pnlEnviar.Controls[0]).Font.Size := Max(14, BtnH * 28 div 100);
+  end;
 end;
 
 // ══════════════════════════════════════════════════════════════════
@@ -714,7 +818,7 @@ begin
   Pnl := TPanel(Sender);
   Pnl.Canvas.Brush.Color := CLR_CARD;
   Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
-  Pnl.Canvas.Font.Height := -12;
+  Pnl.Canvas.Font.Height := -(Pnl.Height div 2);
   Pnl.Canvas.Font.Style := [fsBold];
   Ts := Pnl.Canvas.TextStyle;
   Ts.Alignment := taCenter;
