@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, sqldb, DataModule, Utils, Theme, LoginForm, SyncService;
+  ExtCtrls, sqldb, DataModule, Utils, Theme, LoginForm, SyncService, LMessages;
 
 type
   { TfrmPesajeIntegrado }
@@ -14,6 +14,8 @@ type
   TfrmPesajeIntegrado = class(TForm)
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+  protected
+    procedure WMCloseQuery(var Message: TLMessage); message LM_CLOSEQUERY;
   private
     FTara: Integer;
     FPesoBruto: Integer;
@@ -649,6 +651,13 @@ begin
   begin
     ModalResult := mrCancel;
   end;
+end;
+
+// Cerrar con la X del modulo pesaje → cerrar el programa
+procedure TfrmPesajeIntegrado.WMCloseQuery(var Message: TLMessage);
+begin
+  ModalResult := mrAbort;
+  Message.Result := 0;
 end;
 
 // ══════════════════════════════════════════════════════════════════

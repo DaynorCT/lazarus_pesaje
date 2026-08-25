@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons, AuthService, DataModule, LoginForm,
+  Buttons, AuthService, DataModule, LoginForm, LMessages,
   PesajeFrame, DashboardFrame, VehiculosFrame, ChoferesFrame,
   ProveedoresFrame, UsuariosFrame, EmpresasFrame, ProductosFrame,
   OrigenesFrame, DestinosFrame, AbmSimpleFrame, ReportesFrame,
@@ -25,6 +25,8 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ContentClick(Sender: TObject);
+  protected
+    procedure WMCloseQuery(var Message: TLMessage); message LM_CLOSEQUERY;
   private
     FActiveFrame: TFrame;
     FNavItems: array of TPanel;
@@ -574,6 +576,13 @@ begin
   begin
     ModalResult := mrYes;
   end;
+end;
+
+// Cerrar con la X del sistema completo → volver al modo pesaje (ciclo)
+procedure TfrmMain.WMCloseQuery(var Message: TLMessage);
+begin
+  ModalResult := mrYes;
+  Message.Result := 0;
 end;
 
 procedure TfrmMain.LogoClick(Sender: TObject);
