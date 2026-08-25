@@ -5,8 +5,8 @@ unit PesajeIntegrado;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, Math, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, sqldb, DataModule, Utils, Theme, LoginForm, SyncService, LMessages,
+  Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, sqldb, DataModule, Theme, LoginForm, SyncService, LMessages,
   ConfigBalanzaFrame;
 
 type
@@ -18,13 +18,12 @@ type
   protected
     procedure WMCloseQuery(var Message: TLMessage); message LM_CLOSEQUERY;
   private
-    FTara: Integer;
-    FPesoBruto: Integer;
-    FPesoNeto: Integer;
     FConectado: Boolean;
     FMetodoLectura: string;
     FPosInicio: Integer;
     FPosLongitud: Integer;
+    FModoPrueba: Boolean;
+    FPesoCapturado: Integer;
 
     TimerLectura: TTimer;
     TimerEstado: TTimer;
@@ -40,19 +39,10 @@ type
     lblRegistroTitle: TLabel;
     pnlSep1, pnlSep2: TPanel;
     lblConexion: TLabel;
-    lblValBruto: TLabel;
-    lblValTara: TLabel;
-    lblValNeto: TLabel;
-    lblBrutoTit: TLabel;
-    lblTaraTit: TLabel;
-    lblNetoTit: TLabel;
-    pnlValBruto: TPanel;
-    pnlValTara: TPanel;
-    pnlValNeto: TPanel;
 
     pnlSwitchConectar: TPanel;
     pnlCapturarPeso: TPanel;
-    pnlCapturarTara: TPanel;
+    lblPesoCapturado: TLabel;
     pnlEnviar: TPanel;
 
     pnlSincronizar: TPanel;
@@ -64,12 +54,11 @@ type
     procedure SwitchConectarPaint(Sender: TObject);
     procedure SwitchConectarClick(Sender: TObject);
     procedure CapturarPesoClick(Sender: TObject);
-    procedure CapturarTaraClick(Sender: TObject);
+    procedure EnviarPesoClick(Sender: TObject);
     procedure TimerLecturaTimer(Sender: TObject);
     procedure TimerEstadoTimer(Sender: TObject);
     procedure ProcesarTrama(const Trama: string);
     function ExtraerPeso(const Trama: string): string;
-    procedure EnviarPesoClick(Sender: TObject);
     procedure SincronizarClick(Sender: TObject);
     procedure EngranajeClick(Sender: TObject);
     procedure MenuSistemaCompletoClick(Sender: TObject);
@@ -77,9 +66,7 @@ type
     procedure MenuSalirClick(Sender: TObject);
     procedure CerrarMenuEngranaje;
     procedure ContentClick(Sender: TObject);
-    procedure ActualizarResumenPesos;
     procedure ActualizarEstadoSync;
-    procedure Limpiar;
     procedure FormShowHandler(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure AjustarLayout;
@@ -117,18 +104,17 @@ var
   Sep: TPanel;
   YPos: Integer;
   InnerW: Integer;
-  po, pi: TPanel;
+  pi: TPanel;
 begin
   inherited CreateNew(AOwner);
 
   Randomize;
-  FTara := 0;
-  FPesoBruto := 0;
-  FPesoNeto := 0;
   FConectado := False;
   FMetodoLectura := 'AUTO';
   FPosInicio := 8;
   FPosLongitud := 5;
+  FModoPrueba := False;
+  FPesoCapturado := 0;
 
   Caption := 'Sistema de Pesaje';
   Width := APP_WIDTH;
@@ -312,106 +298,22 @@ begin
   Lbl.Alignment := taCenter;
   lblConexion := Lbl;
 
-  pnlCapturarPeso := CrearBoton(pnlRegistro, YPos, CREG_PAD + 84,
-    (InnerW - 84 - 6) div 2, 30, 'Cap. peso', CLR_PRIMARY, CLR_WHITE, 0, @CapturarPesoClick);
+  pnlCapturarPeso := CrearBoton(pnlRegistro, YPos, CREG_PAD + 88,
+    InnerW - 88 - 8, 30, 'Capturar peso', CLR_PRIMARY, CLR_WHITE, 0, @CapturarPesoClick);
   pnlCapturarPeso.Enabled := False;
 
-  pnlCapturarTara := CrearBoton(pnlRegistro, YPos, CREG_PAD + 84 + (InnerW - 84 - 6) div 2 + 6,
-    (InnerW - 84 - 6) div 2, 30, 'Cap. tara', CLR_INFO, CLR_WHITE, 0, @CapturarTaraClick);
-  pnlCapturarTara.Enabled := False;
-  YPos := YPos + 30 + 18;
+  Lbl := TLabel.Create(pnlRegistro);
+  Lbl.Parent := pnlRegistro;
+  Lbl.SetBounds(CREG_PAD, YPos + 36, InnerW, 16);
+  Lbl.Caption := 'Peso capturado: 0 kg';
+  Lbl.Font.Size := 10;
+  Lbl.Font.Color := CLR_TEXT_SLATE;
+  Lbl.Alignment := taCenter;
+  lblPesoCapturado := Lbl;
 
-  lblBrutoTit := TLabel.Create(pnlRegistro);
-  lblBrutoTit.Parent := pnlRegistro;
-  lblBrutoTit.SetBounds(CREG_PAD + 4, YPos, 100, 13);
-  lblBrutoTit.Caption := 'Peso Bruto';
-  lblBrutoTit.Font.Size := 9;
-  lblBrutoTit.Font.Color := CLR_TEXT_SLATE;
-
-  lblTaraTit := TLabel.Create(pnlRegistro);
-  lblTaraTit.Parent := pnlRegistro;
-  lblTaraTit.SetBounds(CREG_PAD + 140, YPos, 90, 13);
-  lblTaraTit.Caption := 'Peso tara';
-  lblTaraTit.Font.Size := 9;
-  lblTaraTit.Font.Color := CLR_TEXT_SLATE;
-
-  lblNetoTit := TLabel.Create(pnlRegistro);
-  lblNetoTit.Parent := pnlRegistro;
-  lblNetoTit.SetBounds(CREG_PAD + 276, YPos, 90, 13);
-  lblNetoTit.Caption := 'Peso Neto';
-  lblNetoTit.Font.Size := 9;
-  lblNetoTit.Font.Color := CLR_TEXT_SLATE;
-  YPos := YPos + 16;
-
-  po := TPanel.Create(pnlRegistro);
-  po.Parent := pnlRegistro;
-  po.SetBounds(CREG_PAD, YPos, 120, 32);
-  po.BevelOuter := bvNone;
-  po.Color := CLR_BORDER;
-  pnlValBruto := po;
-  pi := TPanel.Create(po);
-  pi.Parent := po;
-  pi.SetBounds(1, 1, 118, 30);
-  pi.BevelOuter := bvNone;
-  pi.Color := CLR_WHITE;
-  pi.BorderWidth := 4;
-  lblValBruto := TLabel.Create(pi);
-  lblValBruto.Parent := pi;
-  lblValBruto.Align := alClient;
-  lblValBruto.Alignment := taCenter;
-  lblValBruto.Layout := tlCenter;
-  lblValBruto.Caption := '0';
-  lblValBruto.Font.Size := 11;
-  lblValBruto.Font.Style := [fsBold];
-  lblValBruto.Font.Color := CLR_TEXT_HEADING;
-
-  po := TPanel.Create(pnlRegistro);
-  po.Parent := pnlRegistro;
-  po.SetBounds(CREG_PAD + 126, YPos, 120, 32);
-  po.BevelOuter := bvNone;
-  po.Color := CLR_BORDER;
-  pnlValTara := po;
-  pi := TPanel.Create(po);
-  pi.Parent := po;
-  pi.SetBounds(1, 1, 118, 30);
-  pi.BevelOuter := bvNone;
-  pi.Color := CLR_WHITE;
-  pi.BorderWidth := 4;
-  lblValTara := TLabel.Create(pi);
-  lblValTara.Parent := pi;
-  lblValTara.Align := alClient;
-  lblValTara.Alignment := taCenter;
-  lblValTara.Layout := tlCenter;
-  lblValTara.Caption := '0';
-  lblValTara.Font.Size := 11;
-  lblValTara.Font.Style := [fsBold];
-  lblValTara.Font.Color := CLR_TEXT_HEADING;
-
-  po := TPanel.Create(pnlRegistro);
-  po.Parent := pnlRegistro;
-  po.SetBounds(CREG_PAD + 252, YPos, InnerW - 252, 32);
-  po.BevelOuter := bvNone;
-  po.Color := CLR_BORDER;
-  pnlValNeto := po;
-  pi := TPanel.Create(po);
-  pi.Parent := po;
-  pi.SetBounds(1, 1, InnerW - 254, 30);
-  pi.BevelOuter := bvNone;
-  pi.Color := CLR_WHITE;
-  pi.BorderWidth := 4;
-  lblValNeto := TLabel.Create(pi);
-  lblValNeto.Parent := pi;
-  lblValNeto.Align := alClient;
-  lblValNeto.Alignment := taCenter;
-  lblValNeto.Layout := tlCenter;
-  lblValNeto.Caption := '0';
-  lblValNeto.Font.Size := 11;
-  lblValNeto.Font.Style := [fsBold];
-  lblValNeto.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 32 + 16;
-
-  pnlEnviar := CrearBoton(pnlRegistro, YPos, CREG_PAD, InnerW, 44,
-    'ENVIAR PESO', CLR_PRIMARY, CLR_WHITE, 0, @EnviarPesoClick);
+  pnlEnviar := CrearBoton(pnlRegistro, YPos + 56, CREG_PAD, InnerW, 36,
+    'Enviar a la web', CLR_SUCCESS, CLR_WHITE, 0, @EnviarPesoClick);
+  pnlEnviar.Enabled := False;
 
   // ── Timers ─────────────────────────────────────────────────────
   TimerLectura := TTimer.Create(Self);
@@ -427,7 +329,6 @@ begin
   OnShow := @FormShowHandler;
   OnResize := @FormResize;
 
-  ActualizarResumenPesos;
   ActualizarEstadoSync;
   AjustarLayout;
 end;
@@ -532,13 +433,11 @@ end;
 procedure TfrmPesajeIntegrado.AjustarLayout;
 const
   CARD_W = 460;
-  CARD_H = 430;
-  DISP_H = 110;
-  ROW_H  = 32;
-  BOX_H  = 72;
-  BTN_H  = 46;
+  CARD_H = 380;
+  DISP_H = 120;
+  ROW_H  = 40;
 var
-  W, H, P, Gap, InnerW, YPos, BtnW, BoxW, RowY: Integer;
+  W, H, P, Gap, InnerW, YPos, BtnW, RowY: Integer;
   Lbl: TLabel;
 begin
   if (pnlMedio = nil) or (pnlRegistroCard = nil) or (pnlRegistro = nil) then Exit;
@@ -564,71 +463,50 @@ begin
   end;
   if pnlSep1 <> nil then begin pnlSep1.SetBounds(P, YPos, InnerW, 1); YPos := YPos + 10; end;
 
-  // ── Display compacto ──
+  // ── Display ──
   if pnlDisplay <> nil then
   begin
     pnlDisplay.SetBounds(P, YPos, InnerW, DISP_H);
     if pnlDisplay.ControlCount > 0 then
       TPanel(pnlDisplay.Controls[0]).SetBounds(2, 2, InnerW - 4, DISP_H - 4);
     if lblPesoDisplay <> nil then
-      lblPesoDisplay.Font.Height := -40;
+      lblPesoDisplay.Font.Height := -42;
     YPos := YPos + DISP_H + 12;
   end;
   if pnlSep2 <> nil then begin pnlSep2.SetBounds(P, YPos, InnerW, 1); YPos := YPos + 10; end;
 
-  // ── Fila conexion: switch + Cap. peso + Cap. tara ──
+  // ── Fila conexion: switch + boton Capturar peso ──
   RowY := YPos;
   if pnlSwitchConectar <> nil then
   begin
-    pnlSwitchConectar.SetBounds(P, RowY, 64, ROW_H);
+    pnlSwitchConectar.SetBounds(P, RowY, 72, ROW_H);
     if lblConexion <> nil then
     begin
-      lblConexion.SetBounds(P, RowY + ROW_H, 64, 14);
+      lblConexion.SetBounds(P, RowY + ROW_H, 72, 14);
       lblConexion.Font.Size := 9;
     end;
   end;
-  BtnW := (InnerW - 64 - Gap * 2) div 2;
-  if pnlCapturarPeso <> nil then pnlCapturarPeso.SetBounds(P + 64 + Gap, RowY, BtnW, ROW_H);
-  if pnlCapturarTara <> nil then
-    pnlCapturarTara.SetBounds(P + 64 + Gap + BtnW + Gap, RowY, InnerW - 64 - Gap * 2 - BtnW, ROW_H);
+  BtnW := InnerW - 72 - Gap;
+  if pnlCapturarPeso <> nil then pnlCapturarPeso.SetBounds(P + 72 + Gap, RowY, BtnW, ROW_H);
+  Lbl := nil;
   if (pnlCapturarPeso <> nil) and (pnlCapturarPeso.ControlCount > 0) then
-    TLabel(pnlCapturarPeso.Controls[0]).Font.Size := 11;
-  if (pnlCapturarTara <> nil) and (pnlCapturarTara.ControlCount > 0) then
-    TLabel(pnlCapturarTara.Controls[0]).Font.Size := 11;
-  YPos := RowY + ROW_H + 22;
+    Lbl := TLabel(pnlCapturarPeso.Controls[0]);
+  if Lbl <> nil then
+    Lbl.Font.Size := 13;
+  YPos := RowY + ROW_H + 10;
 
-  // ── Cuadros Peso Bruto | Peso tara | Peso Neto ──
-  if (pnlValBruto <> nil) and (pnlValTara <> nil) and (pnlValNeto <> nil) then
+  // ── Peso capturado ──
+  if lblPesoCapturado <> nil then
   begin
-    BoxW := (InnerW - Gap * 2) div 3;
-
-    if lblBrutoTit <> nil then lblBrutoTit.SetBounds(P + 4, YPos, BoxW - 4, 16);
-    if lblTaraTit <> nil then lblTaraTit.SetBounds(P + BoxW + Gap + 4, YPos, BoxW - 4, 16);
-    if lblNetoTit <> nil then lblNetoTit.SetBounds(P + (BoxW + Gap) * 2 + 4, YPos, BoxW - 4, 16);
-    if lblBrutoTit <> nil then lblBrutoTit.Font.Size := 9;
-    if lblTaraTit <> nil then lblTaraTit.Font.Size := 9;
-    if lblNetoTit <> nil then lblNetoTit.Font.Size := 9;
-    YPos := YPos + 18;
-
-    pnlValBruto.SetBounds(P, YPos, BoxW, BOX_H);
-    pnlValTara.SetBounds(P + BoxW + Gap, YPos, BoxW, BOX_H);
-    pnlValNeto.SetBounds(P + (BoxW + Gap) * 2, YPos, BoxW, BOX_H);
-
-    if pnlValBruto.ControlCount > 0 then TPanel(pnlValBruto.Controls[0]).SetBounds(1, 1, BoxW - 2, BOX_H - 2);
-    if pnlValTara.ControlCount > 0 then TPanel(pnlValTara.Controls[0]).SetBounds(1, 1, BoxW - 2, BOX_H - 2);
-    if pnlValNeto.ControlCount > 0 then TPanel(pnlValNeto.Controls[0]).SetBounds(1, 1, BoxW - 2, BOX_H - 2);
-
-    if lblValBruto <> nil then lblValBruto.Font.Size := 22;
-    if lblValTara <> nil then lblValTara.Font.Size := 22;
-    if lblValNeto <> nil then lblValNeto.Font.Size := 22;
-
-    YPos := YPos + BOX_H + 16;
+    lblPesoCapturado.SetBounds(P, YPos, InnerW, 18);
+    lblPesoCapturado.Font.Size := 10;
+    YPos := YPos + 22;
   end;
 
-  // ── Boton ENVIAR ──
+  // ── Boton Enviar a la web ──
   if pnlEnviar <> nil then
   begin
-    pnlEnviar.SetBounds(P, YPos, InnerW, BTN_H);
+    pnlEnviar.SetBounds(P, YPos, InnerW, 46);
     Lbl := nil;
     if pnlEnviar.ControlCount > 0 then
       Lbl := TLabel(pnlEnviar.Controls[0]);
@@ -811,6 +689,13 @@ end;
 
 // ══════════════════════════════════════════════════════════════════
 // Balanza (lectura real del puerto configurado en config_balanza)
+//
+// NOTA: La balanza fisica aun no esta disponible. Mientras tanto este
+// modulo queda operativo en MODO PRUEBA (pesos simulados). Cuando
+// llegue la maquina real, probar la lectura por puerto serie
+// (DM.LeerPuertoSerial) con la trama real y quitar/ajustar la
+// simulacion marcada con "MODO PRUEBA" en SwitchConectarClick y
+// TimerLecturaTimer.
 // ══════════════════════════════════════════════════════════════════
 
 procedure TfrmPesajeIntegrado.SwitchConectarPaint(Sender: TObject);
@@ -850,9 +735,11 @@ begin
     TimerLectura.Enabled := False;
     DM.DesconectarSerial;
     FConectado := False;
+    FModoPrueba := False;
     pnlCapturarPeso.Enabled := False;
-    pnlCapturarTara.Enabled := False;
+    if lblConexion <> nil then lblConexion.Caption := 'Conexion';
     pnlSwitchConectar.Invalidate;
+    if SyncSvc <> nil then SyncSvc.EnviarPesoVivo(0);
     Exit;
   end;
 
@@ -862,7 +749,14 @@ begin
   try
     if Q.EOF then
     begin
-      ShowMessage('No hay configuracion de balanza. Configurela en el sistema completo.');
+      // MODO PRUEBA: no hay balanza configurada, activamos simulacion
+      FConectado := True;
+      FModoPrueba := True;
+      pnlCapturarPeso.Enabled := True;
+      TimerLectura.Enabled := True;
+      if lblConexion <> nil then lblConexion.Caption := 'Prueba';
+      pnlSwitchConectar.Invalidate;
+      ShowMessage('No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.');
       Exit;
     end;
     Puerto := Q.Fields[0].AsString;
@@ -882,14 +776,20 @@ begin
   if DM.ConectarSerial(Puerto, Baud, Bits, ParidadChar, Stop) then
   begin
     FConectado := True;
+    FModoPrueba := False;
     pnlCapturarPeso.Enabled := True;
-    pnlCapturarTara.Enabled := True;
     TimerLectura.Enabled := True;
   end
   else
   begin
-    FConectado := False;
-    ShowMessage('No se pudo conectar al puerto ' + Puerto);
+    // MODO PRUEBA: fallo la conexion real (aun no tenemos la balanza)
+    FConectado := True;
+    FModoPrueba := True;
+    pnlCapturarPeso.Enabled := True;
+    TimerLectura.Enabled := True;
+    if lblConexion <> nil then lblConexion.Caption := 'Prueba';
+    ShowMessage('No se pudo conectar al puerto ' + Puerto +
+      '. Se activa MODO PRUEBA con pesos simulados.');
   end;
   pnlSwitchConectar.Invalidate;
 end;
@@ -897,14 +797,24 @@ end;
 procedure TfrmPesajeIntegrado.TimerLecturaTimer(Sender: TObject);
 var
   Trama: string;
+  PesoSimulado: Integer;
 begin
   if not FConectado then Exit;
+
+  // MODO PRUEBA: aun no disponemos de la balanza fisica, se generan
+  // pesos simulados para probar el flujo completo de captura/envio.
+  if FModoPrueba then
+  begin
+    PesoSimulado := Random(4001) + 1000;
+    lblPesoDisplay.Caption := IntToStr(PesoSimulado) + ' kg';
+    Exit;
+  end;
+
   if not DM.PuertoConectado then
   begin
     FConectado := False;
     TimerLectura.Enabled := False;
     pnlCapturarPeso.Enabled := False;
-    pnlCapturarTara.Enabled := False;
     pnlSwitchConectar.Invalidate;
     Exit;
   end;
@@ -955,88 +865,40 @@ begin
 end;
 
 // ══════════════════════════════════════════════════════════════════
-// Captura de pesos
+// Captura de peso — primero se captura el peso del display y luego
+// se envia con el boton "Enviar a la web" (dos pasos).
 // ══════════════════════════════════════════════════════════════════
-
-procedure TfrmPesajeIntegrado.ActualizarResumenPesos;
-begin
-  if lblValBruto <> nil then lblValBruto.Caption := IntToStr(FPesoBruto);
-  if lblValTara <> nil then lblValTara.Caption := IntToStr(FTara);
-  if lblValNeto <> nil then lblValNeto.Caption := IntToStr(FPesoNeto);
-end;
 
 procedure TfrmPesajeIntegrado.CapturarPesoClick(Sender: TObject);
+var
+  Peso: Integer;
 begin
   if not FConectado then
   begin
     ShowMessage('Conecte la balanza primero');
     Exit;
   end;
-  FPesoBruto := PesoDesdeDisplay(lblPesoDisplay.Caption);
-  if FPesoBruto <= 0 then
+  Peso := PesoDesdeDisplay(lblPesoDisplay.Caption);
+  if Peso <= 0 then
   begin
     ShowMessage('Peso invalido');
     Exit;
   end;
-  FPesoNeto := FPesoBruto - FTara;
-  ActualizarResumenPesos;
-end;
-
-procedure TfrmPesajeIntegrado.CapturarTaraClick(Sender: TObject);
-begin
-  if not FConectado then
-  begin
-    ShowMessage('Conecte la balanza primero');
-    Exit;
-  end;
-  FTara := PesoDesdeDisplay(lblPesoDisplay.Caption);
-  if FTara <= 0 then
-  begin
-    ShowMessage('Peso invalido');
-    Exit;
-  end;
-  FPesoNeto := FPesoBruto - FTara;
-  ActualizarResumenPesos;
-end;
-
-// ══════════════════════════════════════════════════════════════════
-// Enviar peso — envía únicamente el peso captado a la web
-// ══════════════════════════════════════════════════════════════════
-
-procedure TfrmPesajeIntegrado.Limpiar;
-begin
-  FTara := 0;
-  FPesoBruto := 0;
-  FPesoNeto := 0;
-  lblPesoDisplay.Caption := '0 kg';
-  ActualizarResumenPesos;
+  FPesoCapturado := Peso;
+  if lblPesoCapturado <> nil then
+    lblPesoCapturado.Caption := 'Peso capturado: ' + IntToStr(Peso) + ' kg';
+  if pnlEnviar <> nil then
+    pnlEnviar.Enabled := True;
+  pnlEnviar.Invalidate;
 end;
 
 procedure TfrmPesajeIntegrado.EnviarPesoClick(Sender: TObject);
 begin
-  if FPesoBruto <= 0 then
+  if FPesoCapturado <= 0 then
   begin
-    ShowMessage('Capture el peso bruto primero');
+    ShowMessage('Capture el peso primero');
     Exit;
   end;
-  if FTara <= 0 then
-  begin
-    ShowMessage('Capture la tara primero');
-    Exit;
-  end;
-  if FPesoBruto < FTara then
-  begin
-    ShowMessage('El peso bruto no puede ser menor que la tara');
-    Exit;
-  end;
-
-  FPesoNeto := FPesoBruto - FTara;
-  ActualizarResumenPesos;
-
-  if MessageDlg('Enviar peso',
-    Format('Bruto: %d kg | Tara: %d kg | Neto: %d kg. Enviar a la web?',
-    [FPesoBruto, FTara, FPesoNeto]), mtConfirmation, [mbYes, mbNo], 0) <> mrYes then Exit;
-
   if SyncSvc = nil then
   begin
     ShowMessage('Servicio de sincronizacion no disponible');
@@ -1045,11 +907,8 @@ begin
 
   Screen.Cursor := crHourGlass;
   try
-    if SyncSvc.EnviarPeso(FPesoBruto, FTara) then
-    begin
-      ShowMessage('Peso enviado correctamente.');
-      Limpiar;
-    end
+    if SyncSvc.EnviarPesoVivo(FPesoCapturado) then
+      ShowMessage('Peso ' + IntToStr(FPesoCapturado) + ' kg enviado a la web.')
     else
       ShowMessage('No se pudo enviar el peso. Revise la conexion con el sistema web.');
   finally

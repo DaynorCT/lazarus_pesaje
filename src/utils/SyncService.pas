@@ -41,6 +41,7 @@ type
     function SincronizarCatalogos: Boolean;
     function PushPesajesPendientes: Boolean;
     function EnviarPeso(Bruto, Tara: Integer): Boolean;
+    function EnviarPesoVivo(Peso: Integer): Boolean;
     property Conectado: Boolean read FConectado;
     property Pendientes: Integer read FPendientes;
     property UltimaSync: string read FUltimaSync;
@@ -745,6 +746,40 @@ begin
     FConectado := Codigo <> 0;
     FUltimoError := 'Envio fallo (' + IntToStr(Codigo) + ') ' + Copy(Respuesta, 1, 150);
   end;
+end;
+
+// ══════════════════════════════════════════════════════════════════
+// Peso en vivo — envía el peso actual de la balanza a la web para
+// que el navegador lo muestre en la card "Registro de Peso".
+// ══════════════════════════════════════════════════════════════════
+
+function TSyncService.EnviarPesoVivo(Peso: Integer): Boolean;
+var
+  Obj: TJSONObject;
+  Cuerpo: string;
+  Respuesta: string;
+  Codigo: Integer;
+begin
+  Result := False;
+  if not AsegurarToken then Exit;
+
+  Obj := TJSONObject.Create;
+  try
+    Obj.Add('peso', Peso);
+    Cuerpo := Obj.AsJSON;
+  finally
+    Obj.Free;
+  end;
+
+  Codigo := HttpRequest('POST', '/api/pesajes/ultimo-peso', Cuerpo, Respuesta, nil);
+  if Codigo = 401 then
+  begin
+    FAccessToken := '';
+    if AsegurarToken then
+      Codigo := HttpRequest('POST', '/api/pesajes/ultimo-peso', Cuerpo, Respuesta, nil);
+  end;
+
+  Result := Codigo = 200;
 end;
 
 // ══════════════════════════════════════════════════════════════════
