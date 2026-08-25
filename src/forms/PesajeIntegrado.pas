@@ -530,43 +530,49 @@ begin
 end;
 
 procedure TfrmPesajeIntegrado.AjustarLayout;
+const
+  CARD_W = 460;
+  CARD_H = 430;
+  DISP_H = 110;
+  ROW_H  = 32;
+  BOX_H  = 72;
+  BTN_H  = 46;
 var
-  W, H, P, YPos, InnerW, Gap, DisplayH, BoxH, BtnH, BtnW, BoxW, RowY: Integer;
+  W, H, P, Gap, InnerW, YPos, BtnW, BoxW, RowY: Integer;
+  Lbl: TLabel;
 begin
   if (pnlMedio = nil) or (pnlRegistroCard = nil) or (pnlRegistro = nil) then Exit;
 
   W := pnlMedio.ClientWidth;
   H := pnlMedio.ClientHeight;
-  if (W < 320) or (H < 260) then Exit;
+  if (W < CARD_W) or (H < CARD_H) then Exit;
 
-  // El card llena todo el area de contenido
-  pnlRegistroCard.SetBounds(0, 0, W, H);
+  // Card compacta y centrada (no llena la ventana)
+  pnlRegistroCard.SetBounds((W - CARD_W) div 2, (H - CARD_H) div 2, CARD_W, CARD_H);
 
   P := 24;
   Gap := 10;
-  InnerW := W - P * 2;
+  InnerW := CARD_W - P * 2;
 
   // ── Titulo ──
-  YPos := 14;
+  YPos := 12;
   if lblRegistroTitle <> nil then
   begin
-    lblRegistroTitle.SetBounds(P, YPos, InnerW, 28);
-    lblRegistroTitle.Font.Size := Max(14, H div 55);
-    YPos := YPos + 28 + 8;
+    lblRegistroTitle.SetBounds(P, YPos, InnerW, 24);
+    lblRegistroTitle.Font.Size := 12;
+    YPos := YPos + 24 + 8;
   end;
   if pnlSep1 <> nil then begin pnlSep1.SetBounds(P, YPos, InnerW, 1); YPos := YPos + 10; end;
 
-  // ── Display grande (rellena espacio) ──
-  DisplayH := H * 34 div 100;
-  if DisplayH < 120 then DisplayH := 120;
+  // ── Display compacto ──
   if pnlDisplay <> nil then
   begin
-    pnlDisplay.SetBounds(P, YPos, InnerW, DisplayH);
+    pnlDisplay.SetBounds(P, YPos, InnerW, DISP_H);
     if pnlDisplay.ControlCount > 0 then
-      TPanel(pnlDisplay.Controls[0]).SetBounds(2, 2, InnerW - 4, DisplayH - 4);
+      TPanel(pnlDisplay.Controls[0]).SetBounds(2, 2, InnerW - 4, DISP_H - 4);
     if lblPesoDisplay <> nil then
-      lblPesoDisplay.Font.Height := -Max(28, DisplayH * 45 div 100);
-    YPos := YPos + DisplayH + 12;
+      lblPesoDisplay.Font.Height := -40;
+    YPos := YPos + DISP_H + 12;
   end;
   if pnlSep2 <> nil then begin pnlSep2.SetBounds(P, YPos, InnerW, 1); YPos := YPos + 10; end;
 
@@ -574,63 +580,60 @@ begin
   RowY := YPos;
   if pnlSwitchConectar <> nil then
   begin
-    pnlSwitchConectar.SetBounds(P, RowY, 88, 44);
+    pnlSwitchConectar.SetBounds(P, RowY, 64, ROW_H);
     if lblConexion <> nil then
     begin
-      lblConexion.SetBounds(P, RowY + 44, 88, 16);
-      lblConexion.Font.Size := Max(10, H div 130);
+      lblConexion.SetBounds(P, RowY + ROW_H, 64, 14);
+      lblConexion.Font.Size := 9;
     end;
   end;
-  BtnW := (InnerW - 88 - Gap * 2) div 2;
-  if BtnW < 130 then BtnW := 130;
-  if pnlCapturarPeso <> nil then pnlCapturarPeso.SetBounds(P + 88 + Gap, RowY, BtnW, 44);
+  BtnW := (InnerW - 64 - Gap * 2) div 2;
+  if pnlCapturarPeso <> nil then pnlCapturarPeso.SetBounds(P + 64 + Gap, RowY, BtnW, ROW_H);
   if pnlCapturarTara <> nil then
-    pnlCapturarTara.SetBounds(P + 88 + Gap + BtnW + Gap, RowY, InnerW - 88 - Gap * 2 - BtnW, 44);
+    pnlCapturarTara.SetBounds(P + 64 + Gap + BtnW + Gap, RowY, InnerW - 64 - Gap * 2 - BtnW, ROW_H);
   if (pnlCapturarPeso <> nil) and (pnlCapturarPeso.ControlCount > 0) then
-    TLabel(pnlCapturarPeso.Controls[0]).Font.Size := Max(12, H div 80);
+    TLabel(pnlCapturarPeso.Controls[0]).Font.Size := 11;
   if (pnlCapturarTara <> nil) and (pnlCapturarTara.ControlCount > 0) then
-    TLabel(pnlCapturarTara.Controls[0]).Font.Size := Max(12, H div 80);
-  YPos := RowY + 44 + 24;
+    TLabel(pnlCapturarTara.Controls[0]).Font.Size := 11;
+  YPos := RowY + ROW_H + 22;
 
   // ── Cuadros Peso Bruto | Peso tara | Peso Neto ──
   if (pnlValBruto <> nil) and (pnlValTara <> nil) and (pnlValNeto <> nil) then
   begin
-    BoxH := H * 26 div 100;
-    if BoxH < 80 then BoxH := 80;
     BoxW := (InnerW - Gap * 2) div 3;
-    if BoxW < 120 then BoxW := 120;
 
-    if lblBrutoTit <> nil then lblBrutoTit.SetBounds(P + 4, YPos, BoxW - 4, 18);
-    if lblTaraTit <> nil then lblTaraTit.SetBounds(P + BoxW + Gap + 4, YPos, BoxW - 4, 18);
-    if lblNetoTit <> nil then lblNetoTit.SetBounds(P + (BoxW + Gap) * 2 + 4, YPos, BoxW - 4, 18);
-    if lblBrutoTit <> nil then lblBrutoTit.Font.Size := Max(11, H div 110);
-    if lblTaraTit <> nil then lblTaraTit.Font.Size := Max(11, H div 110);
-    if lblNetoTit <> nil then lblNetoTit.Font.Size := Max(11, H div 110);
-    YPos := YPos + 22;
+    if lblBrutoTit <> nil then lblBrutoTit.SetBounds(P + 4, YPos, BoxW - 4, 16);
+    if lblTaraTit <> nil then lblTaraTit.SetBounds(P + BoxW + Gap + 4, YPos, BoxW - 4, 16);
+    if lblNetoTit <> nil then lblNetoTit.SetBounds(P + (BoxW + Gap) * 2 + 4, YPos, BoxW - 4, 16);
+    if lblBrutoTit <> nil then lblBrutoTit.Font.Size := 9;
+    if lblTaraTit <> nil then lblTaraTit.Font.Size := 9;
+    if lblNetoTit <> nil then lblNetoTit.Font.Size := 9;
+    YPos := YPos + 18;
 
-    pnlValBruto.SetBounds(P, YPos, BoxW, BoxH);
-    pnlValTara.SetBounds(P + BoxW + Gap, YPos, BoxW, BoxH);
-    pnlValNeto.SetBounds(P + (BoxW + Gap) * 2, YPos, BoxW, BoxH);
+    pnlValBruto.SetBounds(P, YPos, BoxW, BOX_H);
+    pnlValTara.SetBounds(P + BoxW + Gap, YPos, BoxW, BOX_H);
+    pnlValNeto.SetBounds(P + (BoxW + Gap) * 2, YPos, BoxW, BOX_H);
 
-    if pnlValBruto.ControlCount > 0 then TPanel(pnlValBruto.Controls[0]).SetBounds(1, 1, BoxW - 2, BoxH - 2);
-    if pnlValTara.ControlCount > 0 then TPanel(pnlValTara.Controls[0]).SetBounds(1, 1, BoxW - 2, BoxH - 2);
-    if pnlValNeto.ControlCount > 0 then TPanel(pnlValNeto.Controls[0]).SetBounds(1, 1, BoxW - 2, BoxH - 2);
+    if pnlValBruto.ControlCount > 0 then TPanel(pnlValBruto.Controls[0]).SetBounds(1, 1, BoxW - 2, BOX_H - 2);
+    if pnlValTara.ControlCount > 0 then TPanel(pnlValTara.Controls[0]).SetBounds(1, 1, BoxW - 2, BOX_H - 2);
+    if pnlValNeto.ControlCount > 0 then TPanel(pnlValNeto.Controls[0]).SetBounds(1, 1, BoxW - 2, BOX_H - 2);
 
-    if lblValBruto <> nil then lblValBruto.Font.Size := Max(13, BoxH * 30 div 100);
-    if lblValTara <> nil then lblValTara.Font.Size := Max(13, BoxH * 30 div 100);
-    if lblValNeto <> nil then lblValNeto.Font.Size := Max(13, BoxH * 30 div 100);
+    if lblValBruto <> nil then lblValBruto.Font.Size := 22;
+    if lblValTara <> nil then lblValTara.Font.Size := 22;
+    if lblValNeto <> nil then lblValNeto.Font.Size := 22;
 
-    YPos := YPos + BoxH + 12;
+    YPos := YPos + BOX_H + 16;
   end;
 
-  // ── Boton ENVIAR (rellena el espacio restante) ──
+  // ── Boton ENVIAR ──
   if pnlEnviar <> nil then
   begin
-    BtnH := H - YPos - P;
-    if BtnH < 52 then BtnH := 52;
-    pnlEnviar.SetBounds(P, YPos, InnerW, BtnH);
+    pnlEnviar.SetBounds(P, YPos, InnerW, BTN_H);
+    Lbl := nil;
     if pnlEnviar.ControlCount > 0 then
-      TLabel(pnlEnviar.Controls[0]).Font.Size := Max(14, BtnH * 28 div 100);
+      Lbl := TLabel(pnlEnviar.Controls[0]);
+    if Lbl <> nil then
+      Lbl.Font.Size := 13;
   end;
 end;
 
