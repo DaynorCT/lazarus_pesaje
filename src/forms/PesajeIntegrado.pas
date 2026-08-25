@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, sqldb, DataModule, Utils, Theme, LoginForm, SyncService, LMessages;
+  ExtCtrls, sqldb, DataModule, Utils, Theme, LoginForm, SyncService, LMessages,
+  ConfigBalanzaFrame;
 
 type
   { TfrmPesajeIntegrado }
@@ -69,6 +70,7 @@ type
     procedure SincronizarClick(Sender: TObject);
     procedure EngranajeClick(Sender: TObject);
     procedure MenuSistemaCompletoClick(Sender: TObject);
+    procedure MenuConfigurarBalanzaClick(Sender: TObject);
     procedure MenuSalirClick(Sender: TObject);
     procedure CerrarMenuEngranaje;
     procedure ContentClick(Sender: TObject);
@@ -192,7 +194,7 @@ begin
   FMenuEngranaje.BevelOuter := bvNone;
   FMenuEngranaje.BorderStyle := bsSingle;
   FMenuEngranaje.Width := 230;
-  FMenuEngranaje.Height := 60;
+  FMenuEngranaje.Height := 96;
 
   pnlSincronizar := CrearBoton(pnlTop, 14, pnlTop.ClientWidth - 242, 170, 36,
     'Sincronizar ahora', CLR_PRIMARY, CLR_WHITE, 0, @SincronizarClick);
@@ -614,6 +616,23 @@ begin
   Lbl := TLabel.Create(FMenuEngranaje);
   Lbl.Parent := FMenuEngranaje;
   Lbl.SetBounds(12, YPos, 206, 16);
+  Lbl.Caption := 'Configurar balanza';
+  Lbl.Font.Size := 12;
+  Lbl.Font.Color := CLR_TEXT_HEADING;
+  Lbl.Cursor := crHandPoint;
+  Lbl.OnClick := @MenuConfigurarBalanzaClick;
+  YPos := YPos + 22;
+
+  Sep := TPanel.Create(FMenuEngranaje);
+  Sep.Parent := FMenuEngranaje;
+  Sep.SetBounds(8, YPos, 214, 1);
+  Sep.Color := CLR_BORDER;
+  Sep.BevelOuter := bvNone;
+  YPos := YPos + 8;
+
+  Lbl := TLabel.Create(FMenuEngranaje);
+  Lbl.Parent := FMenuEngranaje;
+  Lbl.SetBounds(12, YPos, 206, 16);
   Lbl.Caption := 'Cerrar sesion';
   Lbl.Font.Size := 12;
   Lbl.Font.Color := CLR_DESTRUCTIVE;
@@ -640,6 +659,29 @@ begin
   if ConfirmarContrasenaActual('Acceso al sistema completo') then
   begin
     ModalResult := mrYes;
+  end;
+end;
+
+procedure TfrmPesajeIntegrado.MenuConfigurarBalanzaClick(Sender: TObject);
+var
+  F: TForm;
+  Frame: TFrameConfigBalanza;
+begin
+  CerrarMenuEngranaje;
+  F := TForm.Create(nil);
+  try
+    F.Caption := 'Configuracion balanza RS232';
+    F.Width := 900;
+    F.Height := 700;
+    F.Position := poMainFormCenter;
+    F.BorderStyle := bsDialog;
+    F.Color := CLR_BG;
+    Frame := TFrameConfigBalanza.Create(F);
+    Frame.Parent := F;
+    Frame.Align := alClient;
+    F.ShowModal;
+  finally
+    F.Free;
   end;
 end;
 
