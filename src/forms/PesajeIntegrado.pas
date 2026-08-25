@@ -161,7 +161,7 @@ begin
   // ── Botón engranaje (cambio de modo / cerrar sesión) ───────────
   pnlEngranaje := TPanel.Create(pnlTop);
   pnlEngranaje.Parent := pnlTop;
-  pnlEngranaje.SetBounds(0, 12, 40, 40);
+  pnlEngranaje.SetBounds(pnlTop.ClientWidth - 64, 12, 40, 40);
   pnlEngranaje.BevelOuter := bvNone;
   pnlEngranaje.Color := CLR_CARD;
   pnlEngranaje.Cursor := crHandPoint;
@@ -192,7 +192,7 @@ begin
   FMenuEngranaje.Width := 230;
   FMenuEngranaje.Height := 60;
 
-  pnlSincronizar := CrearBoton(pnlTop, 14, 0, 170, 36,
+  pnlSincronizar := CrearBoton(pnlTop, 14, pnlTop.ClientWidth - 242, 170, 36,
     'Sincronizar ahora', CLR_PRIMARY, CLR_WHITE, 0, @SincronizarClick);
   pnlSincronizar.Anchors := [akTop, akRight];
   pnlSincronizar.BorderSpacing.Right := 24 + 40 + 8;
@@ -201,7 +201,7 @@ begin
   lblEstado.Parent := pnlTop;
   lblEstado.Anchors := [akTop, akRight];
   lblEstado.BorderSpacing.Right := 24 + 40 + 8 + 170 + 12;
-  lblEstado.SetBounds(0, 0, 420, 64);
+  lblEstado.SetBounds(pnlTop.ClientWidth - 674, 0, 420, 64);
   lblEstado.Alignment := taRightJustify;
   lblEstado.Layout := tlCenter;
   lblEstado.AutoSize := False;

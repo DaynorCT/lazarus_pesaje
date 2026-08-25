@@ -69,6 +69,7 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
+        <TopLine Value="25"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit>
@@ -239,7 +240,7 @@
       <Unit>
         <Filename Value="../../Downloads/PesajeFrame.pas"/>
         <EditorIndex Value="13"/>
-        <UsageCount Value="99"/>
+        <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -247,7 +248,7 @@
         <HasResources Value="True"/>
         <EditorIndex Value="11"/>
         <CursorPos X="41" Y="17"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -258,7 +259,7 @@
         <EditorIndex Value="12"/>
         <TopLine Value="362"/>
         <CursorPos Y="374"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
