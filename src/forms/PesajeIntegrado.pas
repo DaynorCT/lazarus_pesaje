@@ -638,7 +638,7 @@ begin
   FMenuEngranaje.Top := pnlTop.Height + 2;
   YPos := 8;
 
-  CrearItem('Acceder al sistema completo', FA_BUILDING, CLR_TEXT_HEADING, @MenuSistemaCompletoClick);
+  CrearItem('Sistema escritorio', FA_BUILDING, CLR_TEXT_HEADING, @MenuSistemaCompletoClick);
 
   Sep := TPanel.Create(FMenuEngranaje);
   Sep.Parent := FMenuEngranaje;

@@ -68,6 +68,8 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
+        <TopLine Value="668"/>
+        <CursorPos X="32" Y="680"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit>
@@ -245,7 +247,7 @@
         <HasResources Value="True"/>
         <EditorIndex Value="11"/>
         <CursorPos X="41" Y="17"/>
-        <UsageCount Value="63"/>
+        <UsageCount Value="66"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -256,7 +258,7 @@
         <EditorIndex Value="12"/>
         <TopLine Value="362"/>
         <CursorPos Y="374"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="44"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
@@ -267,7 +269,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="42"/>
       </Unit>
       <Unit>
         <Filename Value="src/utils/SyncService.pas"/>
@@ -276,7 +278,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="42"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/PesajeIntegrado.pas"/>
@@ -285,7 +287,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="42"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/AppDialog.pas"/>
@@ -294,14 +296,10 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="25"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-        <Caret Line="240" Column="38" TopLine="229"/>
-      </Position>
       <Position>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <Caret Line="251" Column="20" TopLine="229"/>
@@ -417,6 +415,9 @@
       <Position>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <Caret Line="251" Column="20" TopLine="233"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/MainForm.pas"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>

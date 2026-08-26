@@ -591,7 +591,7 @@ begin
   Sep.SetBounds(12, YPos, FUserMenu.Width - 24, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
   YPos := YPos + 8;
 
-  CrearItem('Volver a pesaje', FA_SCALE, CLR_TEXT_HEADING, @VolverPesajeClick);
+  CrearItem('Volver al sistema web', FA_SCALE, CLR_TEXT_HEADING, @VolverPesajeClick);
 
   Sep := TPanel.Create(FUserMenu); Sep.Parent := FUserMenu;
   Sep.SetBounds(12, YPos, FUserMenu.Width - 24, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
@@ -677,7 +677,7 @@ end;
 procedure TfrmMain.VolverPesajeClick(Sender: TObject);
 begin
   CerrarSubmenus;
-  if ConfirmarContrasenaActual('Volver al modo pesaje') then
+  if ConfirmarContrasenaActual('Volver al sistema web') then
   begin
     ModalResult := mrYes;
   end;
