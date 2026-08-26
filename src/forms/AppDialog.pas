@@ -71,31 +71,60 @@ begin
   Lbl.OnClick := AClick;
 end;
 
+// Calcula la altura necesaria para mostrar Txt con WordWrap en un
+// ancho AW (según la fuente del canvas).
+function AlturaMensaje(ACanvas: TCanvas; const Txt: string; AW: Integer): Integer;
+var
+  I, StartIdx: Integer;
+  Linea, Palabra: string;
+  LH: Integer;
+begin
+  LH := ACanvas.TextHeight('Ag');
+  Result := LH;
+  if AW < 10 then AW := 10;
+  Linea := '';
+  StartIdx := 1;
+  I := 1;
+  while I <= Length(Txt) + 1 do
+  begin
+    if (I > Length(Txt)) or (Txt[I] = ' ') then
+    begin
+      Palabra := Copy(Txt, StartIdx, I - StartIdx);
+      StartIdx := I + 1;
+      if Palabra <> '' then
+      begin
+        if (Linea <> '') and (ACanvas.TextWidth(Linea + ' ' + Palabra) > AW) then
+        begin
+          Result := Result + LH;
+          Linea := Palabra;
+        end
+        else if Linea = '' then
+          Linea := Palabra
+        else
+          Linea := Linea + ' ' + Palabra;
+      end;
+    end;
+    Inc(I);
+  end;
+end;
+
 procedure TAppDialogo.Construir(const Titulo, Mensaje: string;
   ATipo: TDialogoTipo; AConfirmar: Boolean; AConPass: Boolean);
 var
   pnlTop, pnlSep: TPanel;
   lblTitulo, lblIcono, lblMsg: TLabel;
   pO, pI: TPanel;
-  H, MsgH: Integer;
+  H, MsgH, BtnY, MsgW: Integer;
 begin
-  H := 200;
-  if AConfirmar then H := 210;
-  if AConPass then H := 264;
-  MsgH := 78;
-  if AConfirmar then MsgH := 92;
-  if AConPass then MsgH := 56;
+  MsgW := D_W - 78;
 
   Caption := '';
   Width := D_W;
-  Height := H;
   Position := poMainFormCenter;
   BorderStyle := bsDialog;
   Color := CLR_BG;
   Constraints.MinWidth := D_W;
   Constraints.MaxWidth := D_W;
-  Constraints.MinHeight := H;
-  Constraints.MaxHeight := H;
 
   pnlTop := TPanel.Create(Self);
   pnlTop.Parent := Self;
@@ -136,7 +165,6 @@ begin
 
   lblMsg := TLabel.Create(Self);
   lblMsg.Parent := Self;
-  lblMsg.SetBounds(58, 62, D_W - 78, MsgH);
   lblMsg.Caption := Mensaje;
   lblMsg.Font.Size := 10;
   lblMsg.Font.Color := CLR_TEXT;
@@ -144,23 +172,31 @@ begin
   lblMsg.Alignment := taLeftJustify;
   lblMsg.Layout := tlTop;
 
+  // Altura del mensaje según su largo (el texto nunca se corta)
+  lblMsg.Canvas.Font := lblMsg.Font;
+  MsgH := AlturaMensaje(lblMsg.Canvas, Mensaje, MsgW) + 6;
+  if MsgH < 22 then MsgH := 22;
+  lblMsg.SetBounds(58, 62, MsgW, MsgH);
+
+  BtnY := 62 + MsgH + 12;
+
   if AConPass then
   begin
     lblPass := TLabel.Create(Self);
     lblPass.Parent := Self;
-    lblPass.SetBounds(58, 122, D_W - 78, 14);
+    lblPass.SetBounds(58, BtnY + 2, MsgW, 14);
     lblPass.Caption := 'Ingrese la contrasena de ' + UsuarioActual.Email;
     lblPass.Font.Size := 9;
     lblPass.Font.Color := CLR_TEXT_SLATE;
 
     pO := TPanel.Create(Self);
     pO.Parent := Self;
-    pO.SetBounds(58, 142, D_W - 78, 38);
+    pO.SetBounds(58, BtnY + 20, MsgW, 38);
     pO.BevelOuter := bvNone;
     pO.Color := CLR_BORDER;
     pI := TPanel.Create(pO);
     pI.Parent := pO;
-    pI.SetBounds(1, 1, D_W - 80, 36);
+    pI.SetBounds(1, 1, MsgW - 2, 36);
     pI.BevelOuter := bvNone;
     pI.Color := CLR_WHITE;
     pI.BorderWidth := 6;
@@ -172,15 +208,24 @@ begin
     edtPass.Font.Color := CLR_TEXT;
     edtPass.Color := CLR_WHITE;
     edtPass.PasswordChar := '*';
+
+    BtnY := BtnY + 20 + 38 + 10;
   end;
+
+  H := BtnY + BTN_H + 12;
+  if H < 150 then H := 150;
+
+  Self.Height := H;
+  Self.Constraints.MinHeight := H;
+  Self.Constraints.MaxHeight := H;
 
   if AConfirmar or AConPass then
   begin
-    CrearBotonC(Self, D_W - 2 * 122, H - 52, 110, 'CANCELAR', CLR_CARD, CLR_PRIMARY, @CancelarClick);
-    CrearBotonC(Self, D_W - 122 - 12, H - 52, 110, 'ACEPTAR', CLR_PRIMARY, CLR_WHITE, @AceptarClick);
+    CrearBotonC(Self, D_W - 2 * 122, BtnY, 110, 'CANCELAR', CLR_CARD, CLR_PRIMARY, @CancelarClick);
+    CrearBotonC(Self, D_W - 122 - 12, BtnY, 110, 'ACEPTAR', CLR_PRIMARY, CLR_WHITE, @AceptarClick);
   end
   else
-    CrearBotonC(Self, (D_W - 110) div 2, H - 52, 110, 'ACEPTAR', CLR_PRIMARY, CLR_WHITE, @AceptarClick);
+    CrearBotonC(Self, (D_W - 110) div 2, BtnY, 110, 'ACEPTAR', CLR_PRIMARY, CLR_WHITE, @AceptarClick);
 end;
 
 procedure TAppDialogo.AceptarClick(Sender: TObject);

@@ -51,6 +51,10 @@ type
     lblEstado: TLabel;
 
     procedure PaintRounded(Sender: TObject);
+    procedure MenuEngranajePaint(Sender: TObject);
+    procedure MenuItemPaint(Sender: TObject);
+    procedure MenuItemMouseEnter(Sender: TObject);
+    procedure MenuItemMouseLeave(Sender: TObject);
     procedure SwitchConectarPaint(Sender: TObject);
     procedure SwitchConectarClick(Sender: TObject);
     procedure CapturarPesoClick(Sender: TObject);
@@ -181,9 +185,10 @@ begin
   FMenuEngranaje.Visible := False;
   FMenuEngranaje.Color := CLR_CARD;
   FMenuEngranaje.BevelOuter := bvNone;
-  FMenuEngranaje.BorderStyle := bsSingle;
-  FMenuEngranaje.Width := 230;
-  FMenuEngranaje.Height := 96;
+  FMenuEngranaje.BorderStyle := bsNone;
+  FMenuEngranaje.OnPaint := @MenuEngranajePaint;
+  FMenuEngranaje.Width := 250;
+  FMenuEngranaje.Height := 158;
 
   pnlSincronizar := CrearBoton(pnlTop, 14, pnlTop.ClientWidth - 242, 170, 36,
     'Sincronizar ahora', CLR_PRIMARY, CLR_WHITE, 0, @SincronizarClick);
@@ -565,9 +570,57 @@ end;
 
 procedure TfrmPesajeIntegrado.EngranajeClick(Sender: TObject);
 var
+  Pnl, Sep: TPanel;
   Lbl: TLabel;
-  Sep: TPanel;
   YPos: Integer;
+
+  function CrearItem(ACaption: string; AIcon: Word; AColor: TColor;
+    AClick: TNotifyEvent): TPanel;
+  var
+    IconLbl: TLabel;
+  begin
+    Result := TPanel.Create(FMenuEngranaje);
+    Result.Parent := FMenuEngranaje;
+    Result.SetBounds(8, YPos, FMenuEngranaje.Width - 16, 40);
+    Result.BevelOuter := bvNone;
+    Result.Color := CLR_CARD;
+    Result.Cursor := crHandPoint;
+    Result.OnPaint := @MenuItemPaint;
+    Result.OnClick := AClick;
+    Result.OnMouseEnter := @MenuItemMouseEnter;
+    Result.OnMouseLeave := @MenuItemMouseLeave;
+
+    IconLbl := TLabel.Create(Result);
+    IconLbl.Parent := Result;
+    IconLbl.SetBounds(14, 0, 26, 40);
+    IconLbl.Alignment := taCenter;
+    IconLbl.Layout := tlCenter;
+    IconLbl.Caption := FAIconoStr(AIcon, '•');
+    IconLbl.Font.Size := 13;
+    IconLbl.Font.Name := FA_FONT_NAME;
+    IconLbl.Font.Color := CLR_PRIMARY;
+    IconLbl.Transparent := True;
+    IconLbl.Cursor := crHandPoint;
+    IconLbl.OnClick := AClick;
+    IconLbl.OnMouseEnter := @MenuItemMouseEnter;
+    IconLbl.OnMouseLeave := @MenuItemMouseLeave;
+
+    Lbl := TLabel.Create(Result);
+    Lbl.Parent := Result;
+    Lbl.SetBounds(46, 0, Result.Width - 52, 40);
+    Lbl.Alignment := taLeftJustify;
+    Lbl.Layout := tlCenter;
+    Lbl.Caption := ACaption;
+    Lbl.Font.Size := 12;
+    Lbl.Font.Color := AColor;
+    Lbl.Transparent := True;
+    Lbl.Cursor := crHandPoint;
+    Lbl.OnClick := AClick;
+    Lbl.OnMouseEnter := @MenuItemMouseEnter;
+    Lbl.OnMouseLeave := @MenuItemMouseLeave;
+    YPos := YPos + 44;
+  end;
+
 begin
   if FMenuEngranaje.Visible then
   begin
@@ -581,50 +634,79 @@ begin
   FMenuEngranaje.Top := pnlTop.Height + 2;
   YPos := 8;
 
-  Lbl := TLabel.Create(FMenuEngranaje);
-  Lbl.Parent := FMenuEngranaje;
-  Lbl.SetBounds(12, YPos, 206, 16);
-  Lbl.Caption := 'Acceder al sistema completo';
-  Lbl.Font.Size := 12;
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.Cursor := crHandPoint;
-  Lbl.OnClick := @MenuSistemaCompletoClick;
-  YPos := YPos + 22;
+  CrearItem('Acceder al sistema completo', FA_BUILDING, CLR_TEXT_HEADING, @MenuSistemaCompletoClick);
 
   Sep := TPanel.Create(FMenuEngranaje);
   Sep.Parent := FMenuEngranaje;
-  Sep.SetBounds(8, YPos, 214, 1);
+  Sep.SetBounds(16, YPos, FMenuEngranaje.Width - 32, 1);
   Sep.Color := CLR_BORDER;
   Sep.BevelOuter := bvNone;
   YPos := YPos + 8;
 
-  Lbl := TLabel.Create(FMenuEngranaje);
-  Lbl.Parent := FMenuEngranaje;
-  Lbl.SetBounds(12, YPos, 206, 16);
-  Lbl.Caption := 'Configurar balanza';
-  Lbl.Font.Size := 12;
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.Cursor := crHandPoint;
-  Lbl.OnClick := @MenuConfigurarBalanzaClick;
-  YPos := YPos + 22;
+  CrearItem('Configurar balanza', FA_SCALE, CLR_TEXT_HEADING, @MenuConfigurarBalanzaClick);
 
   Sep := TPanel.Create(FMenuEngranaje);
   Sep.Parent := FMenuEngranaje;
-  Sep.SetBounds(8, YPos, 214, 1);
+  Sep.SetBounds(16, YPos, FMenuEngranaje.Width - 32, 1);
   Sep.Color := CLR_BORDER;
   Sep.BevelOuter := bvNone;
   YPos := YPos + 8;
 
-  Lbl := TLabel.Create(FMenuEngranaje);
-  Lbl.Parent := FMenuEngranaje;
-  Lbl.SetBounds(12, YPos, 206, 16);
-  Lbl.Caption := 'Cerrar sesion';
-  Lbl.Font.Size := 12;
-  Lbl.Font.Color := CLR_DESTRUCTIVE;
-  Lbl.Cursor := crHandPoint;
-  Lbl.OnClick := @MenuSalirClick;
+  CrearItem('Cerrar sesion', FA_TIMES, CLR_DESTRUCTIVE, @MenuSalirClick);
 
   FMenuEngranaje.Visible := True;
+end;
+
+procedure TfrmPesajeIntegrado.MenuEngranajePaint(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.Pen.Color := CLR_BORDER;
+  Pnl.Canvas.Pen.Width := 1;
+  Pnl.Canvas.Pen.Style := psSolid;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width - 1, Pnl.Height - 1, 10, 10);
+end;
+
+procedure TfrmPesajeIntegrado.MenuItemPaint(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+end;
+
+procedure TfrmPesajeIntegrado.MenuItemMouseEnter(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  if Sender is TPanel then
+    Pnl := TPanel(Sender)
+  else if Sender is TLabel then
+    Pnl := TPanel(TLabel(Sender).Parent)
+  else
+    Exit;
+  Pnl.Color := CLR_SIDEBAR_HOVER;
+end;
+
+procedure TfrmPesajeIntegrado.MenuItemMouseLeave(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  if Sender is TPanel then
+    Pnl := TPanel(Sender)
+  else if Sender is TLabel then
+    Pnl := TPanel(TLabel(Sender).Parent)
+  else
+    Exit;
+  Pnl.Color := CLR_CARD;
 end;
 
 procedure TfrmPesajeIntegrado.CerrarMenuEngranaje;

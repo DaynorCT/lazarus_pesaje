@@ -40,6 +40,8 @@ type
 
     procedure LogoClick(Sender: TObject);
     procedure NavPaint(Sender: TObject);
+    procedure SubMenuPaint(Sender: TObject);
+    procedure SubPaint(Sender: TObject);
     function CrearNavItem(AIconCode: Word; const ATitle: string; ATag: Integer; X: Integer): TPanel;
     procedure NavClick(Sender: TObject);
     procedure NavMouseEnter(Sender: TObject);
@@ -130,14 +132,15 @@ begin
   FSubCatalogo.Visible := False;
   FSubCatalogo.Color := CLR_CARD;
   FSubCatalogo.BevelOuter := bvNone;
-  FSubCatalogo.BorderStyle := bsSingle;
-  FSubCatalogo.Width := 180;
-  FSubCatalogo.Height := 152;
+  FSubCatalogo.BorderStyle := bsNone;
+  FSubCatalogo.OnPaint := @SubMenuPaint;
+  FSubCatalogo.Width := 220;
+  FSubCatalogo.Height := 186;
 
-  CrearSubItem(FSubCatalogo, FA_TRUCK,    'Vehiculos', 6, 0);
-  CrearSubItem(FSubCatalogo, FA_BOX,      'Productos', 5, 38);
-  CrearSubItem(FSubCatalogo, FA_MAP_PIN,  'Origenes',  7, 76);
-  CrearSubItem(FSubCatalogo, FA_BULLSEYE, 'Destinos',  8, 114);
+  CrearSubItem(FSubCatalogo, FA_TRUCK,    'Vehiculos', 6, 8);
+  CrearSubItem(FSubCatalogo, FA_BOX,      'Productos', 5, 52);
+  CrearSubItem(FSubCatalogo, FA_MAP_PIN,  'Origenes',  7, 96);
+  CrearSubItem(FSubCatalogo, FA_BULLSEYE, 'Destinos',  8, 140);
 
   // Submenu Configuración
   FSubConfig := TPanel.Create(Self);
@@ -145,12 +148,13 @@ begin
   FSubConfig.Visible := False;
   FSubConfig.Color := CLR_CARD;
   FSubConfig.BevelOuter := bvNone;
-  FSubConfig.BorderStyle := bsSingle;
-  FSubConfig.Width := 180;
-  FSubConfig.Height := 80;
+  FSubConfig.BorderStyle := bsNone;
+  FSubConfig.OnPaint := @SubMenuPaint;
+  FSubConfig.Width := 220;
+  FSubConfig.Height := 98;
 
-  CrearSubItem(FSubConfig, FA_FILE,  'Boleta',  12, 0);
-  CrearSubItem(FSubConfig, FA_SCALE, 'Balanza', 13, 40);
+  CrearSubItem(FSubConfig, FA_FILE,  'Boleta',  12, 8);
+  CrearSubItem(FSubConfig, FA_SCALE, 'Balanza', 13, 52);
 
   // Botón usuario
   FUserBtn := TSpeedButton.Create(pnlTop);
@@ -327,6 +331,8 @@ var
 begin
   if Sender is TPanel then
     Pnl := TPanel(Sender)
+  else if Sender is TLabel then
+    Pnl := TPanel(TLabel(Sender).Parent)
   else
     Exit;
   if Pnl <> FActiveSub then
@@ -339,6 +345,8 @@ var
 begin
   if Sender is TPanel then
     Pnl := TPanel(Sender)
+  else if Sender is TLabel then
+    Pnl := TPanel(TLabel(Sender).Parent)
   else
     Exit;
   if Pnl <> FActiveSub then
@@ -391,10 +399,11 @@ begin
   Pnl := TPanel.Create(AParent);
   Pnl.Parent := AParent;
   Pnl.Tag := ATag;
-  Pnl.SetBounds(0, Y, 180, 36);
+  Pnl.SetBounds(8, Y, AParent.Width - 16, 38);
   Pnl.BevelOuter := bvNone;
   Pnl.Color := CLR_CARD;
   Pnl.Cursor := crHandPoint;
+  Pnl.OnPaint := @SubPaint;
   Pnl.OnClick := @SubItemClick;
   Pnl.OnMouseEnter := @SubMouseEnter;
   Pnl.OnMouseLeave := @SubMouseLeave;
@@ -404,31 +413,61 @@ begin
   begin
     IconLbl := TLabel.Create(Pnl);
     IconLbl.Parent := Pnl;
-    IconLbl.SetBounds(12, 0, 24, 36);
+    IconLbl.SetBounds(12, 0, 24, 38);
     IconLbl.Alignment := taCenter;
     IconLbl.Layout := tlCenter;
     IconLbl.Caption := IconStr;
-    IconLbl.Font.Size := 11;
+    IconLbl.Font.Size := 12;
     IconLbl.Font.Name := FA_FONT_NAME;
     IconLbl.Font.Color := CLR_PRIMARY;
     IconLbl.ControlStyle := IconLbl.ControlStyle + [csNoStdEvents];
     IconLbl.OnClick := @SubItemClick;
-    TitleX := 36;
+    IconLbl.OnMouseEnter := @SubMouseEnter;
+    IconLbl.OnMouseLeave := @SubMouseLeave;
+    TitleX := 42;
   end
   else
-    TitleX := 12;
+    TitleX := 14;
 
   TitleLbl := TLabel.Create(Pnl);
   TitleLbl.Parent := Pnl;
-  TitleLbl.SetBounds(TitleX, 0, 180 - TitleX, 36);
+  TitleLbl.SetBounds(TitleX, 0, Pnl.Width - TitleX, 38);
   TitleLbl.Alignment := taLeftJustify;
   TitleLbl.Layout := tlCenter;
   TitleLbl.Caption := ACaption;
-  TitleLbl.Font.Size := 12;
+  TitleLbl.Font.Size := 11;
   TitleLbl.Font.Color := CLR_TEXT;
   TitleLbl.Font.Style := [];
   TitleLbl.ControlStyle := TitleLbl.ControlStyle + [csNoStdEvents];
   TitleLbl.OnClick := @SubItemClick;
+  TitleLbl.OnMouseEnter := @SubMouseEnter;
+  TitleLbl.OnMouseLeave := @SubMouseLeave;
+end;
+
+procedure TfrmMain.SubMenuPaint(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.Pen.Color := CLR_BORDER;
+  Pnl.Canvas.Pen.Width := 1;
+  Pnl.Canvas.Pen.Style := psSolid;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width - 1, Pnl.Height - 1, 10, 10);
+end;
+
+procedure TfrmMain.SubPaint(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_CARD;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
 end;
 
 procedure TfrmMain.UserBtnClick(Sender: TObject);
