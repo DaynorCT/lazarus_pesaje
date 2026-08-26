@@ -186,6 +186,8 @@ begin
   FMenuEngranaje.Color := CLR_CARD;
   FMenuEngranaje.BevelOuter := bvNone;
   FMenuEngranaje.BorderStyle := bsNone;
+  FMenuEngranaje.ParentBackground := False;
+  FMenuEngranaje.ParentColor := False;
   FMenuEngranaje.OnPaint := @MenuEngranajePaint;
   FMenuEngranaje.Width := 250;
   FMenuEngranaje.Height := 158;
@@ -584,6 +586,8 @@ var
     Result.SetBounds(8, YPos, FMenuEngranaje.Width - 16, 40);
     Result.BevelOuter := bvNone;
     Result.Color := CLR_CARD;
+    Result.ParentBackground := False;
+    Result.ParentColor := False;
     Result.Cursor := crHandPoint;
     Result.OnPaint := @MenuItemPaint;
     Result.OnClick := AClick;
@@ -654,6 +658,8 @@ begin
 
   CrearItem('Cerrar sesion', FA_TIMES, CLR_DESTRUCTIVE, @MenuSalirClick);
 
+  FMenuEngranaje.BringToFront;
+  FMenuEngranaje.Invalidate;
   FMenuEngranaje.Visible := True;
 end;
 

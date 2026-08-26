@@ -33,7 +33,7 @@ type
     FActiveNav: TPanel;
     FActiveSub: TPanel;
     FSubCatalogo, FSubConfig, FUserMenu: TPanel;
-    FUserBtn: TSpeedButton;
+    FUserBtn: TPanel;
     imgLogo: TImage;
     pnlLogoFallback: TPanel;
     lblLogoFallback: TLabel;
@@ -133,6 +133,8 @@ begin
   FSubCatalogo.Color := CLR_CARD;
   FSubCatalogo.BevelOuter := bvNone;
   FSubCatalogo.BorderStyle := bsNone;
+  FSubCatalogo.ParentBackground := False;
+  FSubCatalogo.ParentColor := False;
   FSubCatalogo.OnPaint := @SubMenuPaint;
   FSubCatalogo.Width := 220;
   FSubCatalogo.Height := 186;
@@ -149,6 +151,8 @@ begin
   FSubConfig.Color := CLR_CARD;
   FSubConfig.BevelOuter := bvNone;
   FSubConfig.BorderStyle := bsNone;
+  FSubConfig.ParentBackground := False;
+  FSubConfig.ParentColor := False;
   FSubConfig.OnPaint := @SubMenuPaint;
   FSubConfig.Width := 220;
   FSubConfig.Height := 98;
@@ -156,20 +160,36 @@ begin
   CrearSubItem(FSubConfig, FA_FILE,  'Boleta',  12, 8);
   CrearSubItem(FSubConfig, FA_SCALE, 'Balanza', 13, 52);
 
-  // Botón usuario
-  FUserBtn := TSpeedButton.Create(pnlTop);
+  // Botón usuario (mismo estilo que el engranaje del módulo pesaje)
+  FUserBtn := TPanel.Create(pnlTop);
   FUserBtn.Parent := pnlTop;
   FUserBtn.Align := alRight;
   FUserBtn.Width := 40;
   FUserBtn.Height := 40;
   FUserBtn.Top := (FRAME_HEADER_H - 40) div 2;
-  FUserBtn.Caption := FAChar(FA_USER);
-  FUserBtn.Flat := True;
-  FUserBtn.Font.Size := 18;
-  FUserBtn.Font.Name := FA_FONT_NAME;
-  FUserBtn.Font.Color := CLR_PRIMARY;
-  FUserBtn.BorderSpacing.Right := 12;
+  FUserBtn.BevelOuter := bvNone;
+  FUserBtn.Color := CLR_CARD;
+  FUserBtn.ParentBackground := False;
+  FUserBtn.ParentColor := False;
+  FUserBtn.Cursor := crHandPoint;
+  FUserBtn.OnPaint := @NavPaint;
   FUserBtn.OnClick := @UserBtnClick;
+  FUserBtn.BorderSpacing.Right := 12;
+
+  with TLabel.Create(FUserBtn) do
+  begin
+    Parent := FUserBtn;
+    Align := alClient;
+    Alignment := taCenter;
+    Layout := tlCenter;
+    Caption := FAIconoStr(FA_USER, '👤');
+    Font.Size := 16;
+    Font.Name := FA_FONT_NAME;
+    Font.Color := CLR_PRIMARY;
+    Transparent := True;
+    Cursor := crHandPoint;
+    OnClick := @UserBtnClick;
+  end;
 
   // Menú usuario
   FUserMenu := TPanel.Create(Self);
@@ -177,9 +197,12 @@ begin
   FUserMenu.Visible := False;
   FUserMenu.Color := CLR_CARD;
   FUserMenu.BevelOuter := bvNone;
-  FUserMenu.BorderStyle := bsSingle;
-  FUserMenu.Width := 200;
-  FUserMenu.Height := 176;
+  FUserMenu.BorderStyle := bsNone;
+  FUserMenu.ParentBackground := False;
+  FUserMenu.ParentColor := False;
+  FUserMenu.OnPaint := @SubMenuPaint;
+  FUserMenu.Width := 240;
+  FUserMenu.Height := 164;
 end;
 
 function TfrmMain.CrearNavItem(AIconCode: Word; const ATitle: string; ATag: Integer; X: Integer): TPanel;
@@ -263,6 +286,8 @@ begin
     FSubCatalogo.Left := Pnl.Left;
     FSubCatalogo.Top := pnlTop.Height + 2;
     FSubCatalogo.Visible := not FSubCatalogo.Visible;
+    FSubCatalogo.BringToFront;
+    FSubCatalogo.Invalidate;
     Exit;
   end;
   if TagVal = 200 then
@@ -271,6 +296,8 @@ begin
     FSubConfig.Left := Pnl.Left;
     FSubConfig.Top := pnlTop.Height + 2;
     FSubConfig.Visible := not FSubConfig.Visible;
+    FSubConfig.BringToFront;
+    FSubConfig.Invalidate;
     Exit;
   end;
 
@@ -472,9 +499,57 @@ end;
 
 procedure TfrmMain.UserBtnClick(Sender: TObject);
 var
-  Lbl: TLabel;
-  YPos: Integer;
+  Lbl, IconLbl: TLabel;
   Sep: TPanel;
+  YPos: Integer;
+
+  function CrearItem(ACaption: string; AIcon: Word; AColor: TColor;
+    AClick: TNotifyEvent): TPanel;
+  begin
+    Result := TPanel.Create(FUserMenu);
+    Result.Parent := FUserMenu;
+    Result.SetBounds(8, YPos, FUserMenu.Width - 16, 40);
+    Result.BevelOuter := bvNone;
+    Result.Color := CLR_CARD;
+    Result.ParentBackground := False;
+    Result.ParentColor := False;
+    Result.Cursor := crHandPoint;
+    Result.OnPaint := @SubPaint;
+    Result.OnClick := AClick;
+    Result.OnMouseEnter := @SubMouseEnter;
+    Result.OnMouseLeave := @SubMouseLeave;
+
+    IconLbl := TLabel.Create(Result);
+    IconLbl.Parent := Result;
+    IconLbl.SetBounds(14, 0, 26, 40);
+    IconLbl.Alignment := taCenter;
+    IconLbl.Layout := tlCenter;
+    IconLbl.Caption := FAIconoStr(AIcon, '•');
+    IconLbl.Font.Size := 13;
+    IconLbl.Font.Name := FA_FONT_NAME;
+    IconLbl.Font.Color := CLR_PRIMARY;
+    IconLbl.Transparent := True;
+    IconLbl.Cursor := crHandPoint;
+    IconLbl.OnClick := AClick;
+    IconLbl.OnMouseEnter := @SubMouseEnter;
+    IconLbl.OnMouseLeave := @SubMouseLeave;
+
+    Lbl := TLabel.Create(Result);
+    Lbl.Parent := Result;
+    Lbl.SetBounds(46, 0, Result.Width - 52, 40);
+    Lbl.Alignment := taLeftJustify;
+    Lbl.Layout := tlCenter;
+    Lbl.Caption := ACaption;
+    Lbl.Font.Size := 12;
+    Lbl.Font.Color := AColor;
+    Lbl.Transparent := True;
+    Lbl.Cursor := crHandPoint;
+    Lbl.OnClick := AClick;
+    Lbl.OnMouseEnter := @SubMouseEnter;
+    Lbl.OnMouseLeave := @SubMouseLeave;
+    YPos := YPos + 44;
+  end;
+
 begin
   if FUserMenu.Visible then
   begin
@@ -488,53 +563,45 @@ begin
   FUserMenu.DestroyComponents;
   FUserMenu.Left := FUserBtn.Left + FUserBtn.Width - FUserMenu.Width;
   FUserMenu.Top := pnlTop.Height + 2;
-  YPos := 8;
+  YPos := 12;
 
+  // Encabezado: nombre, email y rol
   Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
-  Lbl.SetBounds(12, YPos, 176, 16);
+  Lbl.SetBounds(16, YPos, FUserMenu.Width - 32, 16);
   Lbl.Caption := UsuarioActual.PersonaNombre;
   Lbl.Font.Size := 12; Lbl.Font.Style := [fsBold]; Lbl.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 22;
+  Lbl.Transparent := True;
+  YPos := YPos + 20;
 
   Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
-  Lbl.SetBounds(12, YPos, 176, 14);
+  Lbl.SetBounds(16, YPos, FUserMenu.Width - 32, 14);
   Lbl.Caption := UsuarioActual.Email;
   Lbl.Font.Size := 10; Lbl.Font.Color := CLR_TEXT_SLATE;
-  YPos := YPos + 24;
-
-  Sep := TPanel.Create(FUserMenu); Sep.Parent := FUserMenu;
-  Sep.SetBounds(8, YPos, 184, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
-  YPos := YPos + 8;
+  Lbl.Transparent := True;
+  YPos := YPos + 18;
 
   Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
-  Lbl.SetBounds(12, YPos, 176, 16);
+  Lbl.SetBounds(16, YPos, FUserMenu.Width - 32, 14);
   Lbl.Caption := 'Rol: ' + UsuarioActual.Rol;
   Lbl.Font.Size := 10; Lbl.Font.Color := CLR_TEXT_SLATE;
-  YPos := YPos + 22;
+  Lbl.Transparent := True;
+  YPos := YPos + 16;
 
   Sep := TPanel.Create(FUserMenu); Sep.Parent := FUserMenu;
-  Sep.SetBounds(8, YPos, 184, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
+  Sep.SetBounds(12, YPos, FUserMenu.Width - 24, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
   YPos := YPos + 8;
 
-  Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
-  Lbl.SetBounds(12, YPos, 176, 16);
-  Lbl.Caption := 'Volver a pesaje';
-  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT_HEADING;
-  Lbl.Cursor := crHandPoint;
-  Lbl.OnClick := @VolverPesajeClick;
-  YPos := YPos + 22;
+  CrearItem('Volver a pesaje', FA_SCALE, CLR_TEXT_HEADING, @VolverPesajeClick);
 
   Sep := TPanel.Create(FUserMenu); Sep.Parent := FUserMenu;
-  Sep.SetBounds(8, YPos, 184, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
+  Sep.SetBounds(12, YPos, FUserMenu.Width - 24, 1); Sep.Color := CLR_BORDER; Sep.BevelOuter := bvNone;
   YPos := YPos + 8;
 
-  Lbl := TLabel.Create(FUserMenu); Lbl.Parent := FUserMenu;
-  Lbl.SetBounds(12, YPos, 176, 16);
-  Lbl.Caption := 'Cerrar Sesion';
-  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_DESTRUCTIVE;
-  Lbl.Cursor := crHandPoint;
-  Lbl.OnClick := @LogoutClick;
+  CrearItem('Cerrar Sesion', FA_TIMES, CLR_DESTRUCTIVE, @LogoutClick);
 
+  FUserMenu.Height := YPos + 6;
+  FUserMenu.BringToFront;
+  FUserMenu.Invalidate;
   FUserMenu.Visible := True;
 end;
 
