@@ -309,6 +309,7 @@ var
     Btn.Parent := FMenuEngranaje;
     Btn.SetBounds(8, YPos, FMenuEngranaje.Width - 16, 36);
     Btn.Caption := ACaption;
+    Btn.Font.Color := CLR_TEXT;
     Btn.OnClick := AClick;
     YPos := YPos + 40;
   end;

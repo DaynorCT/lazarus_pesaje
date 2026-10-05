@@ -69,6 +69,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       Anchors = [akTop, akRight]
       BorderSpacing.Right = 72
       Caption = 'Sincronizar ahora'
+      Font.Color = 1842204
+      ParentFont = False
       OnClick = SincronizarClick
       TabOrder = 1
     end
@@ -80,6 +82,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       Anchors = [akTop, akRight]
       BorderSpacing.Right = 24
       Caption = 'Menu'
+      Font.Color = 1842204
+      ParentFont = False
       OnClick = EngranajeClick
       TabOrder = 2
     end
@@ -202,6 +206,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 186
             Width = 112
             Caption = 'Conectar'
+            Font.Color = 1842204
+            ParentFont = False
             OnClick = SwitchConectarClick
             TabOrder = 3
           end
@@ -222,6 +228,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 186
             Width = 284
             Caption = 'Capturar peso'
+            Font.Color = 1842204
+            ParentFont = False
             Enabled = False
             OnClick = CapturarPesoClick
             TabOrder = 4
@@ -243,6 +251,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 242
             Width = 380
             Caption = 'Enviar a la web'
+            Font.Color = 1842204
+            ParentFont = False
             Enabled = False
             OnClick = EnviarPesoClick
             TabOrder = 5

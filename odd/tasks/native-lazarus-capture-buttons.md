@@ -13,13 +13,15 @@ Remove custom-painted button-like controls from the integrated weighing screen a
 ## Tasks
 1. [x] Convert capture and send controls to default `TButton`s while preserving handlers, disabled states, and layout.
 2. [x] Convert all remaining visible clickable actions (sync, gear, connection, and gear-menu entries) to default `TButton`s and preserve their operations.
-3. [ ] Structurally verify the screen and build/visually verify when Lazarus tooling is available.
+3. [x] Set a readable dark caption color on native buttons to address invisible text on macOS while retaining native button shapes.
+4. [ ] Structurally verify and build; test caption visibility on macOS and Windows when available.
 
 ## Verification
 - Capture/send conversion structural checks passed: controls are `TButton`s with default font/color styling, correct captions and handlers, initial disabled state, state updates, and responsive bounds.
-- Independent structural verification passed: sync, gear, connection, capture/send, and the dynamically generated gear-menu actions are `TButton`s with native styling and preserved handlers/state changes. Background-click menu dismissal and non-action containers remain intact. `git diff --check` passed.
-- Build/runtime verification remains unavailable: FPC is installed, but `lazbuild` and Lazarus are unavailable; no GUI behavior was exercised.
-- Native assessment remains unassessable due untracked-file declaration handling. The reviewer capture transition did not produce a verdict; do not treat it as approval.
+- Independent structural verification passed: sync, gear, connection, capture/send, and the dynamically generated gear-menu actions are `TButton`s with preserved handlers/state changes. Background-click menu dismissal and non-action containers remain intact. `git diff --check` passed.
+- User reports on macOS that all button text is invisible while Windows displays it. Applied explicit `CLR_TEXT` with parent font inheritance disabled on all static buttons and dynamic gear-menu buttons, leaving native backgrounds/borders/shapes intact.
+- Independent structural verification and `git diff --check` passed. Documented macOS build `./compilar.sh` succeeded (exit 0; executable `pesaje` generated). Linker warned that existing objects target macOS 11.0 while linking for 10.15; 11 FPC hints. Visual macOS and Windows runtime behavior remain unconfirmed.
+- Native reviewer capture was rejected for the current slot as missing/stale binding; no verdict was obtained.
 
 ## Evidence
 - Existing worktree has user edits. Preserve unrelated portions, particularly `pesaje.lpi` and `src/forms/MainForm.lfm`.
