@@ -1,0 +1,268 @@
+object frmPesajeIntegrado: TfrmPesajeIntegrado
+  Left = 350
+  Height = 768
+  Top = 120
+  Width = 1366
+  Caption = 'Sistema de Pesaje'
+  ClientHeight = 768
+  ClientWidth = 1366
+  Color = $00F5F5F5
+  Constraints.MinHeight = 720
+  Constraints.MinWidth = 1280
+  Position = poScreenCenter
+  OnResize = FormResize
+  OnShow = FormShowHandler
+  object pnlTop: TPanel
+    Left = 0
+    Height = 64
+    Top = 0
+    Width = 1366
+    Align = alTop
+    BevelOuter = bvNone
+    Color = clWhite
+    ClientHeight = 64
+    ClientWidth = 1366
+    ParentBackground = False
+    TabOrder = 0
+    object pnlTopBorder: TPanel
+      Left = 0
+      Height = 1
+      Top = 63
+      Width = 1366
+      Align = alBottom
+      BevelOuter = bvNone
+      Color = $00F0E8E2
+      ParentBackground = False
+      TabOrder = 0
+    end
+    object lblTitulo: TLabel
+      Left = 24
+      Height = 64
+      Top = 0
+      Width = 400
+      Caption = 'SISTEMA DE PESAJE'
+      Font.Color = 3879198
+      Font.Height = -19
+      Font.Style = [fsBold]
+      Layout = tlCenter
+      ParentFont = False
+    end
+    object lblEstado: TLabel
+      Left = 692
+      Height = 64
+      Top = 0
+      Width = 420
+      Anchors = [akTop, akRight]
+      Alignment = taRightJustify
+      AutoSize = False
+      BorderSpacing.Right = 264
+      Font.Color = 9145444
+      Font.Height = -13
+      Layout = tlCenter
+      ParentFont = False
+    end
+    object btnSincronizar: TButton
+      Left = 1124
+      Height = 36
+      Top = 14
+      Width = 170
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 72
+      Caption = 'Sincronizar ahora'
+      OnClick = SincronizarClick
+      TabOrder = 1
+    end
+    object btnEngranaje: TButton
+      Left = 1302
+      Height = 40
+      Top = 12
+      Width = 40
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 24
+      Caption = 'Menu'
+      OnClick = EngranajeClick
+      TabOrder = 2
+    end
+  end
+  object pnlContent: TPanel
+    Left = 0
+    Height = 704
+    Top = 64
+    Width = 1366
+    Align = alClient
+    BevelOuter = bvNone
+    Color = $00F5F5F5
+    OnClick = ContentClick
+    ParentBackground = False
+    TabOrder = 1
+    object pnlMedio: TPanel
+      Left = 24
+      Height = 656
+      Top = 24
+      Width = 1318
+      Align = alClient
+      BevelOuter = bvNone
+      BorderSpacing.Around = 24
+      Color = $00F5F5F5
+      ParentBackground = False
+      TabOrder = 0
+      object pnlRegistroCard: TPanel
+        Left = 0
+        Height = 430
+        Top = 0
+        Width = 420
+        BevelOuter = bvNone
+        Color = clWhite
+        OnPaint = PaintRounded
+        ParentBackground = False
+        ParentColor = False
+        TabOrder = 0
+        object pnlRegistro: TPanel
+          Left = 0
+          Height = 430
+          Top = 0
+          Width = 420
+          Align = alClient
+          BevelOuter = bvNone
+          Color = clWhite
+          ParentBackground = False
+          ParentColor = False
+          TabOrder = 0
+          object lblRegistroTitle: TLabel
+            Left = 20
+            Height = 18
+            Top = 12
+            Width = 380
+            Caption = 'Registro de peso'
+            Font.Color = 3879198
+            Font.Height = -16
+            ParentFont = False
+          end
+          object pnlSep1: TPanel
+            Left = 20
+            Height = 1
+            Top = 38
+            Width = 380
+            BevelOuter = bvNone
+            Color = 14540253
+            ParentBackground = False
+            ParentColor = False
+            TabOrder = 0
+          end
+          object pnlDisplay: TPanel
+            Left = 20
+            Height = 110
+            Top = 49
+            Width = 380
+            BevelOuter = bvNone
+            Color = $00A65E25
+            ParentBackground = False
+            ParentColor = False
+            TabOrder = 1
+            object pnlDisplayInner: TPanel
+              Left = 2
+              Height = 106
+              Top = 2
+              Width = 376
+              BevelOuter = bvNone
+              Color = clWhite
+              ParentBackground = False
+              ParentColor = False
+              TabOrder = 0
+              object lblPesoDisplay: TLabel
+                Left = 0
+                Height = 106
+                Top = 0
+                Width = 376
+                Align = alClient
+                Alignment = taCenter
+                Caption = '0 kg'
+                Font.Color = 3879198
+                Font.Height = -28
+                Font.Style = [fsBold]
+                Layout = tlCenter
+                ParentFont = False
+              end
+            end
+          end
+          object pnlSep2: TPanel
+            Left = 20
+            Height = 1
+            Top = 177
+            Width = 380
+            BevelOuter = bvNone
+            Color = 14540253
+            ParentBackground = False
+            ParentColor = False
+            TabOrder = 2
+          end
+          object btnSwitchConectar: TButton
+            Left = 20
+            Height = 40
+            Top = 186
+            Width = 112
+            Caption = 'Conectar'
+            OnClick = SwitchConectarClick
+            TabOrder = 3
+          end
+          object lblConexion: TLabel
+            Left = 20
+            Height = 14
+            Top = 226
+            Width = 72
+            Alignment = taCenter
+            Caption = 'Conexion'
+            Font.Color = 9145444
+            Font.Height = -12
+            ParentFont = False
+          end
+          object pnlCapturarPeso: TButton
+            Left = 108
+            Height = 30
+            Top = 186
+            Width = 284
+            Caption = 'Capturar peso'
+            Enabled = False
+            OnClick = CapturarPesoClick
+            TabOrder = 4
+          end
+          object lblPesoCapturado: TLabel
+            Left = 20
+            Height = 16
+            Top = 222
+            Width = 380
+            Alignment = taCenter
+            Caption = 'Peso capturado: 0 kg'
+            Font.Color = 9145444
+            Font.Height = -13
+            ParentFont = False
+          end
+          object pnlEnviar: TButton
+            Left = 20
+            Height = 36
+            Top = 242
+            Width = 380
+            Caption = 'Enviar a la web'
+            Enabled = False
+            OnClick = EnviarPesoClick
+            TabOrder = 5
+          end
+        end
+      end
+    end
+  end
+  object TimerLectura: TTimer
+    Enabled = False
+    Interval = 300
+    OnTimer = TimerLecturaTimer
+    Left = 128
+    Top = 80
+  end
+  object TimerEstado: TTimer
+    Enabled = True
+    Interval = 2000
+    OnTimer = TimerEstadoTimer
+    Left = 176
+    Top = 80
+  end
+end

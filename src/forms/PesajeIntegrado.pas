@@ -13,6 +13,26 @@ type
   { TfrmPesajeIntegrado }
 
   TfrmPesajeIntegrado = class(TForm)
+  published
+    pnlTop, pnlContent, pnlMedio, pnlRegistroCard, pnlRegistro: TPanel;
+    pnlDisplay, pnlSep1, pnlSep2: TPanel;
+    pnlCapturarPeso, pnlEnviar: TButton;
+    btnSwitchConectar, btnSincronizar, btnEngranaje: TButton;
+    lblTitulo, lblPesoDisplay, lblRegistroTitle: TLabel;
+    lblConexion, lblPesoCapturado, lblEstado: TLabel;
+    TimerLectura, TimerEstado: TTimer;
+    procedure PaintRounded(Sender: TObject);
+    procedure SwitchConectarClick(Sender: TObject);
+    procedure CapturarPesoClick(Sender: TObject);
+    procedure EnviarPesoClick(Sender: TObject);
+    procedure TimerLecturaTimer(Sender: TObject);
+    procedure TimerEstadoTimer(Sender: TObject);
+    procedure SincronizarClick(Sender: TObject);
+    procedure EngranajeClick(Sender: TObject);
+    procedure ContentClick(Sender: TObject);
+    procedure FormShowHandler(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+  public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   protected
@@ -25,64 +45,25 @@ type
     FModoPrueba: Boolean;
     FPesoCapturado: Integer;
 
-    TimerLectura: TTimer;
-    TimerEstado: TTimer;
-
-    pnlTop: TPanel;
-    pnlContent: TPanel;
-    pnlMedio: TPanel;
-    pnlRegistroCard: TPanel;
-    pnlRegistro: TPanel;
-
-    pnlDisplay: TPanel;
-    lblPesoDisplay: TLabel;
-    lblRegistroTitle: TLabel;
-    pnlSep1, pnlSep2: TPanel;
-    lblConexion: TLabel;
-
-    pnlSwitchConectar: TPanel;
-    pnlCapturarPeso: TPanel;
-    lblPesoCapturado: TLabel;
-    pnlEnviar: TPanel;
-
-    pnlSincronizar: TPanel;
-    pnlEngranaje: TPanel;
     FMenuEngranaje: TPanel;
-    lblEstado: TLabel;
 
-    procedure PaintRounded(Sender: TObject);
     procedure MenuEngranajePaint(Sender: TObject);
-    procedure MenuItemPaint(Sender: TObject);
-    procedure MenuItemMouseEnter(Sender: TObject);
-    procedure MenuItemMouseLeave(Sender: TObject);
-    procedure SwitchConectarPaint(Sender: TObject);
-    procedure SwitchConectarClick(Sender: TObject);
-    procedure CapturarPesoClick(Sender: TObject);
-    procedure EnviarPesoClick(Sender: TObject);
-    procedure TimerLecturaTimer(Sender: TObject);
-    procedure TimerEstadoTimer(Sender: TObject);
     procedure ProcesarTrama(const Trama: string);
     function ExtraerPeso(const Trama: string): string;
-    procedure SincronizarClick(Sender: TObject);
-    procedure EngranajeClick(Sender: TObject);
     procedure MenuSistemaCompletoClick(Sender: TObject);
     procedure MenuConfigurarBalanzaClick(Sender: TObject);
     procedure MenuSalirClick(Sender: TObject);
     procedure CerrarMenuEngranaje;
-    procedure ContentClick(Sender: TObject);
     procedure ActualizarEstadoSync;
-    procedure FormShowHandler(Sender: TObject);
-    procedure FormResize(Sender: TObject);
     procedure AjustarLayout;
-    function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer;
-      const ACaption: string; AColor: TColor; AFontColor: TColor;
-      ATag: Integer; AClick: TNotifyEvent): TPanel;
   end;
 
 var
   frmPesajeIntegrado: TfrmPesajeIntegrado;
 
 implementation
+
+{$R *.lfm}
 
 const
   CREG_W   = 420;
@@ -99,18 +80,12 @@ begin
 end;
 
 // ══════════════════════════════════════════════════════════════════
-// Constructor — toda la UI se crea por código (sin .lfm)
+// Constructor
 // ══════════════════════════════════════════════════════════════════
 
 constructor TfrmPesajeIntegrado.Create(AOwner: TComponent);
-var
-  Lbl: TLabel;
-  Sep: TPanel;
-  YPos: Integer;
-  InnerW: Integer;
-  pi: TPanel;
 begin
-  inherited CreateNew(AOwner);
+  inherited Create(AOwner);
 
   Randomize;
   FConectado := False;
@@ -120,66 +95,6 @@ begin
   FModoPrueba := False;
   FPesoCapturado := 0;
 
-  Caption := 'Sistema de Pesaje';
-  Width := APP_WIDTH;
-  Height := APP_HEIGHT;
-  Position := poScreenCenter;
-  BorderStyle := bsSizeable;
-  Color := CLR_BG;
-  Constraints.MinWidth := APP_MIN_WIDTH;
-  Constraints.MinHeight := APP_MIN_HEIGHT;
-
-  // ── Barra superior ─────────────────────────────────────────────
-  pnlTop := TPanel.Create(Self);
-  pnlTop.Parent := Self;
-  pnlTop.Align := alTop;
-  pnlTop.Height := 64;
-  pnlTop.BevelOuter := bvNone;
-  pnlTop.Color := CLR_CARD;
-
-  with TPanel.Create(pnlTop) do
-  begin
-    Parent := pnlTop;
-    Align := alBottom;
-    Height := 1;
-    BevelOuter := bvNone;
-    Color := CLR_TOPBAR_BORDER;
-  end;
-
-  Lbl := TLabel.Create(pnlTop);
-  Lbl.Parent := pnlTop;
-  Lbl.SetBounds(24, 0, 400, 64);
-  Lbl.Layout := tlCenter;
-  Lbl.Caption := 'SISTEMA DE PESAJE';
-  Lbl.Font.Size := 14;
-  Lbl.Font.Style := [fsBold];
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-
-  // ── Botón engranaje (cambio de modo / cerrar sesión) ───────────
-  pnlEngranaje := TPanel.Create(pnlTop);
-  pnlEngranaje.Parent := pnlTop;
-  pnlEngranaje.SetBounds(pnlTop.ClientWidth - 64, 12, 40, 40);
-  pnlEngranaje.BevelOuter := bvNone;
-  pnlEngranaje.Color := CLR_CARD;
-  pnlEngranaje.Cursor := crHandPoint;
-  pnlEngranaje.OnClick := @EngranajeClick;
-  pnlEngranaje.OnPaint := @PaintRounded;
-  pnlEngranaje.Anchors := [akTop, akRight];
-  pnlEngranaje.BorderSpacing.Right := 24;
-
-  Lbl := TLabel.Create(pnlEngranaje);
-  Lbl.Parent := pnlEngranaje;
-  Lbl.Align := alClient;
-  Lbl.Alignment := taCenter;
-  Lbl.Layout := tlCenter;
-  Lbl.Caption := FAIconoStr(FA_COG, '⚙');
-  Lbl.Font.Size := 16;
-  Lbl.Font.Name := FA_FONT_NAME;
-  Lbl.Font.Color := CLR_PRIMARY;
-  Lbl.Cursor := crHandPoint;
-  Lbl.OnClick := @EngranajeClick;
-
-  // Menú desplegable del engranaje
   FMenuEngranaje := TPanel.Create(Self);
   FMenuEngranaje.Parent := Self;
   FMenuEngranaje.Visible := False;
@@ -189,149 +104,7 @@ begin
   FMenuEngranaje.ParentBackground := False;
   FMenuEngranaje.ParentColor := False;
   FMenuEngranaje.OnPaint := @MenuEngranajePaint;
-  FMenuEngranaje.Width := 250;
-  FMenuEngranaje.Height := 158;
-
-  pnlSincronizar := CrearBoton(pnlTop, 14, pnlTop.ClientWidth - 242, 170, 36,
-    'Sincronizar ahora', CLR_PRIMARY, CLR_WHITE, 0, @SincronizarClick);
-  pnlSincronizar.Anchors := [akTop, akRight];
-  pnlSincronizar.BorderSpacing.Right := 24 + 40 + 8;
-
-  lblEstado := TLabel.Create(pnlTop);
-  lblEstado.Parent := pnlTop;
-  lblEstado.Anchors := [akTop, akRight];
-  lblEstado.BorderSpacing.Right := 24 + 40 + 8 + 170 + 12;
-  lblEstado.SetBounds(pnlTop.ClientWidth - 674, 0, 420, 64);
-  lblEstado.Alignment := taRightJustify;
-  lblEstado.Layout := tlCenter;
-  lblEstado.AutoSize := False;
-  lblEstado.Caption := '';
-  lblEstado.Font.Size := 10;
-  lblEstado.Font.Color := CLR_TEXT_SLATE;
-
-  // ── Contenido ──────────────────────────────────────────────────
-  pnlContent := TPanel.Create(Self);
-  pnlContent.Parent := Self;
-  pnlContent.Align := alClient;
-  pnlContent.BevelOuter := bvNone;
-  pnlContent.Color := CLR_BG;
-  pnlContent.OnClick := @ContentClick;
-
-  pnlMedio := TPanel.Create(pnlContent);
-  pnlMedio.Parent := pnlContent;
-  pnlMedio.Align := alClient;
-  pnlMedio.BevelOuter := bvNone;
-  pnlMedio.Color := CLR_BG;
-  pnlMedio.BorderSpacing.Around := FRAME_MARGIN;
-
-  // ── Card registro de peso (centrado) ───────────────────────────
-  pnlRegistroCard := TPanel.Create(pnlMedio);
-  pnlRegistroCard.Parent := pnlMedio;
-  pnlRegistroCard.SetBounds(0, 0, CREG_W, 430);
-  pnlRegistroCard.BevelOuter := bvNone;
-  pnlRegistroCard.Color := CLR_CARD;
-  pnlRegistroCard.OnPaint := @PaintRounded;
-
-  pnlRegistro := TPanel.Create(pnlRegistroCard);
-  pnlRegistro.Parent := pnlRegistroCard;
-  pnlRegistro.Align := alClient;
-  pnlRegistro.BevelOuter := bvNone;
-  pnlRegistro.Color := CLR_CARD;
-
-  InnerW := CREG_W - CREG_PAD * 2;
-
-  YPos := 12;
-  Lbl := TLabel.Create(pnlRegistro);
-  Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(CREG_PAD, YPos, InnerW, 18);
-  Lbl.Caption := 'Registro de peso';
-  Lbl.Font.Size := 12;
-  Lbl.Font.Color := CLR_TEXT_HEADING;
-  lblRegistroTitle := Lbl;
-  YPos := YPos + 26;
-
-  Sep := TPanel.Create(pnlRegistro);
-  Sep.Parent := pnlRegistro;
-  Sep.SetBounds(CREG_PAD, YPos, InnerW, 1);
-  Sep.BevelOuter := bvNone;
-  Sep.Color := CLR_BORDER;
-  pnlSep1 := Sep;
-  YPos := YPos + 10;
-
-  pnlDisplay := TPanel.Create(pnlRegistro);
-  pnlDisplay.Parent := pnlRegistro;
-  pnlDisplay.SetBounds(CREG_PAD, YPos, InnerW, 110);
-  pnlDisplay.BevelOuter := bvNone;
-  pnlDisplay.Color := CLR_PRIMARY;
-  pi := TPanel.Create(pnlDisplay);
-  pi.Parent := pnlDisplay;
-  pi.SetBounds(2, 2, InnerW - 4, 106);
-  pi.BevelOuter := bvNone;
-  pi.Color := CLR_WHITE;
-  lblPesoDisplay := TLabel.Create(pi);
-  lblPesoDisplay.Parent := pi;
-  lblPesoDisplay.Align := alClient;
-  lblPesoDisplay.Alignment := taCenter;
-  lblPesoDisplay.Layout := tlCenter;
-  lblPesoDisplay.Caption := '0 kg';
-  lblPesoDisplay.Font.Height := -28;
-  lblPesoDisplay.Font.Style := [fsBold];
-  lblPesoDisplay.Font.Color := CLR_TEXT_HEADING;
-  YPos := YPos + 118;
-
-  Sep := TPanel.Create(pnlRegistro);
-  Sep.Parent := pnlRegistro;
-  Sep.SetBounds(CREG_PAD, YPos, InnerW, 1);
-  Sep.BevelOuter := bvNone;
-  Sep.Color := CLR_BORDER;
-  pnlSep2 := Sep;
-  YPos := YPos + 8;
-
-  pnlSwitchConectar := TPanel.Create(pnlRegistro);
-  pnlSwitchConectar.Parent := pnlRegistro;
-  pnlSwitchConectar.SetBounds(CREG_PAD, YPos, 78, 30);
-  pnlSwitchConectar.BevelOuter := bvNone;
-  pnlSwitchConectar.Color := CLR_CARD;
-  pnlSwitchConectar.Cursor := crHandPoint;
-  pnlSwitchConectar.OnPaint := @SwitchConectarPaint;
-  pnlSwitchConectar.OnClick := @SwitchConectarClick;
-
-  Lbl := TLabel.Create(pnlRegistro);
-  Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(CREG_PAD, YPos + 30, 78, 12);
-  Lbl.Caption := 'Conexion';
-  Lbl.Font.Size := 9;
-  Lbl.Font.Color := CLR_TEXT_SLATE;
-  Lbl.Alignment := taCenter;
-  lblConexion := Lbl;
-
-  pnlCapturarPeso := CrearBoton(pnlRegistro, YPos, CREG_PAD + 88,
-    InnerW - 88 - 8, 30, 'Capturar peso', CLR_PRIMARY, CLR_WHITE, 0, @CapturarPesoClick);
-  pnlCapturarPeso.Enabled := False;
-
-  Lbl := TLabel.Create(pnlRegistro);
-  Lbl.Parent := pnlRegistro;
-  Lbl.SetBounds(CREG_PAD, YPos + 36, InnerW, 16);
-  Lbl.Caption := 'Peso capturado: 0 kg';
-  Lbl.Font.Size := 10;
-  Lbl.Font.Color := CLR_TEXT_SLATE;
-  Lbl.Alignment := taCenter;
-  lblPesoCapturado := Lbl;
-
-  pnlEnviar := CrearBoton(pnlRegistro, YPos + 56, CREG_PAD, InnerW, 36,
-    'Enviar a la web', CLR_SUCCESS, CLR_WHITE, 0, @EnviarPesoClick);
-  pnlEnviar.Enabled := False;
-
-  // ── Timers ─────────────────────────────────────────────────────
-  TimerLectura := TTimer.Create(Self);
-  TimerLectura.Interval := 300;
-  TimerLectura.Enabled := False;
-  TimerLectura.OnTimer := @TimerLecturaTimer;
-
-  TimerEstado := TTimer.Create(Self);
-  TimerEstado.Interval := 2000;
-  TimerEstado.Enabled := True;
-  TimerEstado.OnTimer := @TimerEstadoTimer;
+  FMenuEngranaje.SetBounds(0, 0, 250, 158);
 
   OnShow := @FormShowHandler;
   OnResize := @FormResize;
@@ -386,38 +159,6 @@ begin
   end;
 end;
 
-function TfrmPesajeIntegrado.CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer;
-  const ACaption: string; AColor: TColor; AFontColor: TColor;
-  ATag: Integer; AClick: TNotifyEvent): TPanel;
-var
-  Lbl: TLabel;
-begin
-  Result := TPanel.Create(AParent);
-  Result.Parent := AParent;
-  Result.SetBounds(ALeft, ATop, AW, AH);
-  Result.BevelOuter := bvNone;
-  Result.Color := AColor;
-  Result.Tag := ATag;
-  Result.Cursor := crHandPoint;
-  Result.OnClick := AClick;
-  Result.OnPaint := @PaintRounded;
-  Result.ParentBackground := False;
-  Result.ParentColor := False;
-
-  Lbl := TLabel.Create(Result);
-  Lbl.Parent := Result;
-  Lbl.Align := alClient;
-  Lbl.Alignment := taCenter;
-  Lbl.Layout := tlCenter;
-  Lbl.Caption := ACaption;
-  Lbl.Font.Size := 11;
-  Lbl.Font.Style := [fsBold];
-  Lbl.Font.Color := AFontColor;
-  Lbl.Transparent := True;
-  Lbl.Cursor := crHandPoint;
-  Lbl.OnClick := AClick;
-end;
-
 procedure TfrmPesajeIntegrado.FormShowHandler(Sender: TObject);
 begin
   if SyncSvc <> nil then
@@ -445,7 +186,6 @@ const
   ROW_H  = 40;
 var
   W, H, P, Gap, InnerW, YPos, BtnW, RowY: Integer;
-  Lbl: TLabel;
 begin
   if (pnlMedio = nil) or (pnlRegistroCard = nil) or (pnlRegistro = nil) then Exit;
 
@@ -484,22 +224,16 @@ begin
 
   // ── Fila conexion: switch + boton Capturar peso ──
   RowY := YPos;
-  if pnlSwitchConectar <> nil then
+  if btnSwitchConectar <> nil then
+    btnSwitchConectar.SetBounds(P, RowY, 112, ROW_H);
+  if lblConexion <> nil then
   begin
-    pnlSwitchConectar.SetBounds(P, RowY, 72, ROW_H);
-    if lblConexion <> nil then
-    begin
-      lblConexion.SetBounds(P, RowY + ROW_H, 72, 14);
-      lblConexion.Font.Size := 9;
-    end;
+    lblConexion.SetBounds(P, RowY + ROW_H, 112, 14);
+    lblConexion.Font.Size := 9;
   end;
-  BtnW := InnerW - 72 - Gap;
-  if pnlCapturarPeso <> nil then pnlCapturarPeso.SetBounds(P + 72 + Gap, RowY, BtnW, ROW_H);
-  Lbl := nil;
-  if (pnlCapturarPeso <> nil) and (pnlCapturarPeso.ControlCount > 0) then
-    Lbl := TLabel(pnlCapturarPeso.Controls[0]);
-  if Lbl <> nil then
-    Lbl.Font.Size := 13;
+  BtnW := InnerW - 112 - Gap;
+  if pnlCapturarPeso <> nil then
+    pnlCapturarPeso.SetBounds(P + 112 + Gap, RowY, BtnW, ROW_H);
   YPos := RowY + ROW_H + 10;
 
   // ── Peso capturado ──
@@ -512,14 +246,7 @@ begin
 
   // ── Boton Enviar a la web ──
   if pnlEnviar <> nil then
-  begin
     pnlEnviar.SetBounds(P, YPos, InnerW, 46);
-    Lbl := nil;
-    if pnlEnviar.ControlCount > 0 then
-      Lbl := TLabel(pnlEnviar.Controls[0]);
-    if Lbl <> nil then
-      Lbl.Font.Size := 13;
-  end;
 end;
 
 // ══════════════════════════════════════════════════════════════════
@@ -572,57 +299,30 @@ end;
 
 procedure TfrmPesajeIntegrado.EngranajeClick(Sender: TObject);
 var
-  Pnl, Sep: TPanel;
-  Lbl: TLabel;
   YPos: Integer;
 
-  function CrearItem(ACaption: string; AIcon: Word; AColor: TColor;
-    AClick: TNotifyEvent): TPanel;
+  procedure CrearItem(const ACaption: string; AClick: TNotifyEvent);
   var
-    IconLbl: TLabel;
+    Btn: TButton;
   begin
-    Result := TPanel.Create(FMenuEngranaje);
-    Result.Parent := FMenuEngranaje;
-    Result.SetBounds(8, YPos, FMenuEngranaje.Width - 16, 40);
-    Result.BevelOuter := bvNone;
-    Result.Color := CLR_CARD;
-    Result.ParentBackground := False;
-    Result.ParentColor := False;
-    Result.Cursor := crHandPoint;
-    Result.OnPaint := @MenuItemPaint;
-    Result.OnClick := AClick;
-    Result.OnMouseEnter := @MenuItemMouseEnter;
-    Result.OnMouseLeave := @MenuItemMouseLeave;
+    Btn := TButton.Create(FMenuEngranaje);
+    Btn.Parent := FMenuEngranaje;
+    Btn.SetBounds(8, YPos, FMenuEngranaje.Width - 16, 36);
+    Btn.Caption := ACaption;
+    Btn.OnClick := AClick;
+    YPos := YPos + 40;
+  end;
 
-    IconLbl := TLabel.Create(Result);
-    IconLbl.Parent := Result;
-    IconLbl.SetBounds(14, 0, 26, 40);
-    IconLbl.Alignment := taCenter;
-    IconLbl.Layout := tlCenter;
-    IconLbl.Caption := FAIconoStr(AIcon, '•');
-    IconLbl.Font.Size := 13;
-    IconLbl.Font.Name := FA_FONT_NAME;
-    IconLbl.Font.Color := CLR_PRIMARY;
-    IconLbl.Transparent := True;
-    IconLbl.Cursor := crHandPoint;
-    IconLbl.OnClick := AClick;
-    IconLbl.OnMouseEnter := @MenuItemMouseEnter;
-    IconLbl.OnMouseLeave := @MenuItemMouseLeave;
-
-    Lbl := TLabel.Create(Result);
-    Lbl.Parent := Result;
-    Lbl.SetBounds(46, 0, Result.Width - 52, 40);
-    Lbl.Alignment := taLeftJustify;
-    Lbl.Layout := tlCenter;
-    Lbl.Caption := ACaption;
-    Lbl.Font.Size := 12;
-    Lbl.Font.Color := AColor;
-    Lbl.Transparent := True;
-    Lbl.Cursor := crHandPoint;
-    Lbl.OnClick := AClick;
-    Lbl.OnMouseEnter := @MenuItemMouseEnter;
-    Lbl.OnMouseLeave := @MenuItemMouseLeave;
-    YPos := YPos + 44;
+  procedure CrearSeparador;
+  var
+    Sep: TPanel;
+  begin
+    Sep := TPanel.Create(FMenuEngranaje);
+    Sep.Parent := FMenuEngranaje;
+    Sep.SetBounds(16, YPos, FMenuEngranaje.Width - 32, 1);
+    Sep.Color := CLR_BORDER;
+    Sep.BevelOuter := bvNone;
+    YPos := YPos + 8;
   end;
 
 begin
@@ -633,30 +333,15 @@ begin
   end;
 
   FMenuEngranaje.DestroyComponents;
-
-  FMenuEngranaje.Left := pnlEngranaje.Left + pnlEngranaje.Width - FMenuEngranaje.Width;
+  FMenuEngranaje.Left := btnEngranaje.Left + btnEngranaje.Width - FMenuEngranaje.Width;
   FMenuEngranaje.Top := pnlTop.Height + 2;
   YPos := 8;
 
-  CrearItem('Sistema escritorio', FA_BUILDING, CLR_TEXT_HEADING, @MenuSistemaCompletoClick);
-
-  Sep := TPanel.Create(FMenuEngranaje);
-  Sep.Parent := FMenuEngranaje;
-  Sep.SetBounds(16, YPos, FMenuEngranaje.Width - 32, 1);
-  Sep.Color := CLR_BORDER;
-  Sep.BevelOuter := bvNone;
-  YPos := YPos + 8;
-
-  CrearItem('Configurar balanza', FA_SCALE, CLR_TEXT_HEADING, @MenuConfigurarBalanzaClick);
-
-  Sep := TPanel.Create(FMenuEngranaje);
-  Sep.Parent := FMenuEngranaje;
-  Sep.SetBounds(16, YPos, FMenuEngranaje.Width - 32, 1);
-  Sep.Color := CLR_BORDER;
-  Sep.BevelOuter := bvNone;
-  YPos := YPos + 8;
-
-  CrearItem('Cerrar sesion', FA_TIMES, CLR_DESTRUCTIVE, @MenuSalirClick);
+  CrearItem('Sistema escritorio', @MenuSistemaCompletoClick);
+  CrearSeparador;
+  CrearItem('Configurar balanza', @MenuConfigurarBalanzaClick);
+  CrearSeparador;
+  CrearItem('Cerrar sesion', @MenuSalirClick);
 
   FMenuEngranaje.BringToFront;
   FMenuEngranaje.Invalidate;
@@ -675,44 +360,6 @@ begin
   Pnl.Canvas.Pen.Width := 1;
   Pnl.Canvas.Pen.Style := psSolid;
   Pnl.Canvas.RoundRect(0, 0, Pnl.Width - 1, Pnl.Height - 1, 10, 10);
-end;
-
-procedure TfrmPesajeIntegrado.MenuItemPaint(Sender: TObject);
-var
-  Pnl: TPanel;
-begin
-  Pnl := TPanel(Sender);
-  Pnl.Canvas.Brush.Color := CLR_CARD;
-  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
-  Pnl.Canvas.Brush.Color := Pnl.Color;
-  Pnl.Canvas.Pen.Style := psClear;
-  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
-end;
-
-procedure TfrmPesajeIntegrado.MenuItemMouseEnter(Sender: TObject);
-var
-  Pnl: TPanel;
-begin
-  if Sender is TPanel then
-    Pnl := TPanel(Sender)
-  else if Sender is TLabel then
-    Pnl := TPanel(TLabel(Sender).Parent)
-  else
-    Exit;
-  Pnl.Color := CLR_SIDEBAR_HOVER;
-end;
-
-procedure TfrmPesajeIntegrado.MenuItemMouseLeave(Sender: TObject);
-var
-  Pnl: TPanel;
-begin
-  if Sender is TPanel then
-    Pnl := TPanel(Sender)
-  else if Sender is TLabel then
-    Pnl := TPanel(TLabel(Sender).Parent)
-  else
-    Exit;
-  Pnl.Color := CLR_CARD;
 end;
 
 procedure TfrmPesajeIntegrado.CerrarMenuEngranaje;
@@ -785,31 +432,6 @@ end;
 // TimerLecturaTimer.
 // ══════════════════════════════════════════════════════════════════
 
-procedure TfrmPesajeIntegrado.SwitchConectarPaint(Sender: TObject);
-var
-  Pnl: TPanel;
-  Ts: TTextStyle;
-begin
-  Pnl := TPanel(Sender);
-  Pnl.Canvas.Brush.Color := CLR_CARD;
-  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
-  Pnl.Canvas.Font.Height := -(Pnl.Height div 2);
-  Pnl.Canvas.Font.Style := [fsBold];
-  Ts := Pnl.Canvas.TextStyle;
-  Ts.Alignment := taCenter;
-  Ts.Layout := tlCenter;
-  if FConectado then
-  begin
-    Pnl.Canvas.Font.Color := CLR_SUCCESS;
-    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, FAIconoStr(FA_CHECK, '●') + ' ──', Ts);
-  end
-  else
-  begin
-    Pnl.Canvas.Font.Color := CLR_DESTRUCTIVE;
-    Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, FAIconoStr(FA_TIMES, '○') + ' ──', Ts);
-  end;
-end;
-
 procedure TfrmPesajeIntegrado.SwitchConectarClick(Sender: TObject);
 var
   Q: TSQLQuery;
@@ -824,8 +446,8 @@ begin
     FConectado := False;
     FModoPrueba := False;
     pnlCapturarPeso.Enabled := False;
-    if lblConexion <> nil then lblConexion.Caption := 'Conexion';
-    pnlSwitchConectar.Invalidate;
+    btnSwitchConectar.Caption := 'Conectar';
+    if lblConexion <> nil then lblConexion.Caption := 'Desconectada';
     if SyncSvc <> nil then SyncSvc.EnviarPesoVivo(0);
     Exit;
   end;
@@ -841,8 +463,8 @@ begin
       FModoPrueba := True;
       pnlCapturarPeso.Enabled := True;
       TimerLectura.Enabled := True;
-      if lblConexion <> nil then lblConexion.Caption := 'Prueba';
-      pnlSwitchConectar.Invalidate;
+      btnSwitchConectar.Caption := 'Desconectar';
+      if lblConexion <> nil then lblConexion.Caption := 'Modo prueba';
       MostrarInfoDialogo('Balanza', 'No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.');
       Exit;
     end;
@@ -874,11 +496,14 @@ begin
     FModoPrueba := True;
     pnlCapturarPeso.Enabled := True;
     TimerLectura.Enabled := True;
-    if lblConexion <> nil then lblConexion.Caption := 'Prueba';
+    btnSwitchConectar.Caption := 'Desconectar';
+    if lblConexion <> nil then lblConexion.Caption := 'Modo prueba';
     MostrarInfoDialogo('Balanza', 'No se pudo conectar al puerto ' + Puerto +
       '. Se activa MODO PRUEBA con pesos simulados.');
   end;
-  pnlSwitchConectar.Invalidate;
+  if FConectado and not FModoPrueba and (lblConexion <> nil) then
+    lblConexion.Caption := 'Conectada';
+  if FConectado then btnSwitchConectar.Caption := 'Desconectar';
 end;
 
 procedure TfrmPesajeIntegrado.TimerLecturaTimer(Sender: TObject);
@@ -902,7 +527,8 @@ begin
     FConectado := False;
     TimerLectura.Enabled := False;
     pnlCapturarPeso.Enabled := False;
-    pnlSwitchConectar.Invalidate;
+    btnSwitchConectar.Caption := 'Conectar';
+    if lblConexion <> nil then lblConexion.Caption := 'Desconectada';
     Exit;
   end;
   Trama := DM.LeerPuertoSerial;

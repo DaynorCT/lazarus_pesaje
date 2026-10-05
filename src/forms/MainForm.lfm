@@ -1,9 +1,8 @@
 object frmMain: TfrmMain
-  Left = 89
+  Left = 36
   Height = 768
-  Top = 119
+  Top = 37
   Width = 1366
-  BorderStyle = bsSizeable
   Caption = 'Sistema de Pesaje'
   ClientHeight = 768
   ClientWidth = 1366
