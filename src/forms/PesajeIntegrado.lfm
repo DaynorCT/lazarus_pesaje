@@ -1,0 +1,188 @@
+object frmPesajeIntegrado: TfrmPesajeIntegrado
+  Left = 360
+  Height = 560
+  Top = 180
+  Width = 900
+  Caption = 'Sistema de Pesaje'
+  ClientHeight = 560
+  ClientWidth = 900
+  Color = clBtnFace
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 760
+  OnShow = FormShowHandler
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object pnlTop: TPanel
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 76
+    ClientWidth = 900
+    Height = 76
+    TabOrder = 0
+    object lblTitulo: TLabel
+      Left = 20
+      Height = 24
+      Top = 8
+      Width = 250
+      Caption = 'SISTEMA DE PESAJE'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblEstado: TLabel
+      Anchors = [akTop]
+      Left = 330
+      Height = 20
+      Top = 28
+      Width = 350
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Estado de sincronizacion'
+      Layout = tlCenter
+    end
+    object btnSincronizar: TButton
+      Anchors = [akTop]
+      Left = 690
+      Height = 32
+      Top = 22
+      Width = 130
+      Caption = 'Sincronizar ahora'
+      OnClick = btnSincronizarClick
+      TabOrder = 0
+    end
+    object btnEngranaje: TButton
+      Anchors = [akTop]
+      Left = 832
+      Height = 32
+      Top = 22
+      Width = 48
+      Caption = '⚙'
+      OnClick = btnEngranajeClick
+      TabOrder = 1
+    end
+  end
+  object pnlContenido: TPanel
+    Align = alClient
+    BevelOuter = bvNone
+    ClientHeight = 484
+    ClientWidth = 900
+    TabOrder = 1
+    object pnlRegistro: TPanel
+      AnchorSideLeft.Control = pnlContenido
+      AnchorSideLeft.Side = asrCenter
+      AnchorSideTop.Control = pnlContenido
+      AnchorSideTop.Side = asrCenter
+      Left = 230
+      Height = 420
+      Top = 32
+      Width = 440
+      BevelOuter = bvLowered
+      TabOrder = 0
+      object lblRegistroTitle: TLabel
+        Left = 24
+        Height = 24
+        Top = 14
+        Width = 392
+        Caption = 'Registro de peso'
+        Font.Size = 12
+        ParentFont = False
+      end
+      object pnlDisplay: TPanel
+        Left = 24
+        Height = 110
+        Top = 48
+        Width = 392
+        BevelOuter = bvLowered
+        TabOrder = 0
+        object lblPesoDisplay: TLabel
+          Align = alClient
+          Alignment = taCenter
+          Caption = '0 kg'
+          Font.Height = -28
+          Font.Style = [fsBold]
+          Layout = tlCenter
+          ParentFont = False
+        end
+      end
+      object lblConexion: TLabel
+        Left = 24
+        Height = 24
+        Top = 176
+        Width = 90
+        Alignment = taCenter
+        Caption = 'Desconectada'
+        Layout = tlCenter
+      end
+      object btnConectar: TButton
+        Left = 24
+        Height = 32
+        Top = 204
+        Width = 90
+        Caption = 'Conectar'
+        OnClick = btnConectarClick
+        TabOrder = 1
+      end
+      object btnCapturar: TButton
+        Left = 126
+        Height = 32
+        Top = 204
+        Width = 290
+        Caption = 'Capturar peso'
+        OnClick = btnCapturarClick
+        TabOrder = 2
+      end
+      object lblPesoCapturado: TLabel
+        Left = 24
+        Height = 22
+        Top = 250
+        Width = 392
+        Alignment = taCenter
+        Caption = 'Peso capturado: 0 kg'
+        Layout = tlCenter
+      end
+      object btnEnviar: TButton
+        Left = 24
+        Height = 40
+        Top = 284
+        Width = 392
+        Caption = 'Enviar a la web'
+        OnClick = btnEnviarClick
+        TabOrder = 3
+      end
+    end
+  end
+  object PopupEngranaje: TPopupMenu
+    Left = 824
+    Top = 80
+    object miSistemaCompleto: TMenuItem
+      Caption = 'Sistema escritorio'
+      OnClick = miSistemaCompletoClick
+    end
+    object miSeparador1: TMenuItem
+      Caption = '-'
+    end
+    object miConfigurarBalanza: TMenuItem
+      Caption = 'Configurar balanza'
+      OnClick = miConfigurarBalanzaClick
+    end
+    object miSeparador2: TMenuItem
+      Caption = '-'
+    end
+    object miCerrarSesion: TMenuItem
+      Caption = 'Cerrar sesion'
+      OnClick = miCerrarSesionClick
+    end
+  end
+  object TimerLectura: TTimer
+    Enabled = False
+    Interval = 300
+    OnTimer = TimerLecturaTimer
+    Left = 784
+    Top = 80
+  end
+  object TimerEstado: TTimer
+    Interval = 2000
+    OnTimer = TimerEstadoTimer
+    Left = 744
+    Top = 80
+  end
+end

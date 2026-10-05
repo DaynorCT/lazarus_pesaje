@@ -29,7 +29,7 @@
         <Filename Value="pesaje.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Pesaje"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit>
@@ -39,7 +39,7 @@
         <ComponentName Value="DM"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="432"/>
         <CursorPos X="40" Y="445"/>
         <UsageCount Value="205"/>
@@ -56,7 +56,7 @@
         <ComponentName Value="frmLogin"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit>
@@ -66,7 +66,6 @@
         <ComponentName Value="frmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="668"/>
         <CursorPos X="32" Y="680"/>
@@ -79,7 +78,7 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="457"/>
         <CursorPos X="41" Y="457"/>
         <UsageCount Value="205"/>
@@ -98,7 +97,7 @@
         <ComponentName Value="FrameVehiculos"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="201"/>
         <CursorPos X="59" Y="224"/>
         <UsageCount Value="205"/>
@@ -124,7 +123,7 @@
         <ComponentName Value="FrameUsuarios"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="732"/>
         <CursorPos X="5" Y="743"/>
         <UsageCount Value="205"/>
@@ -140,7 +139,7 @@
       <Unit>
         <Filename Value="src/utils/Utils.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="24"/>
         <CursorPos Y="36"/>
         <UsageCount Value="205"/>
@@ -156,15 +155,15 @@
       </Unit>
       <Unit>
         <Filename Value="../../fpcupdeluxe/lazarus/lcl/include/control.inc"/>
-        <EditorIndex Value="17"/>
-        <TopLine Value="4010"/>
-        <CursorPos Y="4010"/>
+        <EditorIndex Value="19"/>
+        <TopLine Value="4009"/>
+        <CursorPos X="96" Y="4030"/>
         <UsageCount Value="105"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/PesajeFrame.lfm"/>
-        <EditorIndex Value="16"/>
+        <EditorIndex Value="18"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
@@ -175,7 +174,7 @@
         <ComponentName Value="FrameEmpresas"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <CursorPos X="8" Y="13"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -183,7 +182,7 @@
       <Unit>
         <Filename Value="src/auth/LoginForm.lfm"/>
         <HasResources Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="100"/>
         <CursorPos X="32" Y="14"/>
         <UsageCount Value="100"/>
@@ -193,7 +192,7 @@
       <Unit>
         <Filename Value="src/reports/BoletaPesaje.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="17"/>
         <TopLine Value="233"/>
         <CursorPos X="20" Y="251"/>
         <UsageCount Value="200"/>
@@ -230,7 +229,7 @@
         <ComponentName Value="FrameConfigBalanza"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="16"/>
         <TopLine Value="384"/>
         <CursorPos Y="394"/>
         <UsageCount Value="200"/>
@@ -238,16 +237,16 @@
       </Unit>
       <Unit>
         <Filename Value="../../Downloads/PesajeFrame.pas"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="15"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/ProductosFrame.pas"/>
         <HasResources Value="True"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="13"/>
         <CursorPos X="41" Y="17"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="67"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -255,12 +254,11 @@
         <ComponentName Value="FrameDestinos"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="362"/>
         <CursorPos Y="374"/>
-        <UsageCount Value="44"/>
+        <UsageCount Value="45"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/utils/ConfigService.pas"/>
@@ -269,7 +267,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="44"/>
       </Unit>
       <Unit>
         <Filename Value="src/utils/SyncService.pas"/>
@@ -278,16 +276,21 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="44"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/PesajeIntegrado.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="42"/>
+        <ComponentName Value="frmPesajeIntegrado"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="87"/>
+        <CursorPos X="23" Y="91"/>
+        <UsageCount Value="44"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src/forms/AppDialog.pas"/>
@@ -296,22 +299,18 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="27"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/forms/PesajeIntegrado.lfm"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="src/reports/BoletaPesaje.pas"/>
-        <Caret Line="251" Column="20" TopLine="229"/>
-      </Position>
-      <Position>
-        <Filename Value="src/forms/PesajeFrame.pas"/>
-        <Caret Line="276" Column="31" TopLine="272"/>
-      </Position>
-      <Position>
-        <Filename Value="src/forms/EmpresasFrame.pas"/>
-        <Caret Line="685" Column="30" TopLine="680"/>
-      </Position>
       <Position>
         <Filename Value="src/forms/PesajeFrame.pas"/>
         <Caret Line="276" Column="31" TopLine="273"/>
@@ -418,6 +417,17 @@
       </Position>
       <Position>
         <Filename Value="src/forms/MainForm.pas"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/MainForm.pas"/>
+        <Caret Line="680" Column="32" TopLine="668"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/PesajeIntegrado.lfm"/>
+      </Position>
+      <Position>
+        <Filename Value="src/forms/PesajeIntegrado.pas"/>
+        <Caret Line="97" Column="32" TopLine="85"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>
