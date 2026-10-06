@@ -40,6 +40,9 @@ type
 
   TDialogoFinalizar = class(TForm)
   private
+    FPnlWrap: TPanel;
+    FBtnCancelar, FBtnFinalizar: TPanel;
+    procedure PosicionarBotones(Sender: TObject);
     procedure OkClick(Sender: TObject);
     procedure CancelClick(Sender: TObject);
   end;
@@ -275,13 +278,29 @@ begin
   end;
 end;
 
+procedure TDialogoFinalizar.PosicionarBotones(Sender: TObject);
+const
+  BUTTON_WIDTH = 110;
+  BUTTON_GAP = 12;
+  BUTTON_TOP = 214;
+var
+  W, LeftPos: Integer;
+begin
+  if (FPnlWrap = nil) or (FBtnCancelar = nil) or (FBtnFinalizar = nil) then Exit;
+  W := FPnlWrap.ClientWidth;
+  LeftPos := (W - (2 * BUTTON_WIDTH + BUTTON_GAP)) div 2;
+  FBtnCancelar.SetBounds(LeftPos, BUTTON_TOP, BUTTON_WIDTH, BTN_H);
+  FBtnFinalizar.SetBounds(LeftPos + BUTTON_WIDTH + BUTTON_GAP,
+    BUTTON_TOP, BUTTON_WIDTH, BTN_H);
+end;
+
 // Diálogo "Finalizar pesaje" con el mismo estilo uniforme.
 function MostrarDialogoFinalizar(PesajeID, Bruto, Tara, Neto: Integer): Boolean;
 var
   F: TDialogoFinalizar;
   pnlWrap, pnlDatos: TPanel;
   Lbl: TLabel;
-  YPos, W: Integer;
+  YPos, W, BtnW, BtnGap, BtnLeft: Integer;
 begin
   Result := False;
   F := TDialogoFinalizar.CreateNew(nil);
@@ -369,9 +388,20 @@ begin
     Lbl.Font.Color := CLR_TEXT_SLATE;
 
     YPos := 214;
-    W := D_W - 28;
-    CrearBotonC(pnlWrap, YPos, W - 210, 96, 'CANCELAR', CLR_CARD, CLR_TEXT, @F.CancelClick);
-    CrearBotonC(pnlWrap, YPos, W - 106, 96, 'FINALIZAR', CLR_PRIMARY, CLR_PRIMARY_FG, @F.OkClick);
+    W := pnlWrap.ClientWidth;
+    BtnW := 110;
+    BtnGap := 12;
+    BtnLeft := (W - (2 * BtnW + BtnGap)) div 2;
+    CrearBotonC(pnlWrap, BtnLeft, YPos, BtnW, 'CANCELAR', CLR_CARD, CLR_TEXT, @F.CancelClick);
+    CrearBotonC(pnlWrap, BtnLeft + BtnW + BtnGap, YPos, BtnW, 'FINALIZAR', CLR_PRIMARY, CLR_PRIMARY_FG, @F.OkClick);
+
+    F.FPnlWrap := pnlWrap;
+    F.FBtnCancelar := TPanel(pnlWrap.Controls[pnlWrap.ControlCount - 2]);
+    F.FBtnFinalizar := TPanel(pnlWrap.Controls[pnlWrap.ControlCount - 1]);
+    F.OnShow := @F.PosicionarBotones;
+    F.OnResize := @F.PosicionarBotones;
+    pnlWrap.OnResize := @F.PosicionarBotones;
+    F.PosicionarBotones(nil);
 
     Result := F.ShowModal = mrOk;
   finally

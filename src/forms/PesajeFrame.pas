@@ -116,6 +116,31 @@ const
   FFIELD      = 168;
   FCOMBO      = 140;
 
+function ActionZoneBounds(const CellBounds: TRect; Zone, ZoneCount: Integer): TRect;
+var
+  CellWidth: Integer;
+begin
+  CellWidth := CellBounds.Right - CellBounds.Left;
+  Result := CellBounds;
+  Result.Left := CellBounds.Left + (CellWidth * (Zone - 1)) div ZoneCount;
+  Result.Right := CellBounds.Left + (CellWidth * Zone) div ZoneCount;
+end;
+
+function ActionZoneAtX(const CellBounds: TRect; X, ZoneCount: Integer): Integer;
+var
+  Zone: Integer;
+  ZoneBounds: TRect;
+begin
+  Result := 0;
+  if (X < CellBounds.Left) or (X >= CellBounds.Right) then Exit;
+  for Zone := 1 to ZoneCount do
+  begin
+    ZoneBounds := ActionZoneBounds(CellBounds, Zone, ZoneCount);
+    if (X >= ZoneBounds.Left) and (X < ZoneBounds.Right) then
+      Exit(Zone);
+  end;
+end;
+
 function TFramePesaje.BuscarComboIndex(Cmb: TComboBox; ID: Integer): Integer;
 var i: Integer;
 begin
@@ -872,7 +897,7 @@ end;
 
 procedure TFramePesaje.GridDrawCell(Sender: TObject; aCol, aRow: Integer;
   aRect: TRect; aState: TGridDrawState);
-var Ts: TTextStyle; IsSelected: Boolean;
+var Ts: TTextStyle; IsSelected: Boolean; ActionCount: Integer; ActionRect: TRect;
 begin
   if aRow = 0 then begin
     Grid.Canvas.Brush.Color := CLR_CARD; Grid.Canvas.FillRect(aRect);
@@ -909,40 +934,42 @@ begin
     if IsSelected then Grid.Canvas.Brush.Color:=CLR_TABLE_ROW_HOVER else Grid.Canvas.Brush.Color:=CLR_CARD;
     Grid.Canvas.FillRect(aRect);
     Grid.Canvas.Font.Height:=-10; Grid.Canvas.Font.Style:=[fsBold];
-    Ts:=Grid.Canvas.TextStyle; Ts.Layout:=tlCenter;
-    if (aRow=FHoverRow) and (FHoverZone>0) then begin
+    Ts:=Grid.Canvas.TextStyle; Ts.Layout:=tlCenter; Ts.Alignment:=taCenter;
+
+    if Grid.Cells[16,aRow]='ACTIVO' then begin
+      if Grid.Cells[17,aRow]='EN_PROCESO' then ActionCount:=3 else ActionCount:=2;
+    end else ActionCount:=3;
+
+    if (aRow=FHoverRow) and (FHoverZone>0) and
+       ((Grid.Cells[16,aRow]='ACTIVO') or (FHoverZone=1)) then begin
+      ActionRect:=ActionZoneBounds(aRect,FHoverZone,ActionCount);
       Grid.Canvas.Brush.Color:=CLR_SIDEBAR_ACTIVE; Grid.Canvas.Pen.Style:=psClear;
-      if Grid.Cells[16,aRow]='ACTIVO' then begin
-        if Grid.Cells[17,aRow]='EN_PROCESO' then
-          case FHoverZone of
-            1: Grid.Canvas.RoundRect(aRect.Left+14,aRect.Top+3,aRect.Left+52, aRect.Bottom-3,5,5);
-            2: Grid.Canvas.RoundRect(aRect.Left+48,aRect.Top+3,aRect.Left+100,aRect.Bottom-3,5,5);
-            3: Grid.Canvas.RoundRect(aRect.Left+96,aRect.Top+3,aRect.Left+148,aRect.Bottom-3,5,5);
-          end
-        else case FHoverZone of
-          1: Grid.Canvas.RoundRect(aRect.Left+14,aRect.Top+3,aRect.Left+82, aRect.Bottom-3,5,5);
-          2: Grid.Canvas.RoundRect(aRect.Left+78,aRect.Top+3,aRect.Left+148,aRect.Bottom-3,5,5);
-        end;
-      end else if FHoverZone=1 then
-        Grid.Canvas.RoundRect(aRect.Left+14,aRect.Top+3,aRect.Left+52,aRect.Bottom-3,5,5);
+      Grid.Canvas.RoundRect(ActionRect.Left+3,aRect.Top+3,ActionRect.Right-3,aRect.Bottom-3,5,5);
     end;
+
     if Grid.Cells[16,aRow]='ACTIVO' then begin
       if Grid.Cells[17,aRow]='EN_PROCESO' then begin
-        Grid.Canvas.Font.Color:=CLR_SUCCESS; Ts.Alignment:=taCenter;
-        Grid.Canvas.Font.Name:=FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left+18,aRect.Top,aRect.Left+50,aRect.Bottom),aRect.Left+18,aRect.Top+1,FAIconoStr(FA_CHECK,'●')+' ──',Ts);
+        ActionRect:=ActionZoneBounds(aRect,1,3);
+        Grid.Canvas.Font.Color:=CLR_SUCCESS; Grid.Canvas.Font.Name:=FAFuente;
+        Grid.Canvas.TextRect(ActionRect,ActionRect.Left,ActionRect.Top+1,FAIconoStr(FA_CHECK,'●')+' ──',Ts);
+        ActionRect:=ActionZoneBounds(aRect,2,3);
         Grid.Canvas.Font.Color:=CLR_PRIMARY; Grid.Canvas.Font.Name:=FAFuente;
-        Grid.Canvas.TextRect(Rect(aRect.Left+50,aRect.Top,aRect.Left+100,aRect.Bottom),aRect.Left+50,aRect.Top+1,FAIconoStr(FA_EDIT,'✎'),Ts);
+        Grid.Canvas.TextRect(ActionRect,ActionRect.Left,ActionRect.Top+1,FAIconoStr(FA_EDIT,'✎'),Ts);
+        ActionRect:=ActionZoneBounds(aRect,3,3);
         Grid.Canvas.Font.Color:=CLR_INFO; Grid.Canvas.Font.Name:=FAFuente;
-        Grid.Canvas.TextRect(Rect(aRect.Left+96,aRect.Top,aRect.Left+145,aRect.Bottom),aRect.Left+96,aRect.Top+1,FAIconoStr(FA_CHECK,'✅'),Ts);
+        Grid.Canvas.TextRect(ActionRect,ActionRect.Left,ActionRect.Top+1,FAIconoStr(FA_CHECK,'✅'),Ts);
       end else begin
-        Grid.Canvas.Font.Color:=CLR_SUCCESS; Ts.Alignment:=taCenter;
-        Grid.Canvas.Font.Name:=FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left+18,aRect.Top,aRect.Left+80,aRect.Bottom),aRect.Left+18,aRect.Top+1,FAIconoStr(FA_CHECK,'●')+' ──',Ts);
+        ActionRect:=ActionZoneBounds(aRect,1,2);
+        Grid.Canvas.Font.Color:=CLR_SUCCESS; Grid.Canvas.Font.Name:=FAFuente;
+        Grid.Canvas.TextRect(ActionRect,ActionRect.Left,ActionRect.Top+1,FAIconoStr(FA_CHECK,'●')+' ──',Ts);
+        ActionRect:=ActionZoneBounds(aRect,2,2);
         Grid.Canvas.Font.Color:=CLR_PRIMARY; Grid.Canvas.Font.Name:=FAFuente;
-        Grid.Canvas.TextRect(Rect(aRect.Left+78,aRect.Top,aRect.Left+145,aRect.Bottom),aRect.Left+78,aRect.Top+1,FAIconoStr(FA_FILE,'📄'),Ts);
+        Grid.Canvas.TextRect(ActionRect,ActionRect.Left,ActionRect.Top+1,FAIconoStr(FA_FILE,'📄'),Ts);
       end;
     end else begin
-      Grid.Canvas.Font.Color:=CLR_DESTRUCTIVE; Ts.Alignment:=taCenter;
-      Grid.Canvas.Font.Name:=FAFuente; Grid.Canvas.TextRect(Rect(aRect.Left+18,aRect.Top,aRect.Left+52,aRect.Bottom),aRect.Left+18,aRect.Top+1,FAIconoStr(FA_TIMES,'○')+' ──',Ts);
+      ActionRect:=ActionZoneBounds(aRect,1,3);
+      Grid.Canvas.Font.Color:=CLR_DESTRUCTIVE; Grid.Canvas.Font.Name:=FAFuente;
+      Grid.Canvas.TextRect(ActionRect,ActionRect.Left,ActionRect.Top+1,FAIconoStr(FA_TIMES,'○')+' ──',Ts);
     end;
     Exit;
   end;
@@ -959,7 +986,7 @@ end;
 
 procedure TFramePesaje.GridMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-var Col,Row,ID,TotalH,I,CellW: Integer;
+var Col,Row,ID,TotalH,I,Zone,ZoneCount: Integer; CellBounds: TRect;
 begin
   if Button<>mbLeft then Exit;
   Grid.MouseToCell(X,Y,Col,Row);
@@ -968,34 +995,35 @@ begin
   if Y>TotalH then Exit;
   if Col<>18 then Exit;
   ID:=PtrInt(Grid.Objects[0,Row]);
-  CellW:=Grid.CellRect(Col,Row).Right-Grid.CellRect(Col,Row).Left;
+  CellBounds:=Grid.CellRect(Col,Row);
   if Grid.Cells[16,Row]='ACTIVO' then begin
-    if Grid.Cells[17,Row]='EN_PROCESO' then begin
-      if X<Grid.CellRect(Col,Row).Left+CellW div 3 then ToggleEstadoPesaje(ID,Grid.Cells[16,Row])
-      else if X<Grid.CellRect(Col,Row).Left+2*CellW div 3 then CargarPesaje(ID)
-      else FinalizarPesaje(ID);
-    end else begin
-      if X<Grid.CellRect(Col,Row).Left+CellW div 2 then ToggleEstadoPesaje(ID,Grid.Cells[16,Row])
-      else ImprimirBoleta(ID);
+    if Grid.Cells[17,Row]='EN_PROCESO' then ZoneCount:=3 else ZoneCount:=2;
+    Zone:=ActionZoneAtX(CellBounds,X,ZoneCount);
+    case Zone of
+      1: ToggleEstadoPesaje(ID,Grid.Cells[16,Row]);
+      2: if ZoneCount=3 then CargarPesaje(ID) else ImprimirBoleta(ID);
+      3: if ZoneCount=3 then FinalizarPesaje(ID);
     end;
-  end else if X<Grid.CellRect(Col,Row).Left+CellW div 3 then
-    ToggleEstadoPesaje(ID,Grid.Cells[16,Row]);
+  end else begin
+    Zone:=ActionZoneAtX(CellBounds,X,3);
+    if Zone=1 then ToggleEstadoPesaje(ID,Grid.Cells[16,Row]);
+  end;
 end;
 
 procedure TFramePesaje.GridMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-var Col,Row,CellW,Zona,NewZone: Integer;
+var Col,Row,Zona,NewZone,ZoneCount: Integer; CellBounds: TRect;
 begin
   Grid.MouseToCell(X,Y,Col,Row);
   if (Col<>18) or (Row<1) or (Row>=Grid.RowCount) then begin NewZone:=0; Row:=0; end
   else begin
-    CellW:=Grid.CellRect(Col,Row).Right-Grid.CellRect(Col,Row).Left;
+    CellBounds:=Grid.CellRect(Col,Row);
     if Grid.Cells[16,Row]='ACTIVO' then begin
-      if Grid.Cells[17,Row]='EN_PROCESO' then begin
-        if X<Grid.CellRect(Col,Row).Left+CellW div 3 then Zona:=1
-        else if X<Grid.CellRect(Col,Row).Left+2*CellW div 3 then Zona:=2
-        else Zona:=3;
-      end else if X<Grid.CellRect(Col,Row).Left+CellW div 2 then Zona:=1 else Zona:=2;
-    end else if X<Grid.CellRect(Col,Row).Left+CellW div 3 then Zona:=1 else Zona:=0;
+      if Grid.Cells[17,Row]='EN_PROCESO' then ZoneCount:=3 else ZoneCount:=2;
+      Zona:=ActionZoneAtX(CellBounds,X,ZoneCount);
+    end else begin
+      Zona:=ActionZoneAtX(CellBounds,X,3);
+      if Zona<>1 then Zona:=0;
+    end;
     NewZone:=Zona;
   end;
   if (FHoverRow<>Row) or (FHoverZone<>NewZone) then begin

@@ -426,7 +426,7 @@ procedure TfrmPesajeIntegrado.EngranajeClick(Sender: TObject);
 var
   YPos: Integer;
 
-  procedure CrearItem(AIconCode: Word; const ACaption: string;
+  procedure CrearItem(AIconCode: Word; const ACaption, AIconFallback: string;
     AClick: TNotifyEvent; AColor: TColor);
   var
     Item: TPanel;
@@ -446,8 +446,8 @@ var
     Icono.SetBounds(10, 0, 24, 38);
     Icono.Alignment := taCenter;
     Icono.Layout := tlCenter;
-    Icono.Caption := FAIconoStr(AIconCode, '•');
-    Icono.Font.Name := FA_FONT_NAME;
+    Icono.Caption := FAIconoStr(AIconCode, AIconFallback);
+    Icono.Font.Name := FAFuente;
     Icono.Font.Size := 13;
     Icono.Font.Color := AColor;
     Icono.Transparent := True;
@@ -491,11 +491,11 @@ begin
   FMenuEngranaje.Top := pnlTop.Height + 2;
   YPos := 8;
 
-  CrearItem(FA_HOME, 'Sistema escritorio', @MenuSistemaCompletoClick, CLR_PRIMARY);
+  CrearItem(FA_HOME, 'Sistema escritorio', '⌂', @MenuSistemaCompletoClick, CLR_PRIMARY);
   CrearSeparador;
-  CrearItem(FA_COG, 'CONFIGURAR BALANZA', @MenuConfigurarBalanzaClick, CLR_TEXT_SLATE);
+  CrearItem(FA_COG, 'CONFIGURAR BALANZA', '⚙', @MenuConfigurarBalanzaClick, CLR_TEXT_SLATE);
   CrearSeparador;
-  CrearItem(FA_TIMES, 'Cerrar sesion', @MenuSalirClick, CLR_DESTRUCTIVE);
+  CrearItem(FA_TIMES, 'Cerrar sesion', '×', @MenuSalirClick, CLR_DESTRUCTIVE);
 
   FMenuEngranaje.BringToFront;
   FMenuEngranaje.Invalidate;
