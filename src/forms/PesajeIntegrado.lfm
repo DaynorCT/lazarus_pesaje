@@ -229,7 +229,7 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 186
             Width = 112
             BevelOuter = bvNone
-            Caption = 'Conectar'
+            Caption = 'CONECTAR'
             Font.Color = clWhite
             ParentBackground = False
             ParentColor = False
@@ -255,7 +255,7 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 186
             Width = 284
             BevelOuter = bvNone
-            Caption = 'Capturar peso'
+            Caption = 'CAPTURAR PESO'
             Enabled = False
             Font.Color = 1842204
             ParentBackground = False
@@ -282,7 +282,7 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 248
             Width = 380
             BevelOuter = bvNone
-            Caption = 'Enviar a la web'
+            Caption = 'ENVIAR A LA WEB'
             Enabled = False
             Font.Color = 1842204
             ParentBackground = False

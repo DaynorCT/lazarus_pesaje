@@ -410,17 +410,45 @@ procedure TfrmPesajeIntegrado.EngranajeClick(Sender: TObject);
 var
   YPos: Integer;
 
-  procedure CrearItem(const ACaption: string; AClick: TNotifyEvent);
+  procedure CrearItem(AIconCode: Word; const ACaption: string;
+    AClick: TNotifyEvent; AColor: TColor);
   var
-    Btn: TButton;
+    Item: TPanel;
+    Icono, Texto: TLabel;
   begin
-    Btn := TButton.Create(FMenuEngranaje);
-    Btn.Parent := FMenuEngranaje;
-    Btn.SetBounds(8, YPos, FMenuEngranaje.Width - 16, 36);
-    Btn.Caption := ACaption;
-    Btn.Font.Color := CLR_TEXT;
-    Btn.OnClick := AClick;
-    YPos := YPos + 40;
+    Item := TPanel.Create(FMenuEngranaje);
+    Item.Parent := FMenuEngranaje;
+    Item.SetBounds(10, YPos, FMenuEngranaje.Width - 20, 38);
+    Item.BevelOuter := bvNone;
+    Item.Color := CLR_CARD;
+    Item.Cursor := crHandPoint;
+    Item.OnPaint := @PaintRounded;
+    Item.OnClick := AClick;
+
+    Icono := TLabel.Create(Item);
+    Icono.Parent := Item;
+    Icono.SetBounds(10, 0, 24, 38);
+    Icono.Alignment := taCenter;
+    Icono.Layout := tlCenter;
+    Icono.Caption := FAIconoStr(AIconCode, '•');
+    Icono.Font.Name := FA_FONT_NAME;
+    Icono.Font.Size := 13;
+    Icono.Font.Color := AColor;
+    Icono.Transparent := True;
+    Icono.Cursor := crHandPoint;
+    Icono.OnClick := AClick;
+
+    Texto := TLabel.Create(Item);
+    Texto.Parent := Item;
+    Texto.SetBounds(42, 0, Item.Width - 50, 38);
+    Texto.Layout := tlCenter;
+    Texto.Caption := ACaption;
+    Texto.Font.Size := 11;
+    Texto.Font.Color := CLR_TEXT;
+    Texto.Transparent := True;
+    Texto.Cursor := crHandPoint;
+    Texto.OnClick := AClick;
+    YPos := YPos + 42;
   end;
 
   procedure CrearSeparador;
@@ -429,10 +457,10 @@ var
   begin
     Sep := TPanel.Create(FMenuEngranaje);
     Sep.Parent := FMenuEngranaje;
-    Sep.SetBounds(16, YPos, FMenuEngranaje.Width - 32, 1);
+    Sep.SetBounds(18, YPos, FMenuEngranaje.Width - 36, 1);
     Sep.Color := CLR_BORDER;
     Sep.BevelOuter := bvNone;
-    YPos := YPos + 8;
+    YPos := YPos + 6;
   end;
 
 begin
@@ -447,11 +475,11 @@ begin
   FMenuEngranaje.Top := pnlTop.Height + 2;
   YPos := 8;
 
-  CrearItem('Sistema escritorio', @MenuSistemaCompletoClick);
+  CrearItem(FA_HOME, 'Sistema escritorio', @MenuSistemaCompletoClick, CLR_PRIMARY);
   CrearSeparador;
-  CrearItem('Configurar balanza', @MenuConfigurarBalanzaClick);
+  CrearItem(FA_COG, 'CONFIGURAR BALANZA', @MenuConfigurarBalanzaClick, CLR_TEXT_SLATE);
   CrearSeparador;
-  CrearItem('Cerrar sesion', @MenuSalirClick);
+  CrearItem(FA_TIMES, 'Cerrar sesion', @MenuSalirClick, CLR_DESTRUCTIVE);
 
   FMenuEngranaje.BringToFront;
   FMenuEngranaje.Invalidate;
@@ -556,7 +584,7 @@ begin
     FConectado := False;
     FModoPrueba := False;
     pnlCapturarPeso.Enabled := False;
-    btnSwitchConectar.Caption := 'Conectar';
+    btnSwitchConectar.Caption := 'CONECTAR';
     if lblConexion <> nil then lblConexion.Caption := 'Desconectada';
     if SyncSvc <> nil then SyncSvc.EnviarPesoVivo(0);
     Exit;
@@ -573,7 +601,7 @@ begin
       FModoPrueba := True;
       pnlCapturarPeso.Enabled := True;
       TimerLectura.Enabled := True;
-      btnSwitchConectar.Caption := 'Desconectar';
+      btnSwitchConectar.Caption := 'DESCONECTAR';
       if lblConexion <> nil then lblConexion.Caption := 'Modo prueba';
       MostrarInfoDialogo('Balanza', 'No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.', dtInfo, 32);
       Exit;
@@ -606,14 +634,14 @@ begin
     FModoPrueba := True;
     pnlCapturarPeso.Enabled := True;
     TimerLectura.Enabled := True;
-    btnSwitchConectar.Caption := 'Desconectar';
+    btnSwitchConectar.Caption := 'DESCONECTAR';
     if lblConexion <> nil then lblConexion.Caption := 'Modo prueba';
     MostrarInfoDialogo('Balanza', 'No se pudo conectar al puerto ' + Puerto +
       '. Se activa MODO PRUEBA con pesos simulados.');
   end;
   if FConectado and not FModoPrueba and (lblConexion <> nil) then
     lblConexion.Caption := 'Conectada';
-  if FConectado then btnSwitchConectar.Caption := 'Desconectar';
+  if FConectado then btnSwitchConectar.Caption := 'DESCONECTAR';
 end;
 
 procedure TfrmPesajeIntegrado.TimerLecturaTimer(Sender: TObject);
@@ -637,7 +665,7 @@ begin
     FConectado := False;
     TimerLectura.Enabled := False;
     pnlCapturarPeso.Enabled := False;
-    btnSwitchConectar.Caption := 'Conectar';
+    btnSwitchConectar.Caption := 'CONECTAR';
     if lblConexion <> nil then lblConexion.Caption := 'Desconectada';
     Exit;
   end;
