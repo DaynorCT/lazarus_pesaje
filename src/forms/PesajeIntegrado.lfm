@@ -244,7 +244,7 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Font.Height = -12
             ParentFont = False
           end
-          object pnlCapturarPeso: TButton
+          object pnlCapturarPeso: TPanel
             Left = 108
             Height = 30
             Top = 186
@@ -253,8 +253,12 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Enabled = False
             Font.Color = 1842204
             ParentFont = False
+            ParentBackground = False
+            ParentColor = False
+            BevelOuter = bvNone
             TabOrder = 4
             OnClick = CapturarPesoClick
+            OnPaint = PaintCaptureButton
           end
           object lblPesoCapturado: TLabel
             Left = 20
