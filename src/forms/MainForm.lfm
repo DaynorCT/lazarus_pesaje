@@ -1,7 +1,7 @@
 object frmMain: TfrmMain
-  Left = 36
+  Left = 44
   Height = 768
-  Top = 37
+  Top = 38
   Width = 1366
   Caption = 'Sistema de Pesaje'
   ClientHeight = 768

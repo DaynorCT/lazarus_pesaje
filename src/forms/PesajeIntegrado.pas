@@ -17,11 +17,13 @@ type
     pnlTop, pnlContent, pnlMedio, pnlRegistroCard, pnlRegistro: TPanel;
     pnlDisplay, pnlSep1, pnlSep2: TPanel;
     pnlCapturarPeso, pnlEnviar: TButton;
-    btnSwitchConectar, btnSincronizar, btnEngranaje: TButton;
+    btnSwitchConectar: TPanel;
+    btnSincronizar, btnEngranaje: TButton;
     lblTitulo, lblPesoDisplay, lblRegistroTitle: TLabel;
     lblConexion, lblPesoCapturado, lblEstado: TLabel;
     TimerLectura, TimerEstado: TTimer;
     procedure PaintRounded(Sender: TObject);
+    procedure PaintConnectButton(Sender: TObject);
     procedure SwitchConectarClick(Sender: TObject);
     procedure CapturarPesoClick(Sender: TObject);
     procedure EnviarPesoClick(Sender: TObject);
@@ -159,10 +161,27 @@ begin
   end;
 end;
 
+procedure TfrmPesajeIntegrado.PaintConnectButton(Sender: TObject);
+var
+  Pnl: TPanel;
+  Ts: TTextStyle;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Style := bsSolid;
+  Pnl.Canvas.Brush.Color := CLR_SUCCESS;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  Pnl.Canvas.Font.Assign(Pnl.Font);
+  Pnl.Canvas.Font.Color := CLR_WHITE;
+  Pnl.Canvas.Brush.Style := bsClear;
+  Ts := Pnl.Canvas.TextStyle;
+  Ts.Alignment := taCenter;
+  Ts.Layout := tlCenter;
+  Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, Pnl.Caption, Ts);
+end;
+
 procedure TfrmPesajeIntegrado.FormShowHandler(Sender: TObject);
 begin
-  if btnSwitchConectar <> nil then
-    btnSwitchConectar.Color := CLR_SUCCESS;
   if SyncSvc <> nil then
   begin
     Screen.Cursor := crHourGlass;

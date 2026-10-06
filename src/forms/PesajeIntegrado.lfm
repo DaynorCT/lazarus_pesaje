@@ -1,15 +1,16 @@
 object frmPesajeIntegrado: TfrmPesajeIntegrado
-  Left = 350
+  Left = 74
   Height = 768
-  Top = 120
+  Top = 104
   Width = 1366
   Caption = 'Sistema de Pesaje'
   ClientHeight = 768
   ClientWidth = 1366
-  Color = $00F5F5F5
+  Color = 16119285
   Constraints.MinHeight = 720
   Constraints.MinWidth = 1280
   Position = poScreenCenter
+  LCLVersion = '4.7.0.0'
   OnResize = FormResize
   OnShow = FormShowHandler
   object pnlTop: TPanel
@@ -19,10 +20,11 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
     Width = 1366
     Align = alTop
     BevelOuter = bvNone
-    Color = clWhite
     ClientHeight = 64
     ClientWidth = 1366
+    Color = clWhite
     ParentBackground = False
+    ParentColor = False
     TabOrder = 0
     object pnlTopBorder: TPanel
       Left = 0
@@ -31,15 +33,16 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       Width = 1366
       Align = alBottom
       BevelOuter = bvNone
-      Color = $00F0E8E2
+      Color = 15788258
       ParentBackground = False
+      ParentColor = False
       TabOrder = 0
     end
     object lblTitulo: TLabel
       Left = 24
-      Height = 64
+      Height = 22
       Top = 0
-      Width = 400
+      Width = 189
       Caption = 'SISTEMA DE PESAJE'
       Font.Color = 3879198
       Font.Height = -19
@@ -52,8 +55,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       Height = 64
       Top = 0
       Width = 420
-      Anchors = [akTop, akRight]
       Alignment = taRightJustify
+      Anchors = [akTop, akRight]
       AutoSize = False
       BorderSpacing.Right = 264
       Font.Color = 9145444
@@ -71,8 +74,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       Caption = 'Sincronizar ahora'
       Font.Color = 1842204
       ParentFont = False
-      OnClick = SincronizarClick
       TabOrder = 1
+      OnClick = SincronizarClick
     end
     object btnEngranaje: TButton
       Left = 1302
@@ -84,8 +87,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       Caption = 'Menu'
       Font.Color = 1842204
       ParentFont = False
-      OnClick = EngranajeClick
       TabOrder = 2
+      OnClick = EngranajeClick
     end
   end
   object pnlContent: TPanel
@@ -95,20 +98,26 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
     Width = 1366
     Align = alClient
     BevelOuter = bvNone
-    Color = $00F5F5F5
-    OnClick = ContentClick
+    ClientHeight = 704
+    ClientWidth = 1366
+    Color = 16119285
     ParentBackground = False
+    ParentColor = False
     TabOrder = 1
+    OnClick = ContentClick
     object pnlMedio: TPanel
       Left = 24
       Height = 656
       Top = 24
       Width = 1318
       Align = alClient
-      BevelOuter = bvNone
       BorderSpacing.Around = 24
-      Color = $00F5F5F5
+      BevelOuter = bvNone
+      ClientHeight = 656
+      ClientWidth = 1318
+      Color = 16119285
       ParentBackground = False
+      ParentColor = False
       TabOrder = 0
       object pnlRegistroCard: TPanel
         Left = 0
@@ -116,11 +125,13 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
         Top = 0
         Width = 420
         BevelOuter = bvNone
+        ClientHeight = 430
+        ClientWidth = 420
         Color = clWhite
-        OnPaint = PaintRounded
         ParentBackground = False
         ParentColor = False
         TabOrder = 0
+        OnPaint = PaintRounded
         object pnlRegistro: TPanel
           Left = 0
           Height = 430
@@ -128,6 +139,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
           Width = 420
           Align = alClient
           BevelOuter = bvNone
+          ClientHeight = 430
+          ClientWidth = 420
           Color = clWhite
           ParentBackground = False
           ParentColor = False
@@ -136,7 +149,7 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Left = 20
             Height = 18
             Top = 12
-            Width = 380
+            Width = 122
             Caption = 'Registro de peso'
             Font.Color = 3879198
             Font.Height = -16
@@ -159,7 +172,9 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 49
             Width = 380
             BevelOuter = bvNone
-            Color = $00A65E25
+            ClientHeight = 110
+            ClientWidth = 380
+            Color = 10903077
             ParentBackground = False
             ParentColor = False
             TabOrder = 1
@@ -169,6 +184,8 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
               Top = 2
               Width = 376
               BevelOuter = bvNone
+              ClientHeight = 106
+              ClientWidth = 376
               Color = clWhite
               ParentBackground = False
               ParentColor = False
@@ -200,22 +217,27 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             ParentColor = False
             TabOrder = 2
           end
-          object btnSwitchConectar: TButton
+          object btnSwitchConectar: TPanel
+            Cursor = crHandPoint
             Left = 20
             Height = 40
             Top = 186
             Width = 112
+            BevelOuter = bvNone
             Caption = 'Conectar'
-            Font.Color = 1842204
+            Font.Color = clWhite
+            ParentBackground = False
+            ParentColor = False
             ParentFont = False
-            OnClick = SwitchConectarClick
             TabOrder = 3
+            OnClick = SwitchConectarClick
+            OnPaint = PaintConnectButton
           end
           object lblConexion: TLabel
             Left = 20
-            Height = 14
+            Height = 15
             Top = 226
-            Width = 72
+            Width = 53
             Alignment = taCenter
             Caption = 'Conexion'
             Font.Color = 9145444
@@ -228,17 +250,17 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Top = 186
             Width = 284
             Caption = 'Capturar peso'
+            Enabled = False
             Font.Color = 1842204
             ParentFont = False
-            Enabled = False
-            OnClick = CapturarPesoClick
             TabOrder = 4
+            OnClick = CapturarPesoClick
           end
           object lblPesoCapturado: TLabel
             Left = 20
             Height = 16
             Top = 222
-            Width = 380
+            Width = 129
             Alignment = taCenter
             Caption = 'Peso capturado: 0 kg'
             Font.Color = 9145444
@@ -248,14 +270,14 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
           object pnlEnviar: TButton
             Left = 20
             Height = 36
-            Top = 242
+            Top = 248
             Width = 380
             Caption = 'Enviar a la web'
+            Enabled = False
             Font.Color = 1842204
             ParentFont = False
-            Enabled = False
-            OnClick = EnviarPesoClick
             TabOrder = 5
+            OnClick = EnviarPesoClick
           end
         end
       end
@@ -269,7 +291,6 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
     Top = 80
   end
   object TimerEstado: TTimer
-    Enabled = True
     Interval = 2000
     OnTimer = TimerEstadoTimer
     Left = 176
