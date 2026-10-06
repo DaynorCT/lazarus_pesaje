@@ -575,7 +575,7 @@ begin
       TimerLectura.Enabled := True;
       btnSwitchConectar.Caption := 'Desconectar';
       if lblConexion <> nil then lblConexion.Caption := 'Modo prueba';
-      MostrarInfoDialogo('Balanza', 'No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.');
+      MostrarInfoDialogo('Balanza', 'No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.', dtInfo, 32);
       Exit;
     end;
     Puerto := Q.Fields[0].AsString;

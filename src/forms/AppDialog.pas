@@ -12,7 +12,7 @@ type
   TDialogoTipo = (dtInfo, dtExito, dtError, dtPregunta);
 
 function MostrarInfoDialogo(const Titulo, Mensaje: string;
-  ATipo: TDialogoTipo = dtInfo): Boolean;
+  ATipo: TDialogoTipo = dtInfo; AExtraButtonSpacing: Integer = 0): Boolean;
 function ConfirmarDialogo(const Titulo, Mensaje: string): Boolean;
 function ConfirmarContrasena(const Titulo: string): Boolean;
 function MostrarDialogoFinalizar(PesajeID, Bruto, Tara, Neto: Integer): Boolean;
@@ -35,7 +35,7 @@ type
     procedure AceptarClick(Sender: TObject);
     procedure CancelarClick(Sender: TObject);
     procedure Construir(const Titulo, Mensaje: string; ATipo: TDialogoTipo;
-      AConfirmar: Boolean; AConPass: Boolean);
+      AConfirmar: Boolean; AConPass: Boolean; AExtraButtonSpacing: Integer);
   end;
 
   TDialogoFinalizar = class(TForm)
@@ -71,50 +71,14 @@ begin
   Lbl.OnClick := AClick;
 end;
 
-// Calcula la altura necesaria para mostrar Txt con WordWrap en un
-// ancho AW (según la fuente del canvas).
-function AlturaMensaje(ACanvas: TCanvas; const Txt: string; AW: Integer): Integer;
-var
-  I, StartIdx: Integer;
-  Linea, Palabra: string;
-  LH: Integer;
-begin
-  LH := ACanvas.TextHeight('Ag');
-  Result := LH;
-  if AW < 10 then AW := 10;
-  Linea := '';
-  StartIdx := 1;
-  I := 1;
-  while I <= Length(Txt) + 1 do
-  begin
-    if (I > Length(Txt)) or (Txt[I] = ' ') then
-    begin
-      Palabra := Copy(Txt, StartIdx, I - StartIdx);
-      StartIdx := I + 1;
-      if Palabra <> '' then
-      begin
-        if (Linea <> '') and (ACanvas.TextWidth(Linea + ' ' + Palabra) > AW) then
-        begin
-          Result := Result + LH;
-          Linea := Palabra;
-        end
-        else if Linea = '' then
-          Linea := Palabra
-        else
-          Linea := Linea + ' ' + Palabra;
-      end;
-    end;
-    Inc(I);
-  end;
-end;
-
 procedure TAppDialogo.Construir(const Titulo, Mensaje: string;
-  ATipo: TDialogoTipo; AConfirmar: Boolean; AConPass: Boolean);
+  ATipo: TDialogoTipo; AConfirmar: Boolean; AConPass: Boolean;
+  AExtraButtonSpacing: Integer);
 var
   pnlTop, pnlSep: TPanel;
   lblTitulo, lblIcono, lblMsg: TLabel;
   pO, pI: TPanel;
-  H, MsgH, BtnY, MsgW: Integer;
+  H, MsgH, BtnY, MsgW, MsgPrefW: Integer;
 begin
   MsgW := D_W - 78;
 
@@ -169,16 +133,24 @@ begin
   lblMsg.Font.Size := 10;
   lblMsg.Font.Color := CLR_TEXT;
   lblMsg.WordWrap := True;
+  lblMsg.AutoSize := False;
   lblMsg.Alignment := taLeftJustify;
   lblMsg.Layout := tlTop;
+  lblMsg.SetBounds(58, 62, MsgW, 1);
 
-  // Altura del mensaje según su largo (el texto nunca se corta)
-  lblMsg.Canvas.Font := lblMsg.Font;
-  MsgH := AlturaMensaje(lblMsg.Canvas, Mensaje, MsgW) + 6;
+  // Use the LCL label's wrapped preferred size, so sizing matches actual
+  // widget-set font metrics instead of a separate manual line estimate.
+  HandleNeeded;
+  MsgPrefW := MsgW;
+  MsgH := 0;
+  lblMsg.GetPreferredSize(MsgPrefW, MsgH);
+  // Add vertical slack for wrapped lines; some widget sets under-report the
+  // preferred height by a few pixels and clip the final line otherwise.
+  MsgH := MsgH + 18;
   if MsgH < 22 then MsgH := 22;
-  lblMsg.SetBounds(58, 62, MsgW, MsgH);
+  lblMsg.Height := MsgH;
 
-  BtnY := 62 + MsgH + 12;
+  BtnY := lblMsg.Top + lblMsg.Height + 12 + AExtraButtonSpacing;
 
   if AConPass then
   begin
@@ -215,9 +187,9 @@ begin
   H := BtnY + BTN_H + 12;
   if H < 150 then H := 150;
 
-  Self.Height := H;
-  Self.Constraints.MinHeight := H;
-  Self.Constraints.MaxHeight := H;
+  ClientHeight := H;
+  Constraints.MinHeight := Height;
+  Constraints.MaxHeight := Height;
 
   if AConfirmar or AConPass then
   begin
@@ -264,13 +236,13 @@ begin
 end;
 
 function MostrarInfoDialogo(const Titulo, Mensaje: string;
-  ATipo: TDialogoTipo): Boolean;
+  ATipo: TDialogoTipo; AExtraButtonSpacing: Integer): Boolean;
 var
   F: TAppDialogo;
 begin
   F := TAppDialogo.CreateNew(nil);
   try
-    F.Construir(Titulo, Mensaje, ATipo, False, False);
+    F.Construir(Titulo, Mensaje, ATipo, False, False, AExtraButtonSpacing);
     Result := F.ShowModal = mrOk;
   finally
     F.Free;
@@ -283,7 +255,7 @@ var
 begin
   F := TAppDialogo.CreateNew(nil);
   try
-    F.Construir(Titulo, Mensaje, dtPregunta, True, False);
+    F.Construir(Titulo, Mensaje, dtPregunta, True, False, 0);
     Result := F.ShowModal = mrOk;
   finally
     F.Free;
@@ -296,7 +268,7 @@ var
 begin
   F := TAppDialogo.CreateNew(nil);
   try
-    F.Construir(Titulo, 'Para continuar ingrese su contrasena.', dtInfo, False, True);
+    F.Construir(Titulo, 'Para continuar ingrese su contrasena.', dtInfo, False, True, 0);
     Result := F.ShowModal = mrOk;
   finally
     F.Free;
