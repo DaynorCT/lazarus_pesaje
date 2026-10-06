@@ -271,7 +271,7 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Font.Height = -13
             ParentFont = False
           end
-          object pnlEnviar: TButton
+          object pnlEnviar: TPanel
             Left = 20
             Height = 36
             Top = 248
@@ -280,8 +280,12 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
             Enabled = False
             Font.Color = 1842204
             ParentFont = False
+            BevelOuter = bvNone
+            ParentBackground = False
+            ParentColor = False
             TabOrder = 5
             OnClick = EnviarPesoClick
+            OnPaint = PaintSendButton
           end
         end
       end

@@ -17,7 +17,7 @@ type
     pnlTop, pnlContent, pnlMedio, pnlRegistroCard, pnlRegistro: TPanel;
     pnlDisplay, pnlSep1, pnlSep2: TPanel;
     pnlCapturarPeso: TPanel;
-    pnlEnviar: TButton;
+    pnlEnviar: TPanel;
     btnSwitchConectar: TPanel;
     btnSincronizar, btnEngranaje: TButton;
     lblTitulo, lblPesoDisplay, lblRegistroTitle: TLabel;
@@ -26,6 +26,7 @@ type
     procedure PaintRounded(Sender: TObject);
     procedure PaintConnectButton(Sender: TObject);
     procedure PaintCaptureButton(Sender: TObject);
+    procedure PaintSendButton(Sender: TObject);
     procedure SwitchConectarClick(Sender: TObject);
     procedure CapturarPesoClick(Sender: TObject);
     procedure EnviarPesoClick(Sender: TObject);
@@ -192,6 +193,37 @@ begin
   if Pnl.Enabled then
   begin
     Pnl.Canvas.Brush.Color := CLR_INFO;
+    Pnl.Canvas.Font.Color := CLR_WHITE;
+  end
+  else
+  begin
+    Pnl.Canvas.Brush.Color := CLR_CARD;
+    Pnl.Canvas.Font.Color := CLR_TEXT_MUTED;
+  end;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  Pnl.Canvas.Font.Assign(Pnl.Font);
+  if Pnl.Enabled then
+    Pnl.Canvas.Font.Color := CLR_WHITE
+  else
+    Pnl.Canvas.Font.Color := CLR_TEXT_MUTED;
+  Pnl.Canvas.Brush.Style := bsClear;
+  Ts := Pnl.Canvas.TextStyle;
+  Ts.Alignment := taCenter;
+  Ts.Layout := tlCenter;
+  Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, Pnl.Caption, Ts);
+end;
+
+procedure TfrmPesajeIntegrado.PaintSendButton(Sender: TObject);
+var
+  Pnl: TPanel;
+  Ts: TTextStyle;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Style := bsSolid;
+  if Pnl.Enabled then
+  begin
+    Pnl.Canvas.Brush.Color := CLR_PRIMARY;
     Pnl.Canvas.Font.Color := CLR_WHITE;
   end
   else
