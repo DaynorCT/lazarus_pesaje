@@ -26,6 +26,7 @@ type
     TimerLectura, TimerEstado: TTimer;
     procedure PaintRounded(Sender: TObject);
     procedure PaintConnectButton(Sender: TObject);
+    procedure PaintGearButton(Sender: TObject);
     procedure PaintCaptureButton(Sender: TObject);
     procedure PaintSendButton(Sender: TObject);
     procedure SwitchConectarClick(Sender: TObject);
@@ -177,6 +178,21 @@ begin
   Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
   Pnl.Canvas.Font.Assign(Pnl.Font);
   Pnl.Canvas.Font.Color := CLR_WHITE;
+  Pnl.Canvas.Brush.Style := bsClear;
+  Ts := Pnl.Canvas.TextStyle;
+  Ts.Alignment := taCenter;
+  Ts.Layout := tlCenter;
+  Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, Pnl.Caption, Ts);
+end;
+
+procedure TfrmPesajeIntegrado.PaintGearButton(Sender: TObject);
+var
+  Pnl: TPanel;
+  Ts: TTextStyle;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Font.Assign(Pnl.Font);
+  Pnl.Canvas.Font.Color := CLR_SUCCESS;
   Pnl.Canvas.Brush.Style := bsClear;
   Ts := Pnl.Canvas.TextStyle;
   Ts.Alignment := taCenter;

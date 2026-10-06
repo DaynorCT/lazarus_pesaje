@@ -87,13 +87,13 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       BevelOuter = bvNone
       BorderSpacing.Right = 24
       Caption = 'Menu'
-      Color = 3308846
+      Color = clWhite
       ParentBackground = False
       ParentColor = False
       ParentFont = False
       TabOrder = 2
       OnClick = EngranajeClick
-      OnPaint = PaintConnectButton
+      OnPaint = PaintGearButton
     end
   end
   object pnlContent: TPanel

@@ -1,7 +1,7 @@
 # Apply Theme Colors and Icons to Weighing Controls
 
 ## Goal
-Render the integrated weighing controls with their selected theme colors and replace the gear button's “Menu” text with the existing Font Awesome gear icon.
+Render the integrated weighing controls with their selected theme colors; show the gear as only a success-colored Font Awesome icon, without a colored button surface or outline.
 
 ## Scope
 - Change only the integrated controls in `src/forms/PesajeIntegrado.lfm` and `src/forms/PesajeIntegrado.pas`.
@@ -21,11 +21,13 @@ Render the integrated weighing controls with their selected theme colors and rep
 8. [x] Build and structurally verify all four controls.
 9. [x] Replace the gear button's “Menu” text with `FA_COG`, using the bundled font and a Unicode gear fallback.
 10. [x] Build and verify the icon rendering configuration.
+11. [x] Remove the gear button's colored surface and outline; render only the `FA_COG` icon in `CLR_SUCCESS`.
+12. [x] Build and verify the icon-only control.
 
 ## Verification
-- `./compilar.sh mac` passed (`COMPILACION EXITOSA`); existing objects warned about macOS 11.0 vs 10.15 and the compiler emitted 26 hints.
+- `./compilar.sh mac` passed (`COMPILACION EXITOSA`, 870 lines compiled, 26 hints); existing objects warned about macOS 11.0 vs 10.15.
 - `git diff --check` passed.
-- Source wiring for all action/control clicks and paint handlers, disabled states, runtime enablement, gear icon font/fallback, and menu preservation was structurally verified.
+- Source wiring and preserved gear menu were structurally verified; only gear painter changes visuals to transparent/no border with success-colored glyph.
 - Runtime visual appearance and interaction have not been manually verified in a running GUI.
 
 ## Evidence
