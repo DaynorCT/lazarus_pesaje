@@ -161,6 +161,8 @@ end;
 
 procedure TfrmPesajeIntegrado.FormShowHandler(Sender: TObject);
 begin
+  if btnSwitchConectar <> nil then
+    btnSwitchConectar.Color := CLR_SUCCESS;
   if SyncSvc <> nil then
   begin
     Screen.Cursor := crHourGlass;
