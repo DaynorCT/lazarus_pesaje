@@ -19,7 +19,8 @@ type
     pnlCapturarPeso: TPanel;
     pnlEnviar: TPanel;
     btnSwitchConectar: TPanel;
-    btnSincronizar, btnEngranaje: TButton;
+    btnSincronizar: TButton;
+    btnEngranaje: TPanel;
     lblTitulo, lblPesoDisplay, lblRegistroTitle: TLabel;
     lblConexion, lblPesoCapturado, lblEstado: TLabel;
     TimerLectura, TimerEstado: TTimer;
@@ -247,6 +248,12 @@ end;
 
 procedure TfrmPesajeIntegrado.FormShowHandler(Sender: TObject);
 begin
+  if btnEngranaje <> nil then
+  begin
+    btnEngranaje.Caption := FAIconoStr(FA_COG, '⚙');
+    btnEngranaje.Font.Name := FAFuente;
+    btnEngranaje.Font.Size := 18;
+  end;
   if SyncSvc <> nil then
   begin
     Screen.Cursor := crHourGlass;

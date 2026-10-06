@@ -77,18 +77,23 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       TabOrder = 1
       OnClick = SincronizarClick
     end
-    object btnEngranaje: TButton
+    object btnEngranaje: TPanel
+      Cursor = crHandPoint
       Left = 1302
       Height = 40
       Top = 12
       Width = 40
       Anchors = [akTop, akRight]
+      BevelOuter = bvNone
       BorderSpacing.Right = 24
       Caption = 'Menu'
-      Font.Color = 1842204
+      Color = 3308846
+      ParentBackground = False
+      ParentColor = False
       ParentFont = False
       TabOrder = 2
       OnClick = EngranajeClick
+      OnPaint = PaintConnectButton
     end
   end
   object pnlContent: TPanel
