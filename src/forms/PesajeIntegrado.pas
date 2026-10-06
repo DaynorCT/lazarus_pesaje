@@ -73,8 +73,10 @@ implementation
 {$R *.lfm}
 
 const
-  CREG_W   = 420;
-  CREG_PAD = 20;
+  CREG_W        = 420;
+  CREG_PAD      = 20;
+  FA_LINK_ICON  = $F0C1;
+  FA_UNLINK_ICON = $F127;
 
 function PesoDesdeDisplay(const ACaption: string): Integer;
 var
@@ -166,23 +168,84 @@ begin
   end;
 end;
 
+procedure PaintActionButton(Pnl: TPanel; AIcon: Word; const AIconFallback: string;
+  AActiveColor: TColor; AEnabled: Boolean);
+var
+  IconText, IconFont: string;
+  TextColor, ButtonColor: TColor;
+  IconWidth, TextWidth, Gap, X, Y: Integer;
+begin
+  if AEnabled then
+  begin
+    ButtonColor := AActiveColor;
+    TextColor := CLR_WHITE;
+  end
+  else
+  begin
+    ButtonColor := CLR_CARD;
+    TextColor := CLR_TEXT_MUTED;
+  end;
+
+  Pnl.Canvas.Brush.Style := bsSolid;
+  Pnl.Canvas.Brush.Color := ButtonColor;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  Pnl.Canvas.Brush.Style := bsClear;
+
+  if FA_FONT_LOADED then
+  begin
+    IconText := FAIconoStr(AIcon, AIconFallback);
+    IconFont := FA_FONT_NAME;
+  end
+  else
+  begin
+    IconText := AIconFallback;
+    IconFont := Pnl.Font.Name;
+  end;
+  Pnl.Canvas.Font.Name := IconFont;
+  Pnl.Canvas.Font.Size := 12;
+  Pnl.Canvas.Font.Color := TextColor;
+  IconWidth := Pnl.Canvas.TextWidth(IconText);
+  Pnl.Canvas.Font.Assign(Pnl.Font);
+  Pnl.Canvas.Font.Color := TextColor;
+  TextWidth := Pnl.Canvas.TextWidth(Pnl.Caption);
+  Gap := 7;
+  X := (Pnl.Width - IconWidth - Gap - TextWidth) div 2;
+
+  Pnl.Canvas.Font.Name := IconFont;
+  Pnl.Canvas.Font.Size := 12;
+  Pnl.Canvas.Font.Color := TextColor;
+  Y := (Pnl.Height - Pnl.Canvas.TextHeight(IconText)) div 2;
+  Pnl.Canvas.TextOut(X, Y, IconText);
+
+  Inc(X, IconWidth + Gap);
+  Pnl.Canvas.Font.Assign(Pnl.Font);
+  Pnl.Canvas.Font.Color := TextColor;
+  Y := (Pnl.Height - Pnl.Canvas.TextHeight(Pnl.Caption)) div 2;
+  Pnl.Canvas.TextOut(X, Y, Pnl.Caption);
+end;
+
 procedure TfrmPesajeIntegrado.PaintConnectButton(Sender: TObject);
 var
   Pnl: TPanel;
-  Ts: TTextStyle;
+  IconCode: Word;
+  IconFallback: string;
+  ButtonColor: TColor;
 begin
   Pnl := TPanel(Sender);
-  Pnl.Canvas.Brush.Style := bsSolid;
-  Pnl.Canvas.Brush.Color := CLR_SUCCESS;
-  Pnl.Canvas.Pen.Style := psClear;
-  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
-  Pnl.Canvas.Font.Assign(Pnl.Font);
-  Pnl.Canvas.Font.Color := CLR_WHITE;
-  Pnl.Canvas.Brush.Style := bsClear;
-  Ts := Pnl.Canvas.TextStyle;
-  Ts.Alignment := taCenter;
-  Ts.Layout := tlCenter;
-  Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, Pnl.Caption, Ts);
+  if FConectado then
+  begin
+    ButtonColor := CLR_DESTRUCTIVE;
+    IconCode := FA_UNLINK_ICON;
+    IconFallback := '×';
+  end
+  else
+  begin
+    ButtonColor := CLR_SUCCESS;
+    IconCode := FA_LINK_ICON;
+    IconFallback := '↔';
+  end;
+  PaintActionButton(Pnl, IconCode, IconFallback, ButtonColor, True);
 end;
 
 procedure TfrmPesajeIntegrado.PaintGearButton(Sender: TObject);
@@ -201,65 +264,15 @@ begin
 end;
 
 procedure TfrmPesajeIntegrado.PaintCaptureButton(Sender: TObject);
-var
-  Pnl: TPanel;
-  Ts: TTextStyle;
 begin
-  Pnl := TPanel(Sender);
-  Pnl.Canvas.Brush.Style := bsSolid;
-  if Pnl.Enabled then
-  begin
-    Pnl.Canvas.Brush.Color := CLR_INFO;
-    Pnl.Canvas.Font.Color := CLR_WHITE;
-  end
-  else
-  begin
-    Pnl.Canvas.Brush.Color := CLR_CARD;
-    Pnl.Canvas.Font.Color := CLR_TEXT_MUTED;
-  end;
-  Pnl.Canvas.Pen.Style := psClear;
-  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
-  Pnl.Canvas.Font.Assign(Pnl.Font);
-  if Pnl.Enabled then
-    Pnl.Canvas.Font.Color := CLR_WHITE
-  else
-    Pnl.Canvas.Font.Color := CLR_TEXT_MUTED;
-  Pnl.Canvas.Brush.Style := bsClear;
-  Ts := Pnl.Canvas.TextStyle;
-  Ts.Alignment := taCenter;
-  Ts.Layout := tlCenter;
-  Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, Pnl.Caption, Ts);
+  PaintActionButton(TPanel(Sender), FA_SCALE, '⚖', CLR_INFO,
+    TPanel(Sender).Enabled);
 end;
 
 procedure TfrmPesajeIntegrado.PaintSendButton(Sender: TObject);
-var
-  Pnl: TPanel;
-  Ts: TTextStyle;
 begin
-  Pnl := TPanel(Sender);
-  Pnl.Canvas.Brush.Style := bsSolid;
-  if Pnl.Enabled then
-  begin
-    Pnl.Canvas.Brush.Color := CLR_PRIMARY;
-    Pnl.Canvas.Font.Color := CLR_WHITE;
-  end
-  else
-  begin
-    Pnl.Canvas.Brush.Color := CLR_CARD;
-    Pnl.Canvas.Font.Color := CLR_TEXT_MUTED;
-  end;
-  Pnl.Canvas.Pen.Style := psClear;
-  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
-  Pnl.Canvas.Font.Assign(Pnl.Font);
-  if Pnl.Enabled then
-    Pnl.Canvas.Font.Color := CLR_WHITE
-  else
-    Pnl.Canvas.Font.Color := CLR_TEXT_MUTED;
-  Pnl.Canvas.Brush.Style := bsClear;
-  Ts := Pnl.Canvas.TextStyle;
-  Ts.Alignment := taCenter;
-  Ts.Layout := tlCenter;
-  Pnl.Canvas.TextRect(Pnl.ClientRect, 0, 0, Pnl.Caption, Ts);
+  PaintActionButton(TPanel(Sender), FA_HOME, '↗', CLR_PRIMARY,
+    TPanel(Sender).Enabled);
 end;
 
 procedure TfrmPesajeIntegrado.FormShowHandler(Sender: TObject);
@@ -294,7 +307,7 @@ const
   DISP_H = 120;
   ROW_H  = 40;
 var
-  W, H, P, Gap, InnerW, YPos, BtnW, RowY: Integer;
+  W, H, P, Gap, InnerW, YPos, BtnW, RowY, ConnectW: Integer;
 begin
   if (pnlMedio = nil) or (pnlRegistroCard = nil) or (pnlRegistro = nil) then Exit;
 
@@ -331,18 +344,21 @@ begin
   end;
   if pnlSep2 <> nil then begin pnlSep2.SetBounds(P, YPos, InnerW, 1); YPos := YPos + 10; end;
 
-  // ── Fila conexion: switch + boton Capturar peso ──
+  // ── Fila conexion: el boton se ensancha para DESCONECTAR + icono.
+  // El ancho extra se toma del boton Capturar, manteniendo el layout alineado.
   RowY := YPos;
+  ConnectW := 112;
+  if FConectado then ConnectW := 152;
   if btnSwitchConectar <> nil then
-    btnSwitchConectar.SetBounds(P, RowY, 112, ROW_H);
+    btnSwitchConectar.SetBounds(P, RowY, ConnectW, ROW_H);
   if lblConexion <> nil then
   begin
-    lblConexion.SetBounds(P, RowY + ROW_H, 112, 14);
+    lblConexion.SetBounds(P, RowY + ROW_H, ConnectW, 14);
     lblConexion.Font.Size := 9;
   end;
-  BtnW := InnerW - 112 - Gap;
+  BtnW := InnerW - ConnectW - Gap;
   if pnlCapturarPeso <> nil then
-    pnlCapturarPeso.SetBounds(P + 112 + Gap, RowY, BtnW, ROW_H);
+    pnlCapturarPeso.SetBounds(P + ConnectW + Gap, RowY, BtnW, ROW_H);
   YPos := RowY + ROW_H + 10;
 
   // ── Peso capturado ──
@@ -586,6 +602,7 @@ begin
     pnlCapturarPeso.Enabled := False;
     btnSwitchConectar.Caption := 'CONECTAR';
     if lblConexion <> nil then lblConexion.Caption := 'Desconectada';
+    AjustarLayout;
     if SyncSvc <> nil then SyncSvc.EnviarPesoVivo(0);
     Exit;
   end;
@@ -603,6 +620,7 @@ begin
       TimerLectura.Enabled := True;
       btnSwitchConectar.Caption := 'DESCONECTAR';
       if lblConexion <> nil then lblConexion.Caption := 'Modo prueba';
+      AjustarLayout;
       MostrarInfoDialogo('Balanza', 'No hay balanza configurada. Se activa MODO PRUEBA con pesos simulados.', dtInfo, 32);
       Exit;
     end;
@@ -642,6 +660,7 @@ begin
   if FConectado and not FModoPrueba and (lblConexion <> nil) then
     lblConexion.Caption := 'Conectada';
   if FConectado then btnSwitchConectar.Caption := 'DESCONECTAR';
+  AjustarLayout;
 end;
 
 procedure TfrmPesajeIntegrado.TimerLecturaTimer(Sender: TObject);
@@ -667,6 +686,7 @@ begin
     pnlCapturarPeso.Enabled := False;
     btnSwitchConectar.Caption := 'CONECTAR';
     if lblConexion <> nil then lblConexion.Caption := 'Desconectada';
+    AjustarLayout;
     Exit;
   end;
   Trama := DM.LeerPuertoSerial;
