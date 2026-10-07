@@ -2,6 +2,6 @@
   "url" : "http://localhost:3000",
   "apikey" : "",
   "autoenviar" : true,
-  "modo_operacion" : "AUTONOMO",
+  "modo_operacion" : "INTEGRADO",
   "alwaysontop" : false
 }

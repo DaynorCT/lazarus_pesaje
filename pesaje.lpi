@@ -39,6 +39,7 @@
         <ComponentName Value="DM"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
         <TopLine Value="432"/>
         <CursorPos X="40" Y="445"/>
@@ -79,7 +80,6 @@
         <ComponentName Value="FramePesaje"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="11"/>
         <TopLine Value="474"/>
         <CursorPos X="94" Y="474"/>
