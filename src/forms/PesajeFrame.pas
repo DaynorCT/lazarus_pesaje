@@ -1250,11 +1250,22 @@ begin
 end;
 
 procedure TFramePesaje.SwitchTaraClick(Sender: TObject);
+var Q: TSQLQuery; VehiculoID: Integer;
 begin
   FUsarTaraManual:=not FUsarTaraManual;
   if not FUsarTaraManual then begin
     FTaraManual:=''; FTaraCapturada:=-1; pnlGuardarTara.Visible:=False;
-    edtTaraManual.ReadOnly:=True; edtTaraManual.Text:=IntToStr(FTara);
+    edtTaraManual.ReadOnly:=True;
+    if cmbVehiculo.ItemIndex>0 then begin
+      VehiculoID:=PtrInt(cmbVehiculo.Items.Objects[cmbVehiculo.ItemIndex]);
+      Q:=DM.AbrirQuery('SELECT tara FROM vehiculos WHERE id='+IntToStr(VehiculoID));
+      try
+        if not Q.EOF then FTara:=Q.Fields[0].AsInteger;
+      finally Q.Close; end;
+    end else FTara:=0;
+    edtTaraManual.Text:=IntToStr(FTara);
+    FPesoNeto:=FPesoBruto-FTara;
+    ActualizarResumenPesos;
   end else begin
     edtTaraManual.ReadOnly:=False; pnlGuardarTara.Visible:=True;
     if FTara>0 then begin FTaraManual:=IntToStr(FTara); edtTaraManual.Text:=FTaraManual; end
