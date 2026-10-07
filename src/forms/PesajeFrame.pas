@@ -335,7 +335,8 @@ begin
   pnlCapturarPeso.OnPaint := @PaintRounded; pnlCapturarPeso.OnClick := @CapturarPesoClick;
   Lbl := TLabel.Create(pnlCapturarPeso); Lbl.Parent := pnlCapturarPeso;
   Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
-  Lbl.Caption := 'Cap. peso'; Lbl.Font.Size := 10; Lbl.Font.Color := CLR_WHITE;
+  Lbl.Caption := '⚖  Cap. peso'; Lbl.Font.Name := 'default';
+  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_WHITE;
   Lbl.Transparent := True; Lbl.Cursor := crHandPoint; Lbl.OnClick := @CapturarPesoClick;
 
   pnlCapturarTara := TPanel.Create(pnlRegistro);
@@ -348,7 +349,8 @@ begin
   pnlCapturarTara.OnPaint := @PaintRounded; pnlCapturarTara.OnClick := @TaraClick;
   Lbl := TLabel.Create(pnlCapturarTara); Lbl.Parent := pnlCapturarTara;
   Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
-  Lbl.Caption := 'Cap. tara'; Lbl.Font.Size := 10; Lbl.Font.Color := CLR_WHITE;
+  Lbl.Caption := '⚖−  Cap. tara'; Lbl.Font.Name := 'default';
+  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_WHITE;
   Lbl.Transparent := True; Lbl.Cursor := crHandPoint; Lbl.OnClick := @TaraClick;
   YPos := YPos + C_BTN_H + 18;
 

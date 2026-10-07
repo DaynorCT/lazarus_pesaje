@@ -40,8 +40,8 @@ type
 
   TDialogoFinalizar = class(TForm)
   private
-    FPnlWrap: TPanel;
-    FBtnCancelar, FBtnFinalizar: TPanel;
+    FPanelBotones: TPanel;
+    FBtnCancelar, FBtnFinalizar: TButton;
     procedure PosicionarBotones(Sender: TObject);
     procedure OkClick(Sender: TObject);
     procedure CancelClick(Sender: TObject);
@@ -282,39 +282,37 @@ procedure TDialogoFinalizar.PosicionarBotones(Sender: TObject);
 const
   BUTTON_WIDTH = 110;
   BUTTON_GAP = 12;
-  BUTTON_TOP = 214;
 var
-  W, LeftPos: Integer;
+  W, LeftPos, TopPos: Integer;
 begin
-  if (FPnlWrap = nil) or (FBtnCancelar = nil) or (FBtnFinalizar = nil) then Exit;
-  W := FPnlWrap.ClientWidth;
+  if (FPanelBotones = nil) or (FBtnCancelar = nil) or (FBtnFinalizar = nil) then Exit;
+  W := FPanelBotones.ClientWidth;
   LeftPos := (W - (2 * BUTTON_WIDTH + BUTTON_GAP)) div 2;
-  FBtnCancelar.SetBounds(LeftPos, BUTTON_TOP, BUTTON_WIDTH, BTN_H);
+  TopPos := (FPanelBotones.ClientHeight - BTN_H) div 2;
+  FBtnCancelar.SetBounds(LeftPos, TopPos, BUTTON_WIDTH, BTN_H);
   FBtnFinalizar.SetBounds(LeftPos + BUTTON_WIDTH + BUTTON_GAP,
-    BUTTON_TOP, BUTTON_WIDTH, BTN_H);
+    TopPos, BUTTON_WIDTH, BTN_H);
 end;
 
-// Diálogo "Finalizar pesaje" con el mismo estilo uniforme.
+// Hybrid dialog: native Lazarus layout/buttons with the project's custom summary card.
 function MostrarDialogoFinalizar(PesajeID, Bruto, Tara, Neto: Integer): Boolean;
 var
   F: TDialogoFinalizar;
-  pnlWrap, pnlDatos: TPanel;
+  pnlWrap, pnlHeader, pnlDatos, pnlConfirm, pnlButtons, Sep: TPanel;
   Lbl: TLabel;
-  YPos, W, BtnW, BtnGap, BtnLeft: Integer;
+  Btn: TButton;
 begin
   Result := False;
   F := TDialogoFinalizar.CreateNew(nil);
   try
     F.Caption := '';
     F.Width := D_W;
-    F.Height := 300;
+    F.Height := 340;
     F.Position := poMainFormCenter;
-    F.BorderStyle := bsDialog;
+    F.BorderStyle := bsSizeable;
     F.Color := CLR_BG;
     F.Constraints.MinWidth := D_W;
-    F.Constraints.MaxWidth := D_W;
-    F.Constraints.MinHeight := 300;
-    F.Constraints.MaxHeight := 300;
+    F.Constraints.MinHeight := 340;
 
     pnlWrap := TPanel.Create(F);
     pnlWrap.Parent := F;
@@ -323,84 +321,125 @@ begin
     pnlWrap.Color := CLR_CARD;
     pnlWrap.BorderSpacing.Around := 14;
 
+    pnlHeader := TPanel.Create(F);
+    pnlHeader.Parent := pnlWrap;
+    pnlHeader.Align := alTop;
+    pnlHeader.Height := 58;
+    pnlHeader.BorderSpacing.Bottom := 8;
+    pnlHeader.BevelOuter := bvNone;
+    pnlHeader.Color := CLR_CARD;
+
     Lbl := TLabel.Create(F);
-    Lbl.Parent := pnlWrap;
-    Lbl.SetBounds(6, 6, D_W - 40, 24);
+    Lbl.Parent := pnlHeader;
+    Lbl.Align := alTop;
+    Lbl.Height := 30;
+    Lbl.BorderSpacing.Left := 6;
     Lbl.Caption := 'Finalizar Pesaje #' + IntToStr(PesajeID);
     Lbl.Font.Size := 13;
     Lbl.Font.Style := [fsBold];
     Lbl.Font.Color := CLR_TEXT_HEADING;
 
     Lbl := TLabel.Create(F);
-    Lbl.Parent := pnlWrap;
-    Lbl.SetBounds(6, 34, D_W - 40, 16);
+    Lbl.Parent := pnlHeader;
+    Lbl.Align := alTop;
+    Lbl.Height := 22;
+    Lbl.BorderSpacing.Left := 6;
     Lbl.Caption := 'Verifique los pesos antes de finalizar';
     Lbl.Font.Size := 10;
     Lbl.Font.Color := CLR_TEXT_SLATE;
 
     pnlDatos := TPanel.Create(F);
     pnlDatos.Parent := pnlWrap;
-    pnlDatos.SetBounds(6, 58, D_W - 40, 112);
+    pnlDatos.Align := alTop;
+    pnlDatos.Height := 112;
+    pnlDatos.BorderSpacing.Bottom := 12;
     pnlDatos.BevelOuter := bvNone;
     pnlDatos.Color := CLR_SIDEBAR_ACTIVE;
 
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(16, 14, 100, 18); Lbl.Caption := 'Peso Bruto';
+    Lbl.SetBounds(16, 14, 120, 18); Lbl.Caption := 'Peso Bruto';
     Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_SLATE;
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(190, 14, pnlDatos.Width - 206, 18);
+    Lbl.SetBounds(150, 14, D_W - 194, 18);
+    Lbl.Anchors := [akTop, akLeft, akRight];
     Lbl.Caption := FormatFloat('#,##0', Bruto) + ' kg';
     Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
 
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(16, 38, 100, 18); Lbl.Caption := 'Tara';
+    Lbl.SetBounds(16, 38, 120, 18); Lbl.Caption := 'Tara';
     Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_SLATE;
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(190, 38, pnlDatos.Width - 206, 18);
+    Lbl.SetBounds(150, 38, D_W - 194, 18);
+    Lbl.Anchors := [akTop, akLeft, akRight];
     Lbl.Caption := FormatFloat('#,##0', Tara) + ' kg';
     Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
 
-    with TPanel.Create(F) do
-    begin
-      Parent := pnlDatos;
-      SetBounds(16, 66, pnlDatos.Width - 32, 1);
-      BevelOuter := bvNone;
-      Color := CLR_BORDER;
-    end;
+    Sep := TPanel.Create(F);
+    Sep.Parent := pnlDatos;
+    Sep.SetBounds(16, 66, D_W - 60, 1);
+    Sep.Anchors := [akTop, akLeft, akRight];
+    Sep.BevelOuter := bvNone;
+    Sep.Color := CLR_BORDER;
 
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(16, 76, 100, 22); Lbl.Caption := 'Peso Neto';
+    Lbl.SetBounds(16, 76, 120, 22); Lbl.Caption := 'Peso Neto';
     Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING; Lbl.Font.Style := [fsBold];
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(190, 72, pnlDatos.Width - 206, 26);
+    Lbl.SetBounds(150, 72, D_W - 194, 26);
+    Lbl.Anchors := [akTop, akLeft, akRight];
     Lbl.Caption := FormatFloat('#,##0', Neto) + ' kg';
     Lbl.Font.Size := 14; Lbl.Font.Color := CLR_PRIMARY; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
 
-    YPos := 186;
+    pnlConfirm := TPanel.Create(F);
+    pnlConfirm.Parent := pnlWrap;
+    pnlConfirm.Align := alTop;
+    pnlConfirm.Height := 34;
+    pnlConfirm.BorderSpacing.Bottom := 8;
+    pnlConfirm.BevelOuter := bvNone;
+    pnlConfirm.Color := CLR_CARD;
+
     Lbl := TLabel.Create(F);
-    Lbl.Parent := pnlWrap;
-    Lbl.SetBounds(6, YPos, D_W - 40, 16);
+    Lbl.Parent := pnlConfirm;
+    Lbl.Align := alClient;
+    Lbl.BorderSpacing.Left := 6;
+    Lbl.Layout := tlCenter;
     Lbl.Caption := 'Confirme la finalizacion del pesaje';
     Lbl.Font.Size := 10;
     Lbl.Font.Color := CLR_TEXT_SLATE;
 
-    YPos := 214;
-    W := pnlWrap.ClientWidth;
-    BtnW := 110;
-    BtnGap := 12;
-    BtnLeft := (W - (2 * BtnW + BtnGap)) div 2;
-    CrearBotonC(pnlWrap, BtnLeft, YPos, BtnW, 'CANCELAR', CLR_CARD, CLR_TEXT, @F.CancelClick);
-    CrearBotonC(pnlWrap, BtnLeft + BtnW + BtnGap, YPos, BtnW, 'FINALIZAR', CLR_PRIMARY, CLR_PRIMARY_FG, @F.OkClick);
+    pnlButtons := TPanel.Create(F);
+    pnlButtons.Parent := pnlWrap;
+    pnlButtons.Align := alBottom;
+    pnlButtons.Height := 44;
+    pnlButtons.BevelOuter := bvNone;
+    pnlButtons.Color := CLR_CARD;
 
-    F.FPnlWrap := pnlWrap;
-    F.FBtnCancelar := TPanel(pnlWrap.Controls[pnlWrap.ControlCount - 2]);
-    F.FBtnFinalizar := TPanel(pnlWrap.Controls[pnlWrap.ControlCount - 1]);
+    F.FPanelBotones := pnlButtons;
+    Btn := TButton.Create(F);
+    F.FBtnCancelar := Btn;
+    Btn.Parent := pnlButtons;
+    Btn.Caption := 'CANCELAR';
+    Btn.Font.Size := 10;
+    Btn.Font.Color := CLR_TEXT;
+    Btn.Cancel := True;
+    Btn.OnClick := @F.CancelClick;
+
+    Btn := TButton.Create(F);
+    F.FBtnFinalizar := Btn;
+    Btn.Parent := pnlButtons;
+    Btn.Caption := 'FINALIZAR';
+    Btn.Font.Size := 10;
+    Btn.Font.Style := [fsBold];
+    Btn.Font.Color := CLR_PRIMARY;
+    Btn.Default := True;
+    Btn.OnClick := @F.OkClick;
+
     F.OnShow := @F.PosicionarBotones;
     F.OnResize := @F.PosicionarBotones;
-    pnlWrap.OnResize := @F.PosicionarBotones;
+    pnlButtons.OnResize := @F.PosicionarBotones;
     F.PosicionarBotones(nil);
 
     Result := F.ShowModal = mrOk;
