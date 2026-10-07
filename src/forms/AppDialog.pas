@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Theme;
+  LCLType, Theme;
 
 type
   TDialogoTipo = (dtInfo, dtExito, dtError, dtPregunta);
@@ -41,8 +41,10 @@ type
   TDialogoFinalizar = class(TForm)
   private
     FPanelBotones: TPanel;
-    FBtnCancelar, FBtnFinalizar: TButton;
+    FPanelCancelar, FPanelFinalizar: TPanel;
     procedure PosicionarBotones(Sender: TObject);
+    procedure DialogKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure PintarBotonPesaje(Sender: TObject);
     procedure OkClick(Sender: TObject);
     procedure CancelClick(Sender: TObject);
   end;
@@ -68,6 +70,58 @@ begin
   Lbl.Caption := ACaption;
   Lbl.Font.Size := 11;
   Lbl.Font.Style := [fsBold];
+  Lbl.Font.Color := AFontColor;
+  Lbl.Transparent := True;
+  Lbl.Cursor := crHandPoint;
+  Lbl.OnClick := AClick;
+end;
+
+procedure TDialogoFinalizar.PintarBotonPesaje(Sender: TObject);
+var
+  Pnl: TPanel;
+begin
+  Pnl := TPanel(Sender);
+  Pnl.Canvas.Brush.Color := CLR_BG;
+  Pnl.Canvas.FillRect(0, 0, Pnl.Width, Pnl.Height);
+  Pnl.Canvas.Brush.Color := Pnl.Color;
+  if Pnl.Tag = 1 then
+  begin
+    Pnl.Canvas.Pen.Color := CLR_INFO;
+    Pnl.Canvas.Pen.Width := 1;
+    Pnl.Canvas.Pen.Style := psSolid;
+    Pnl.Canvas.RoundRect(1, 1, Pnl.Width - 1, Pnl.Height - 1, 8, 8);
+  end
+  else
+  begin
+    Pnl.Canvas.Pen.Style := psClear;
+    Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  end;
+end;
+
+function CrearBotonPesaje(AParent: TWinControl; ALeft, ATop, AW: Integer;
+  const ACaption: string; AColor, AFontColor: TColor; ATag: Integer;
+  AClick, APaint: TNotifyEvent): TPanel;
+var
+  Lbl: TLabel;
+begin
+  Result := TPanel.Create(AParent);
+  Result.Parent := AParent;
+  Result.SetBounds(ALeft, ATop, AW, BTN_H);
+  Result.BevelOuter := bvNone;
+  Result.Color := AColor;
+  Result.Tag := ATag;
+  Result.Cursor := crHandPoint;
+  Result.OnPaint := APaint;
+  Result.OnClick := AClick;
+
+  Lbl := TLabel.Create(Result);
+  Lbl.Parent := Result;
+  Lbl.Align := alClient;
+  Lbl.Alignment := taCenter;
+  Lbl.Layout := tlCenter;
+  Lbl.Caption := ACaption;
+  Lbl.Font.Size := 12;
+  Lbl.Font.Style := [];
   Lbl.Font.Color := AFontColor;
   Lbl.Transparent := True;
   Lbl.Cursor := crHandPoint;
@@ -285,13 +339,23 @@ const
 var
   W, LeftPos, TopPos: Integer;
 begin
-  if (FPanelBotones = nil) or (FBtnCancelar = nil) or (FBtnFinalizar = nil) then Exit;
+  if (FPanelBotones = nil) or (FPanelCancelar = nil) or (FPanelFinalizar = nil) then Exit;
   W := FPanelBotones.ClientWidth;
   LeftPos := (W - (2 * BUTTON_WIDTH + BUTTON_GAP)) div 2;
   TopPos := (FPanelBotones.ClientHeight - BTN_H) div 2;
-  FBtnCancelar.SetBounds(LeftPos, TopPos, BUTTON_WIDTH, BTN_H);
-  FBtnFinalizar.SetBounds(LeftPos + BUTTON_WIDTH + BUTTON_GAP,
+  FPanelCancelar.SetBounds(LeftPos, TopPos, BUTTON_WIDTH, BTN_H);
+  FPanelFinalizar.SetBounds(LeftPos + BUTTON_WIDTH + BUTTON_GAP,
     TopPos, BUTTON_WIDTH, BTN_H);
+end;
+
+procedure TDialogoFinalizar.DialogKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Shift <> [] then Exit;
+  case Key of
+    VK_ESCAPE: begin Key := 0; CancelClick(Sender); end;
+    VK_RETURN: begin Key := 0; OkClick(Sender); end;
+  end;
 end;
 
 // Hybrid dialog: native Lazarus layout/buttons with the project's custom summary card.
@@ -300,7 +364,6 @@ var
   F: TDialogoFinalizar;
   pnlWrap, pnlHeader, pnlDatos, pnlConfirm, pnlButtons, Sep: TPanel;
   Lbl: TLabel;
-  Btn: TButton;
 begin
   Result := False;
   F := TDialogoFinalizar.CreateNew(nil);
@@ -418,25 +481,15 @@ begin
     pnlButtons.Color := CLR_CARD;
 
     F.FPanelBotones := pnlButtons;
-    Btn := TButton.Create(F);
-    F.FBtnCancelar := Btn;
-    Btn.Parent := pnlButtons;
-    Btn.Caption := 'CANCELAR';
-    Btn.Font.Size := 10;
-    Btn.Font.Color := CLR_TEXT;
-    Btn.Cancel := True;
-    Btn.OnClick := @F.CancelClick;
+    F.FPanelCancelar := CrearBotonPesaje(pnlButtons, 0, 0, 110,
+      'CANCELAR', CLR_CARD, CLR_PRIMARY, 1, @F.CancelClick,
+      @F.PintarBotonPesaje);
+    F.FPanelFinalizar := CrearBotonPesaje(pnlButtons, 0, 0, 110,
+      'FINALIZAR', CLR_PRIMARY, CLR_WHITE, 0, @F.OkClick,
+      @F.PintarBotonPesaje);
 
-    Btn := TButton.Create(F);
-    F.FBtnFinalizar := Btn;
-    Btn.Parent := pnlButtons;
-    Btn.Caption := 'FINALIZAR';
-    Btn.Font.Size := 10;
-    Btn.Font.Style := [fsBold];
-    Btn.Font.Color := CLR_PRIMARY;
-    Btn.Default := True;
-    Btn.OnClick := @F.OkClick;
-
+    F.KeyPreview := True;
+    F.OnKeyDown := @F.DialogKeyDown;
     F.OnShow := @F.PosicionarBotones;
     F.OnResize := @F.PosicionarBotones;
     pnlButtons.OnResize := @F.PosicionarBotones;
