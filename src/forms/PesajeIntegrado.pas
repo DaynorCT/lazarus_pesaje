@@ -360,13 +360,13 @@ begin
     btnSwitchConectar.SetBounds(P, RowY, ConnectW, ROW_H);
   if lblConexion <> nil then
   begin
-    lblConexion.SetBounds(P, RowY + ROW_H, ConnectW, 14);
+    lblConexion.SetBounds(P, RowY + ROW_H + 2, ConnectW, 14);
     lblConexion.Font.Size := 9;
   end;
   BtnW := InnerW - ConnectW - Gap;
   if pnlCapturarPeso <> nil then
     pnlCapturarPeso.SetBounds(P + ConnectW + Gap, RowY, BtnW, ROW_H);
-  YPos := RowY + ROW_H + 10;
+  YPos := RowY + ROW_H + 28;
 
   // ── Peso capturado ──
   if lblPesoCapturado <> nil then
