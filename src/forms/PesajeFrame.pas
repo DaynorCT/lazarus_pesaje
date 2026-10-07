@@ -1222,13 +1222,21 @@ begin
 end;
 
 procedure TFramePesaje.TaraClick(Sender: TObject);
+var PesoActual: Integer;
 begin
-if not FConectado then begin MostrarInfoDialogo('Balanza', 'Conecte la balanza primero'); Exit; end;
+  if cmbVehiculo.ItemIndex < 1 then begin MostrarInfoDialogo('Vehiculo', 'Seleccione un vehiculo primero'); Exit; end;
+  if not FConectado then begin MostrarInfoDialogo('Balanza', 'Conecte la balanza primero'); Exit; end;
   if not FUsarTaraManual then begin MostrarInfoDialogo('Tara', 'Active el modo manual de tara para capturar'); Exit; end;
-  if FTara<=0 then begin MostrarInfoDialogo('Peso', 'Peso invalido'); Exit; end;
-  FTaraCapturada:=FTara; FTaraManual:=IntToStr(FTara);
-  edtTaraManual.Text:=FTaraManual; edtTaraManual.ReadOnly:=True;
-  FPesoBruto:=0; FPesoNeto:=0; ActualizarResumenPesos;
+  PesoActual := PesoDesdeDisplay(lblPesoDisplay.Caption);
+  if PesoActual <= 0 then begin MostrarInfoDialogo('Peso', 'Peso invalido'); Exit; end;
+  FTara := PesoActual;
+  FTaraCapturada := PesoActual;
+  FTaraManual := IntToStr(PesoActual);
+  edtTaraManual.Text := FTaraManual;
+  edtTaraManual.ReadOnly := True;
+  FPesoBruto := 0;
+  FPesoNeto := 0;
+  ActualizarResumenPesos;
 end;
 
 procedure TFramePesaje.SwitchTaraPaint(Sender: TObject);
