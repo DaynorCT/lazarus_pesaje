@@ -42,7 +42,12 @@ type
   private
     FPanelBotones: TPanel;
     FPanelCancelar, FPanelFinalizar: TPanel;
+    FPanelContenedor, FPanelEncabezado, FPanelConfirmacion: TPanel;
+    FPanelDatos: TPanel;
+    FValorBruto, FValorTara, FValorNeto, FSeparador: TControl;
     procedure PosicionarBotones(Sender: TObject);
+    procedure AjustarDatos(Sender: TObject);
+    procedure PosicionarSecciones(Sender: TObject);
     procedure DialogKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure PintarBotonPesaje(Sender: TObject);
     procedure OkClick(Sender: TObject);
@@ -346,6 +351,39 @@ begin
   FPanelCancelar.SetBounds(LeftPos, TopPos, BUTTON_WIDTH, BTN_H);
   FPanelFinalizar.SetBounds(LeftPos + BUTTON_WIDTH + BUTTON_GAP,
     TopPos, BUTTON_WIDTH, BTN_H);
+  AjustarDatos(Sender);
+end;
+
+procedure TDialogoFinalizar.PosicionarSecciones(Sender: TObject);
+begin
+  if (FPanelContenedor = nil) or (FPanelEncabezado = nil) or
+    (FPanelDatos = nil) or (FPanelConfirmacion = nil) or
+    (FPanelBotones = nil) then Exit;
+  FPanelEncabezado.SetBounds(0, 0, FPanelContenedor.ClientWidth, 58);
+  FPanelDatos.SetBounds(0, 66, FPanelContenedor.ClientWidth, 112);
+  FPanelConfirmacion.SetBounds(0, 190, FPanelContenedor.ClientWidth, 34);
+  FPanelBotones.SetBounds(0, FPanelContenedor.ClientHeight - 44,
+    FPanelContenedor.ClientWidth, 44);
+  AjustarDatos(Sender);
+  PosicionarBotones(Sender);
+end;
+
+procedure TDialogoFinalizar.AjustarDatos(Sender: TObject);
+const
+  VALUE_LEFT = 150;
+  RIGHT_MARGIN = 16;
+var
+  ValueWidth, SeparatorWidth: Integer;
+begin
+  if FPanelDatos = nil then Exit;
+  ValueWidth := FPanelDatos.ClientWidth - VALUE_LEFT - RIGHT_MARGIN;
+  if ValueWidth < 0 then ValueWidth := 0;
+  SeparatorWidth := FPanelDatos.ClientWidth - 32;
+  if SeparatorWidth < 0 then SeparatorWidth := 0;
+  if FValorBruto <> nil then FValorBruto.Width := ValueWidth;
+  if FValorTara <> nil then FValorTara.Width := ValueWidth;
+  if FValorNeto <> nil then FValorNeto.Width := ValueWidth;
+  if FSeparador <> nil then FSeparador.Width := SeparatorWidth;
 end;
 
 procedure TDialogoFinalizar.DialogKeyDown(Sender: TObject; var Key: Word;
@@ -364,6 +402,7 @@ var
   F: TDialogoFinalizar;
   pnlWrap, pnlHeader, pnlDatos, pnlConfirm, pnlButtons, Sep: TPanel;
   Lbl: TLabel;
+  LblValorBruto, LblValorTara, LblValorNeto: TLabel;
 begin
   Result := False;
   F := TDialogoFinalizar.CreateNew(nil);
@@ -386,8 +425,7 @@ begin
 
     pnlHeader := TPanel.Create(F);
     pnlHeader.Parent := pnlWrap;
-    pnlHeader.Align := alTop;
-    pnlHeader.Height := 58;
+    pnlHeader.SetBounds(0, 0, 0, 58);
     pnlHeader.BorderSpacing.Bottom := 8;
     pnlHeader.BevelOuter := bvNone;
     pnlHeader.Color := CLR_CARD;
@@ -413,18 +451,17 @@ begin
 
     pnlDatos := TPanel.Create(F);
     pnlDatos.Parent := pnlWrap;
-    pnlDatos.Align := alTop;
-    pnlDatos.Height := 112;
-    pnlDatos.BorderSpacing.Bottom := 12;
+    pnlDatos.SetBounds(0, 0, 0, 112);
     pnlDatos.BevelOuter := bvNone;
     pnlDatos.Color := CLR_SIDEBAR_ACTIVE;
 
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
     Lbl.SetBounds(16, 14, 120, 18); Lbl.Caption := 'Peso Bruto';
     Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_SLATE;
-    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(150, 14, D_W - 194, 18);
-    Lbl.Anchors := [akTop, akLeft, akRight];
+    LblValorBruto := TLabel.Create(F); LblValorBruto.Parent := pnlDatos;
+    LblValorBruto.SetBounds(150, 14, 0, 18);
+    LblValorBruto.Anchors := [akTop, akLeft];
+    Lbl := LblValorBruto;
     Lbl.Caption := FormatFloat('#,##0', Bruto) + ' kg';
     Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
@@ -432,35 +469,35 @@ begin
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
     Lbl.SetBounds(16, 38, 120, 18); Lbl.Caption := 'Tara';
     Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_SLATE;
-    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(150, 38, D_W - 194, 18);
-    Lbl.Anchors := [akTop, akLeft, akRight];
+    LblValorTara := TLabel.Create(F); LblValorTara.Parent := pnlDatos;
+    LblValorTara.SetBounds(150, 38, 0, 18);
+    LblValorTara.Anchors := [akTop, akLeft];
+    Lbl := LblValorTara;
     Lbl.Caption := FormatFloat('#,##0', Tara) + ' kg';
     Lbl.Font.Size := 12; Lbl.Font.Color := CLR_TEXT; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
 
     Sep := TPanel.Create(F);
     Sep.Parent := pnlDatos;
-    Sep.SetBounds(16, 66, D_W - 60, 1);
-    Sep.Anchors := [akTop, akLeft, akRight];
+    Sep.SetBounds(16, 66, 0, 1);
+    Sep.Anchors := [akTop, akLeft];
     Sep.BevelOuter := bvNone;
     Sep.Color := CLR_BORDER;
 
     Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
     Lbl.SetBounds(16, 76, 120, 22); Lbl.Caption := 'Peso Neto';
     Lbl.Font.Size := 11; Lbl.Font.Color := CLR_TEXT_HEADING; Lbl.Font.Style := [fsBold];
-    Lbl := TLabel.Create(F); Lbl.Parent := pnlDatos;
-    Lbl.SetBounds(150, 72, D_W - 194, 26);
-    Lbl.Anchors := [akTop, akLeft, akRight];
+    LblValorNeto := TLabel.Create(F); LblValorNeto.Parent := pnlDatos;
+    LblValorNeto.SetBounds(150, 72, 0, 26);
+    LblValorNeto.Anchors := [akTop, akLeft];
+    Lbl := LblValorNeto;
     Lbl.Caption := FormatFloat('#,##0', Neto) + ' kg';
     Lbl.Font.Size := 14; Lbl.Font.Color := CLR_PRIMARY; Lbl.Font.Style := [fsBold];
     Lbl.Alignment := taRightJustify;
 
     pnlConfirm := TPanel.Create(F);
     pnlConfirm.Parent := pnlWrap;
-    pnlConfirm.Align := alTop;
-    pnlConfirm.Height := 34;
-    pnlConfirm.BorderSpacing.Bottom := 8;
+    pnlConfirm.SetBounds(0, 0, 0, 34);
     pnlConfirm.BevelOuter := bvNone;
     pnlConfirm.Color := CLR_CARD;
 
@@ -475,10 +512,20 @@ begin
 
     pnlButtons := TPanel.Create(F);
     pnlButtons.Parent := pnlWrap;
-    pnlButtons.Align := alBottom;
-    pnlButtons.Height := 44;
+    pnlButtons.SetBounds(0, 0, 0, 44);
     pnlButtons.BevelOuter := bvNone;
     pnlButtons.Color := CLR_CARD;
+
+    F.FPanelContenedor := pnlWrap;
+    F.FPanelEncabezado := pnlHeader;
+    F.FPanelConfirmacion := pnlConfirm;
+    F.FPanelDatos := pnlDatos;
+    F.FValorBruto := LblValorBruto;
+    F.FValorTara := LblValorTara;
+    F.FValorNeto := LblValorNeto;
+    F.FSeparador := Sep;
+    pnlWrap.OnResize := @F.PosicionarSecciones;
+    pnlDatos.OnResize := @F.AjustarDatos;
 
     F.FPanelBotones := pnlButtons;
     F.FPanelCancelar := CrearBotonPesaje(pnlButtons, 0, 0, 110,
@@ -490,10 +537,9 @@ begin
 
     F.KeyPreview := True;
     F.OnKeyDown := @F.DialogKeyDown;
-    F.OnShow := @F.PosicionarBotones;
-    F.OnResize := @F.PosicionarBotones;
-    pnlButtons.OnResize := @F.PosicionarBotones;
-    F.PosicionarBotones(nil);
+    F.OnShow := @F.PosicionarSecciones;
+    F.OnResize := @F.PosicionarSecciones;
+    F.PosicionarSecciones(nil);
 
     Result := F.ShowModal = mrOk;
   finally
