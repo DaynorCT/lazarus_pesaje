@@ -414,7 +414,7 @@ begin
   // ── Botones ──
   btnConectar := CrearBoton(pnlMain, YPos, 420, 120, 40, 'Conectar', CLR_PRIMARY, CLR_WHITE, 0, @ConectarClick);
   btnLeer := CrearBoton(pnlMain, YPos, 550, 120, 40, 'Leer peso', CLR_PRIMARY, CLR_WHITE, 0, @LeerClick);
-  btnGuardar := CrearBoton(pnlMain, YPos, 680, 100, 40, 'Guardar', CLR_PRIMARY_DARK, CLR_WHITE, 0, @GuardarClick);
+  btnGuardar := CrearBoton(pnlMain, YPos, 680, 100, 40, 'Guardar', CLR_PRIMARY, CLR_WHITE, 0, @GuardarClick);
 
   TimerLectura := TTimer.Create(Self);
   TimerLectura.Interval := 500;
