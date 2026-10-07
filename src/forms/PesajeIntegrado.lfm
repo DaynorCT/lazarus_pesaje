@@ -64,18 +64,24 @@ object frmPesajeIntegrado: TfrmPesajeIntegrado
       Layout = tlCenter
       ParentFont = False
     end
-    object btnSincronizar: TButton
+    object btnSincronizar: TPanel
+      Cursor = crHandPoint
       Left = 1124
       Height = 36
       Top = 14
       Width = 170
       Anchors = [akTop, akRight]
       BorderSpacing.Right = 72
+      BevelOuter = bvNone
       Caption = 'Sincronizar ahora'
+      Color = clWhite
       Font.Color = 1842204
+      ParentBackground = False
+      ParentColor = False
       ParentFont = False
       TabOrder = 1
       OnClick = SincronizarClick
+      OnPaint = PaintSyncButton
     end
     object btnEngranaje: TPanel
       Cursor = crHandPoint

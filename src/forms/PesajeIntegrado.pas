@@ -19,7 +19,7 @@ type
     pnlCapturarPeso: TPanel;
     pnlEnviar: TPanel;
     btnSwitchConectar: TPanel;
-    btnSincronizar: TButton;
+    btnSincronizar: TPanel;
     btnEngranaje: TPanel;
     lblTitulo, lblPesoDisplay, lblRegistroTitle: TLabel;
     lblConexion, lblPesoCapturado, lblEstado: TLabel;
@@ -29,6 +29,7 @@ type
     procedure PaintGearButton(Sender: TObject);
     procedure PaintCaptureButton(Sender: TObject);
     procedure PaintSendButton(Sender: TObject);
+    procedure PaintSyncButton(Sender: TObject);
     procedure SwitchConectarClick(Sender: TObject);
     procedure CapturarPesoClick(Sender: TObject);
     procedure EnviarPesoClick(Sender: TObject);
@@ -77,6 +78,7 @@ const
   CREG_PAD      = 20;
   FA_LINK_ICON  = $F0C1;
   FA_UNLINK_ICON = $F127;
+  FA_REFRESH_ICON = $F021;
 
 function PesoDesdeDisplay(const ACaption: string): Integer;
 var
@@ -273,6 +275,11 @@ procedure TfrmPesajeIntegrado.PaintSendButton(Sender: TObject);
 begin
   PaintActionButton(TPanel(Sender), FA_HOME, '↗', CLR_PRIMARY,
     TPanel(Sender).Enabled);
+end;
+
+procedure TfrmPesajeIntegrado.PaintSyncButton(Sender: TObject);
+begin
+  PaintActionButton(TPanel(Sender), FA_REFRESH_ICON, '↻', CLR_WARNING, True);
 end;
 
 procedure TfrmPesajeIntegrado.FormShowHandler(Sender: TObject);
