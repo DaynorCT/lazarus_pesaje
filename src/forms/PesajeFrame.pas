@@ -85,6 +85,7 @@ type
     procedure AnularPesaje(ID: Integer);
     procedure ToggleEstadoPesaje(ID: Integer; EstadoActual: string);
     procedure PaintRounded(Sender: TObject);
+    procedure PaintCaptureButton(Sender: TObject);
     procedure FormResize(Sender: TObject);
     function MostrarDialogFinalizar(PesajeID, Bruto, Tara, Neto: Integer): Boolean;
     function CrearBoton(AParent: TPanel; ATop, ALeft, AW, AH: Integer; const ACaption: string;
@@ -332,12 +333,10 @@ begin
   pnlCapturarPeso.ParentBackground := False; pnlCapturarPeso.ParentColor := False;
   pnlCapturarPeso.Cursor := crHandPoint;
   pnlCapturarPeso.Enabled := False;
-  pnlCapturarPeso.OnPaint := @PaintRounded; pnlCapturarPeso.OnClick := @CapturarPesoClick;
-  Lbl := TLabel.Create(pnlCapturarPeso); Lbl.Parent := pnlCapturarPeso;
-  Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
-  Lbl.Caption := '⚖  Cap. peso'; Lbl.Font.Name := 'default';
-  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_WHITE;
-  Lbl.Transparent := True; Lbl.Cursor := crHandPoint; Lbl.OnClick := @CapturarPesoClick;
+  pnlCapturarPeso.Caption := 'Cap. peso';
+  pnlCapturarPeso.Font.Size := 12; pnlCapturarPeso.Font.Color := CLR_WHITE;
+  pnlCapturarPeso.OnPaint := @PaintCaptureButton;
+  pnlCapturarPeso.OnClick := @CapturarPesoClick;
 
   pnlCapturarTara := TPanel.Create(pnlRegistro);
   pnlCapturarTara.Parent := pnlRegistro;
@@ -346,12 +345,10 @@ begin
   pnlCapturarTara.ParentBackground := False; pnlCapturarTara.ParentColor := False;
   pnlCapturarTara.Cursor := crHandPoint;
   pnlCapturarTara.Enabled := False;
-  pnlCapturarTara.OnPaint := @PaintRounded; pnlCapturarTara.OnClick := @TaraClick;
-  Lbl := TLabel.Create(pnlCapturarTara); Lbl.Parent := pnlCapturarTara;
-  Lbl.Align := alClient; Lbl.Alignment := taCenter; Lbl.Layout := tlCenter;
-  Lbl.Caption := '⚖−  Cap. tara'; Lbl.Font.Name := 'default';
-  Lbl.Font.Size := 12; Lbl.Font.Color := CLR_WHITE;
-  Lbl.Transparent := True; Lbl.Cursor := crHandPoint; Lbl.OnClick := @TaraClick;
+  pnlCapturarTara.Caption := 'Cap. tara';
+  pnlCapturarTara.Font.Size := 12; pnlCapturarTara.Font.Color := CLR_WHITE;
+  pnlCapturarTara.OnPaint := @PaintCaptureButton;
+  pnlCapturarTara.OnClick := @TaraClick;
   YPos := YPos + C_BTN_H + 18;
 
   lblBrutoTit := TLabel.Create(pnlRegistro); lblBrutoTit.Parent := pnlRegistro;
@@ -534,6 +531,65 @@ begin
     Pnl.Canvas.Pen.Style := psClear;
     Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
   end;
+end;
+
+procedure TFramePesaje.PaintCaptureButton(Sender: TObject);
+var
+  Pnl: TPanel;
+  IconText, IconFont: string;
+  TextColor, ButtonColor: TColor;
+  IconWidth, TextWidth, Gap, X, Y: Integer;
+begin
+  Pnl := TPanel(Sender);
+  if Pnl.Enabled then
+  begin
+    ButtonColor := Pnl.Color;
+    TextColor := CLR_WHITE;
+  end
+  else
+  begin
+    ButtonColor := CLR_CARD;
+    TextColor := CLR_TEXT_MUTED;
+  end;
+
+  Pnl.Canvas.Brush.Style := bsSolid;
+  Pnl.Canvas.Brush.Color := ButtonColor;
+  Pnl.Canvas.Pen.Style := psClear;
+  Pnl.Canvas.RoundRect(0, 0, Pnl.Width, Pnl.Height, 8, 8);
+  Pnl.Canvas.Brush.Style := bsClear;
+
+  if FA_FONT_LOADED then
+  begin
+    IconText := FAIconoStr(FA_SCALE, '⚖');
+    IconFont := FA_FONT_NAME;
+  end
+  else
+  begin
+    IconText := '⚖';
+    IconFont := Pnl.Font.Name;
+  end;
+
+  Pnl.Canvas.Font.Name := IconFont;
+  Pnl.Canvas.Font.Size := Pnl.Font.Size;
+  Pnl.Canvas.Font.Color := TextColor;
+  IconWidth := Pnl.Canvas.TextWidth(IconText);
+  Pnl.Canvas.Font.Assign(Pnl.Font);
+  Pnl.Canvas.Font.Color := TextColor;
+  TextWidth := Pnl.Canvas.TextWidth(Pnl.Caption);
+  Gap := 5;
+  X := (Pnl.Width - IconWidth - Gap - TextWidth) div 2;
+
+  Pnl.Canvas.Font.Name := IconFont;
+  Pnl.Canvas.Font.Size := Pnl.Font.Size;
+  Pnl.Canvas.Font.Color := TextColor;
+  Y := (Pnl.Height - Pnl.Canvas.TextHeight(IconText)) div 2;
+  Pnl.Canvas.TextOut(X, Y, IconText);
+
+  Inc(X, IconWidth + Gap);
+  Pnl.Canvas.Font.Assign(Pnl.Font);
+  Pnl.Canvas.Font.Color := TextColor;
+  Y := (Pnl.Height - Pnl.Canvas.TextHeight(Pnl.Caption)) div 2;
+  Pnl.Canvas.TextOut(X, Y, Pnl.Caption);
 end;
 
 procedure TFramePesaje.AjustarSeparadores;
